@@ -1,16 +1,5 @@
 import React from 'react';
-
-interface Video {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  instructor: string;
-}
-
-interface VideoListProps {
-  videos: Video[];
-}
+import type { Video, VideoListProps } from '../../types/video';
 
 export default function VideoList({ videos }: VideoListProps) {
   if (videos.length === 0) {
@@ -29,4 +18,3 @@ export default function VideoList({ videos }: VideoListProps) {
     </ul>
   );
 }
-      
