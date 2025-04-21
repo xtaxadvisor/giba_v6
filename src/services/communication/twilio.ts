@@ -1,4 +1,4 @@
-import { TWILIO_CONFIG } from '../../config/twilio';
+import { TWILIO_CONFIG, validateTwilioConfig } from '../../config/twilio';
 
 class TwilioService {
   private static instance: TwilioService;
