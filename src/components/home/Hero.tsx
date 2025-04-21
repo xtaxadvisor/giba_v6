@@ -1,4 +1,4 @@
-import { Video } from 'lucide-react';
+import { Phone, Video } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,10 @@ export function Hero() {
   };
 
   return (
-    <div className="relative bg-gradient-to-b from-blue-50 to-white">
+    <div>
+      <div className="relative bg-gradient-to-b from-blue-50 to-white">
+        {/* Content inside this div */}
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-28">
         <div className="text-center animate-slideUp">
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
@@ -40,27 +43,54 @@ export function Hero() {
               onClick={handleConsultation}
               variant="primary"
               size="lg"
-              icon={Video}
+              icon={Phone}
               className="px-8 hover-scale"
             >
-              Video Consultation
-            </Button>
-            
-            {!isAuthenticated && (
+              Get Started with a FREE TaxConsultation
+            </Button> 
+             {!isAuthenticated && (
               <Button
                 onClick={handleCreateAccount}
                 variant="primary"
                 size="lg"
                 className="px-8 hover-scale"
               >
-                Create Free Account
+                Create new Account 
+              </Button>
+            )}
+          </div>    
+          <div className="mt-10 flex flex-wrap justify-center gap-4 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
+            <Button
+              variant="secondary"
+              size="lg"
+              icon={Video}
+              className="px-8 hover-scale"
+              onClick={() => navigate('/browse-videos')}
+            >
+              become a client
+            </Button>
+            {isAuthenticated && (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="px-8 hover-scale"
+                onClick={() => navigate('/client')}
+              >
+                Go to Client Dashboard
               </Button>
             )}
           </div>
         </div>
       </div>
-
-      {/* <AIAssistantWidget /> */}
     </div>
+
   );
 }
+//
+// CSS Animations
+// .animate-slideUp {
+//   animation: slideUp 0.5s ease-out forwards;
+// }
+// @keyframes slideUp {
+//   0% {
+//     transform: translateY(20px);     
