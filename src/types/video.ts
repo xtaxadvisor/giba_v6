@@ -1,11 +1,3 @@
-import React from 'react';
-
-
-
-// Removed duplicate local declaration of VideoListProps
-export interface VideoListProps {
-  videos: Video[];
-}
 export interface Video {
   id: string;
   title: string;
@@ -13,4 +5,7 @@ export interface Video {
   duration: string;
   instructor: string;
 }
-// Removed duplicate declaration of Video
+
+export interface VideoListProps {
+  videos: Video[];
+}
