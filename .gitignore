@@ -35,5 +35,4 @@ yarn-error.log*
 *.sw?
 
 # Netlify
-.netlifysrc/config/twilio.ts
 src/config/twilio.ts
