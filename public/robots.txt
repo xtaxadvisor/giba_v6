@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private routes
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /professional/
+Disallow: /investor/
+Disallow: /student/
+
+# Sitemap
+Sitemap: https://protaxadvisors.tax/sitemap.xml

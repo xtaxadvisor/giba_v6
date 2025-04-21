@@ -1,0 +1,45 @@
+import { useEffect, useState } from 'react';
+import { Users, FileText, Clock, TrendingUp } from 'lucide-react';
+import { Card } from '../../ui/Card';
+import { AdminMetrics } from './AdminMetrics';
+import { RecentActivity } from './RecentActivity';
+import { SystemStatus } from './SystemStatus';
+
+export function AdminDashboard() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 1000); // simulate loading
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <p className="text-sm text-gray-500">Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Card icon={Users} title="Total Users" value="1,234" description="24 new this week" />
+        <Card icon={FileText} title="Total Documents" value="5,678" description="142 pending review" />
+        <Card icon={Clock} title="Average Response" value="2.5h" description="15% faster than last week" />
+        <Card icon={TrendingUp} title="System Health" value="98.5%" description="All systems operational" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AdminMetrics />
+        <RecentActivity />
+      </div>
+
+      <SystemStatus />
+    </div>
+  );
+}

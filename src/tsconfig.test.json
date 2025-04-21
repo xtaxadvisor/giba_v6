@@ -1,0 +1,8 @@
+{
+  // Test configuration
+  "test": {
+    "globals": true, // Makes expect, describe, it global
+    "environment": "jsdom",
+    "exclude": ["dist"]
+  }
+}
