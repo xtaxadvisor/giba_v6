@@ -5,6 +5,47 @@ import { useNotificationStore } from '../lib/store';
 const CLIENT_KEY = 'client';
 const CLIENTS_KEY = 'clients';
 
+async function getById(clientId: string): Promise<any> {
+  const response = await fetch(`/api/clients/${clientId}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch client');
+  }
+  return response.json();
+}
+
+async function getAll(): Promise<any[]> {
+  const response = await fetch('/api/clients');
+  if (!response.ok) {
+    throw new Error('Failed to fetch clients');
+  }
+  return response.json();
+}
+
+async function create(data: any): Promise<any> {
+  const response = await fetch('/api/clients', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create client');
+  }
+  return response.json();
+}
+
+export async function deleteClient(clientId: string): Promise<void> {
+  const response = await fetch(`/api/clients/${clientId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete client');
+  }
+}
+
 export function useClient(clientId: string) {
   const queryClient = useQueryClient();
   const { addNotification } = useNotificationStore();

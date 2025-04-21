@@ -1,20 +1,23 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Users, Database, TrendingUp, MessageSquare, BookOpen } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
+import type { AuthContextType } from '../../contexts/AuthContext';
 import { useNotificationStore } from '../../lib/store';
 import { startTransition } from 'react';
 
 interface PortalButtonProps {
   title: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   path: string;
 }
 
 function PortalButton({ title, description, icon: Icon, path }: PortalButtonProps) {
-  let user, isAuthenticated;
+  let user: AuthContextType['user'];
+  let isAuthenticated: AuthContextType['isAuthenticated'];
   try {
     const auth = useAuth();
     user = auth.user;
@@ -58,7 +61,7 @@ function PortalButton({ title, description, icon: Icon, path }: PortalButtonProp
 }
 
 export function PortalAccess() {
-  const portals = [
+  const portals: PortalButtonProps[] = [
     {
       title: 'Client Portal',
       description: 'Access your documents and manage your financial information securely.',

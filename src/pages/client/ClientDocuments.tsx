@@ -3,6 +3,10 @@ import React from 'react';
 interface ClientDocumentsProps {
   clientId: string;
 }
+// Ensure this file exports the Documents component
+export const Documents: React.FC = () => {
+  return <div>Documents Component</div>;
+};
 
 export function ClientDocuments({ clientId }: ClientDocumentsProps) {
   return (

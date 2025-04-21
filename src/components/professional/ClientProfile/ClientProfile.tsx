@@ -15,7 +15,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ClientInfo } from '@/components/professional/ClientProfile/ClientInfo';
 import { ClientDocuments } from '@/pages/client/ClientDocuments';
 import { ClientCommunication } from '@/pages/client/ClientCommunication';
-import { ClientForm } from '@/pages/client/ClientForm';
+import ClientForm from '@/pages/client/ClientForm';
 import { ClientHistory } from '@/pages/client/ClientHistory'; // Update the path to the correct location
 
 import { useClient } from '@/hooks/useClient';
