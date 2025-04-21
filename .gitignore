@@ -3,9 +3,6 @@ node_modules
 .pnp
 .pnp.js
 
-# Testing
-coverage
-
 # Production
 dist
 build
@@ -33,5 +30,3 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
-
-

@@ -15,6 +15,11 @@ export default defineConfig({
     sourcemap: false,
     minify: 'terser',
     rollupOptions: {
+      external: [
+        '@babel/preset-typescript',
+        'lightningcss',
+        'esbuild'
+      ],
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
