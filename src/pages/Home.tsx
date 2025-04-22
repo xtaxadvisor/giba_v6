@@ -25,13 +25,11 @@ export default function Home() {
     setBookingModalOpen(false);
     setSelectedService('');
   };
-
   return (
     <>
       <Header />
       <main>
         <Hero onBookNow={handleBookNow} />
-        <Services onBookNow={handleBookNow} />
         <Features />
         <FeatureShowcase />
         <Subscriptions />
