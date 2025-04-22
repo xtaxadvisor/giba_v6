@@ -31,7 +31,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
         .from('users')
         .select('*')
         .eq('auth_id', authId)
-        .single();
+       .maybeSingle();
 
       if (error) throw error;
       setUser(data);

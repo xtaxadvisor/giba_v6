@@ -20,7 +20,7 @@ export class DatabaseService<T extends keyof Tables> {
       .from(this.table)
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -31,7 +31,7 @@ export class DatabaseService<T extends keyof Tables> {
       .from(this.table)
       .insert(data)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return created;
@@ -43,7 +43,7 @@ export class DatabaseService<T extends keyof Tables> {
       .update(data)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return updated;

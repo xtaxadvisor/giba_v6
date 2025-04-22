@@ -36,7 +36,7 @@ export class InfrastructureTester {
         .from('public_data')
         .select('count')
         .limit(1)
-        .single();
+        .maybeSingle();
       
       return {
         success: !error,
@@ -60,7 +60,7 @@ export class InfrastructureTester {
         .from('public_data')
         .select('count')
         .limit(1)
-        .single();
+        .maybeSingle();
       
       return {
         success: !error,

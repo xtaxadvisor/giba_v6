@@ -14,7 +14,7 @@ class ClientService extends DatabaseService<'clients'> {
       .from(this.table)
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;

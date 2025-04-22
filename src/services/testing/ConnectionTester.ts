@@ -30,7 +30,7 @@ export class ConnectionTester {
       const { error: queryError } = await supabase
         .from('clients')
         .select('count')
-        .single();
+        .maybeSingle();
 
       if (queryError && queryError.code !== 'PGRST116') {
         // PGRST116 means no rows found, which is OK

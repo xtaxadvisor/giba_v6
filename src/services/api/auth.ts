@@ -22,7 +22,7 @@ export const authService = {
         .from('users')
         .select('*')
         .eq('auth_id', data.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError || !profile) {
         useNotificationStore.getState().addNotification(
@@ -113,7 +113,7 @@ export const authService = {
       .from('users')
       .select('*')
       .eq('auth_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile) {
       console.warn('[authService] No profile found for auth user ID:', user.id);

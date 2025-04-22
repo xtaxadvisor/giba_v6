@@ -65,7 +65,7 @@ const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }): JSX.El
         .from('users')
         .select('*')
         .eq('auth_id', authId)
-        .single();
+       .maybeSingle();
 
       if (error) throw error;
       setUser(data);

@@ -55,7 +55,7 @@ export async function testConnection(retries = 3): Promise<boolean> {
       const { error: publicError } = await supabase
         .from('public_data')
         .select('count')
-        .single();
+        .maybeSingle();
 
       if (!publicError) {
         useNotificationStore.getState().addNotification(

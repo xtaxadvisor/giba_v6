@@ -25,6 +25,7 @@ export default function Home() {
     setBookingModalOpen(false);
     setSelectedService('');
   };
+
   return (
     <>
       <Header />

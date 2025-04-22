@@ -70,7 +70,7 @@ export class SecurityTester {
         .from('users')
         .select('count')
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!publicError) {
         results.issues.push('RLS failed: Public access not restricted');
@@ -83,7 +83,7 @@ export class SecurityTester {
           .from('users')
           .select('*')
           .eq('auth_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (authError) {
           results.issues.push(`RLS failed: Authenticated access error - ${authError.message}`);

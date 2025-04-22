@@ -44,7 +44,7 @@ class DatabaseConnectionManager {
         .from('public_data')
         .select('count')
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
         throw error;

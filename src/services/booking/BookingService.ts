@@ -105,7 +105,7 @@ export class BookingService {
           payment_id: paymentResult.transactionId
         })
         .select()
-        .single();
+       .maybeSingle();
 
       if (bookingError) throw bookingError;
 
@@ -114,7 +114,7 @@ export class BookingService {
         .from('users')
         .select('email')
         .eq('id', bookingData.clientId)
-        .single();
+        .maybeSingle();
 
       // Send confirmation email
       if (client?.email) {

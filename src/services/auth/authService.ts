@@ -57,7 +57,7 @@ export class AuthService {
             .from('users')
             .select('*')
             .eq('auth_id', data.user.id)
-            .single();
+            .maybeSingle();
 
           if (profileError) throw profileError;
 

@@ -18,7 +18,7 @@ export abstract class BaseService<T extends keyof Database['public']['Tables']> 
     const { data, error } = await this.tableRef
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   }
@@ -27,7 +27,7 @@ export abstract class BaseService<T extends keyof Database['public']['Tables']> 
     const { data: created, error } = await this.tableRef
       .insert(data)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return created;
   }
@@ -37,7 +37,7 @@ export abstract class BaseService<T extends keyof Database['public']['Tables']> 
       .update(data)
       .eq('id', id)
       .select()
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return updated;
   }

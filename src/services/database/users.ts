@@ -7,7 +7,7 @@ class UserService {
       .from('users')
       .select('*')
       .eq('auth_id', authId)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -22,7 +22,7 @@ class UserService {
       })
       .eq('id', userId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;

@@ -63,7 +63,7 @@ export const supabaseAuth = {
       .from('users')
       .select('*')
       .eq('auth_id', user.id)
-      .single();
+      .maybeSingle();
     if (profileError) throw profileError;
 
     return { user, profile };
