@@ -1,29 +1,15 @@
-import react from '@vitejs/plugin-react';
-import { PluginOption } from 'vite';
+// utils/response.ts
 
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/.netlify/functions': {
-        target: 'http://localhost:8888',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/\.netlify\/functions/, ''),
-      },
-    },
-  },
-});
-export const createsucessresponse = (statusCode: number, data: any) => ({
-  statusCode,
-  body: JSON.stringify(data)
-}); 
-const createErrorResponse = (statusCode: number, message: string) => ({
-  statusCode,
-  body: JSON.stringify({ error: message })
-});
+export function createSuccessResponse<T>(data: T, statusCode = 200) {
+  return {
+    statusCode,
+    body: JSON.stringify({ data }),
+  };
+}
 
-export { createErrorResponse };
-
-function defineConfig(config: { plugins: PluginOption[]; server: { proxy: { '/.netlify/functions': { target: string; changeOrigin: boolean; rewrite: (path: string) => string; }; }; }; }) {
-  return config;
+export function createErrorResponse(message: string, statusCode = 500) {
+  return {
+    statusCode,
+    body: JSON.stringify({ error: message }),
+  };
 }
