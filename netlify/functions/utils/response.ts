@@ -1,15 +1,28 @@
-// utils/response.ts
 
-export function createSuccessResponse<T>(data: T, statusCode = 200) {
+/**
+ * Utility functions for Netlify Functions responses
+ */
+
+export function createSuccessResponse<T>(data: T) {
   return {
-    statusCode,
-    body: JSON.stringify({ data }),
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
   };
 }
 
-export function createErrorResponse(message: string, statusCode = 500) {
+export function createErrorResponse(error: unknown, statusCode = 500) {
+  let message = "Internal Server Error";
+  if (error instanceof Error) {
+    message = error.message;
+  }
   return {
     statusCode,
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ error: message }),
   };
 }

@@ -6,9 +6,10 @@ import { Select } from '../../components/ui/Select';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { useInvestmentForum } from '../../hooks/useInvestmentForum';
 import { formatTimeAgo } from '../../utils/date';
-
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function InvestorForum() {
+  const { logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -36,6 +37,14 @@ export default function InvestorForum() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <button
+          onClick={logout}
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Logout
+        </button>
+      </div>
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Investment Forum</h1>
         <Button variant="primary" onClick={() => {}} icon={MessageSquare}>

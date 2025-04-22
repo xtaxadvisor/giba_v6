@@ -7,10 +7,19 @@ import { Calendar } from '../../components/dashboard/Calendar';
 import { Settings } from '../../components/dashboard/Settings';
 import { ConsultationList } from '../../components/consultation/ConsultationList';
 import { ClientInsights } from '../../components/client/Dashboard/ClientInsights';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function ClientPortal() { 
+  const { logout } = useAuth();
+
   return ( 
   <ClientLayout>
+    <button
+      onClick={logout}
+      className="logout-button mb-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+    >
+      Logout
+    </button>
     <Routes>
       <Route index element={<ClientDashboard />} />
       <Route path="documents" element={<Documents />} />
