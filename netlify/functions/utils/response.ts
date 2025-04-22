@@ -1,5 +1,4 @@
-
-/**
+/****
  * Utility functions for Netlify Functions responses
  */
 
@@ -26,3 +25,6 @@ export function createErrorResponse(error: unknown, statusCode = 500) {
     body: JSON.stringify({ error: message }),
   };
 }
+
+// Back-compat alias for openai function import
+export { createSuccessResponse as createsucessresponse };

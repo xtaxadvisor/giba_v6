@@ -1,8 +1,7 @@
 import { Handler } from '@netlify/functions';
 import { OpenAI } from 'openai';
 import { handleCors, getCorsHeaders } from './utils/cors';
-import { createErrorResponse } from './utils/response';
-import { createsucessresponse as createSuccessResponse } from './utils/response';
+import { createErrorResponse, createSuccessResponse } from './utils/response';
 
 // Initialize OpenAI with error handling
 const openai = new OpenAI({
@@ -20,7 +19,7 @@ export const handler: Handler = async (event) => {
     // Validate request method
     if (event.httpMethod !== 'POST') {
       return {
-        ...createErrorResponse(405, 'Method not allowed'),
+        ...createErrorResponse('Method not allowed', 405),
         headers: corsHeaders
       };
     }
@@ -28,7 +27,7 @@ export const handler: Handler = async (event) => {
     // Parse and validate request body
     if (!event.body) {
       return {
-        ...createErrorResponse(400, 'Request body is required'),
+        ...createErrorResponse('Request body is required', 400),
         headers: corsHeaders
       };
     }
@@ -37,7 +36,7 @@ export const handler: Handler = async (event) => {
     
     if (!content) {
       return {
-        ...createErrorResponse(400, 'Content is required'),
+        ...createErrorResponse('Content is required', 400),
         headers: corsHeaders
       };
     }
@@ -64,7 +63,7 @@ export const handler: Handler = async (event) => {
 
     // Return success response
     return {
-      ...createSuccessResponse(200, { 
+      ...createSuccessResponse({
         id: completion.id,
         object: completion.object,
         created: completion.created,
@@ -80,8 +79,8 @@ export const handler: Handler = async (event) => {
     // Return appropriate error response
     return {
       ...createErrorResponse(
-        error.response?.status || 500,
-        error.response?.data?.error?.message || 'Failed to get AI response'
+        error.response?.data?.error?.message || 'Failed to get AI response',
+        error.response?.status || 500
       ),
       headers: getCorsHeaders(event)
     };
