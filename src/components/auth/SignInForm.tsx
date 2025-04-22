@@ -3,8 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, ArrowLeft } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { AuthService } from '../../services/auth/authService';
-import { roleRoutes } from '../../utils/constants/roleRoutes'; // Adjust the path as needed
+import { roleRoutes } from '../../utils/constants/roleRoutes';
+import type { Role } from '../../utils/constants/roleRoutes';
+import { supabase } from '../../lib/supabase/client';
 
 export function SignInForm() {
   const [formData, setFormData] = useState({
@@ -12,23 +13,38 @@ export function SignInForm() {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setErrorMsg(null);
 
+    // Basic form validation
+    if (!formData.email.trim() || !formData.password) {
+      setErrorMsg('Please enter both email and password.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const user = await AuthService.signIn(formData.email, formData.password);
-      if (user?.role && roleRoutes[user.role as keyof typeof roleRoutes]) {
-        navigate(roleRoutes[user.role as keyof typeof roleRoutes]);
-      } else {
-        console.warn('Unknown or missing user role:', user?.role);
-        navigate('/dashboard');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (error) {
+        console.error('Sign-in failed:', error);
+        setErrorMsg(error.message);
+        return;
       }
-    } catch (error) {
-      console.error('Sign-in failed:', error);
-      // Optionally display error to the user here
+      const role = data.user?.user_metadata.role as Role | undefined;
+      const target = role && roleRoutes[role]
+        ? roleRoutes[role]
+        : '/dashboard';
+      navigate(target);
+    } catch (unexpected) {
+      console.error('Unexpected error during sign-in:', unexpected);
+      setErrorMsg('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -102,6 +118,12 @@ export function SignInForm() {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
+
+          {errorMsg && (
+            <div className="mt-2 text-sm text-red-600">
+              {errorMsg}
+            </div>
+          )}
 
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-4 p-4 bg-gray-100 rounded-lg">

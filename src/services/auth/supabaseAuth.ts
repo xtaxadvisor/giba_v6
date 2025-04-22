@@ -41,7 +41,8 @@ export const supabaseAuth = {
       email,
       password
     });
-
+    if (error) console.error("Sign‑in failed:", error.message);
+    else console.log("Signed in user:", data.user);
     if (error) throw error;
     return data;
   },
@@ -51,19 +52,21 @@ export const supabaseAuth = {
     if (error) throw error;
   },
 
-  async getCurrentUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+  async getCurrentUser(): Promise<{ user: User; profile: any } | null> {
+    // get auth user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
     if (!user) return null;
 
-    // Get extended profile from users table
-    const { data: profile } = await supabase
+    // get profile from users table
+    const { data: profile, error: profileError } = await supabase
       .from('users')
       .select('*')
       .eq('auth_id', user.id)
       .single();
+    if (profileError) throw profileError;
 
-    return profile;
+    return { user, profile };
   },
 
   async resetPassword(email: string) {
@@ -78,9 +81,20 @@ export const supabaseAuth = {
     if (error) throw error;
   },
 
-  onAuthStateChange(callback: (user: User | null, error?: AuthError) => void) {
-    return supabase.auth.onAuthStateChange((_, session) => {
-      callback(session?.user ?? null);
+  onAuthStateChange(
+    callback: (sessionUser: { user: User; profile: any } | null, error?: AuthError) => void
+  ) {
+    return supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        try {
+          const current = await this.getCurrentUser();
+          callback(current, undefined);
+        } catch (err: any) {
+          callback(null, err);
+        }
+      } else {
+        callback(null, undefined);
+      }
     });
   }
 };

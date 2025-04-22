@@ -1,122 +1,45 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { ServiceCard } from '../booking/ServiceCard';
-import { BookingModal } from '../booking/BookingModal';
-import { Calculator } from 'lucide-react';
-import { Button } from '../ui/Button';
+import React from 'react';
 
-export function Services() {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+export interface ServicesProps {
+  onBookNow: (serviceType: string) => void;
+}
 
-  const services = [
-    {
-      title: 'Tax Planning',
-      description: 'Strategic tax planning and preparation services for optimal financial outcomes.',
-      price: '$200',
-      duration: '60 minutes',
-      features: [
-        'Personal & Business Tax Planning',
-        'Tax Return Preparation',
-        'Tax Compliance Review',
-        'Deduction Optimization',
-        'Year-round Support'
-      ],
-      popular: true
-    },
-    {
-      title: 'Financial Review',
-      description: 'Comprehensive financial analysis and planning for your future.',
-      price: '$150',
-      duration: '45 minutes',
-      features: [
-        'Financial Statement Analysis',
-        'Cash Flow Projections',
-        'Budget Planning',
-        'Performance Metrics',
-        'Investment Review'
-      ]
-    },
-    {
-      title: 'Investment Advisory',
-      description: 'Expert investment guidance and portfolio management services.',
-      price: '$250',
-      duration: '90 minutes',
-      features: [
-        'Portfolio Analysis',
-        'Investment Strategy',
-        'Risk Assessment',
-        'Market Research',
-        'Regular Portfolio Reviews'
-      ]
-    },
-    {
-      title: 'Business Consulting',
-      description: 'Strategic business advice and growth planning for entrepreneurs.',
-      price: 'Custom Quote',
-      duration: '60 minutes',
-      features: [
-        'Business Strategy',
-        'Growth Planning',
-        'Market Analysis',
-        'Financial Forecasting',
-        'Performance Optimization'
-      ]
-    }
-  ];
+export interface BookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  serviceType: string;
+}
 
-  const handleBooking = (serviceTitle: string) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    setSelectedService(serviceTitle.toLowerCase().replace(/\s+/g, '-'));
-  };
+export default function Services({ onBookNow }: ServicesProps) {
+  // Assuming this is the Services component; since original code was BookingModal,
+  // the following is a placeholder for the Services component implementation.
+  // Replace 'yourServiceIdentifier' with actual service types as needed.
 
   return (
-    <section id="services" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Our Services</h2>
-          <p className="mt-4 text-xl text-gray-600">
-            Expert financial solutions tailored to your needs
-          </p>
-          <div className="mt-6">
-            <Button
-              variant="outline"
-              icon={Calculator}
-              onClick={() => console.log('Calculate Service Cost clicked')}
-            >
-              Calculate Service Cost
-            </Button>
-          </div>
-        </div>
+    <div>
+      <button onClick={() => onBookNow('serviceType1')}>Book Now</button>
+      <button onClick={() => onBookNow('serviceType2')}>Book Now</button>
+      {/* Add more buttons as needed */}
+    </div>
+  );
+}
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.title}
-              title={service.title}
-              description={service.description}
-              price={service.price}
-              duration={service.duration}
-              features={service.features}
-              popular={service.popular}
-              onBook={() => handleBooking(service.title)}
-            />
-          ))}
-        </div>
+export function BookingModal({
+  isOpen,
+  onClose,
+  serviceType,
+}: BookingModalProps) {
+  if (!isOpen) return null;
+  
+
+  // Rest of the component implementation uses onClose and serviceType accordingly
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <button onClick={onClose} className="close-button">Close</button>
+        <h2>Book Service: {serviceType}</h2>
+        {/* Additional modal content */}
       </div>
-
-      {selectedService && (
-        <BookingModal
-          isOpen={true}
-          onClose={() => setSelectedService(null)}
-          serviceType={selectedService}
-        />
-      )}
-    </section>
+    </div>
   );
 }

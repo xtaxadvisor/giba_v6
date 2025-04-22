@@ -1,5 +1,6 @@
+import React, { useState } from 'react';
 import { Hero } from '../components/home/Hero';
-import { Services } from '../components/home/Services';
+import Services from '../components/home/Services';
 import { Features } from '../components/home/Features';
 import { FeatureShowcase } from '../components/home/FeatureShowcase';
 import { TrustIndicators } from '../components/home/TrustIndicators';
@@ -9,57 +10,41 @@ import { AboutUs } from '../components/home/AboutUs';
 import { Contact } from '../components/home/Contact';
 import { Header } from '../components/layout/Header';
 import { AIAssistantWidget } from '../components/ai/AIAssistantWidget';
+import BookingModal from '../components/booking/BookingModal';
 
-function Home() {
+export default function Home() {
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string>('');
+
+  const handleBookNow = (serviceType: string) => {
+    setSelectedService(serviceType);
+    setBookingModalOpen(true);
+  };
+
+  const closeBookingModal = () => {
+    setBookingModalOpen(false);
+    setSelectedService('');
+  };
   return (
     <>
-      {(() => {
-  try {
-    return <Header />;
-  } catch (err) {
-    console.error('Header must be used within an AuthProvider.', err);
-    return null;
-  }
-})()}
-
+      <Header />
       <main>
-        {(() => {
-          try {
-            return <Hero />;
-          } catch (err) {
-            console.error('Hero must be used within AuthProvider.', err);
-            return null;
-          }
-        })()}
-        
-        <Services />
-        {(() => {
-          try {
-            return <Features />;
-          } catch (err) {
-            console.error('Features must be used within AuthProvider.', err);
-            return null;
-          }
-        })()}
+        <Hero onBookNow={handleBookNow} />
+        <Services onBookNow={handleBookNow} />
+        <Features />
         <FeatureShowcase />
-        
-        {(() => {
-          try {
-            return <Subscriptions />;
-          } catch (err) {
-            console.error('Subscriptions must be used within AuthProvider.', err);
-            return null;
-          }
-        })()}
-
+        <Subscriptions />
         <TrustIndicators />
         <Testimonials />
         <AboutUs />
         <Contact />
       </main>
+      <BookingModal
+        isOpen={bookingModalOpen}
+        onClose={closeBookingModal}
+        serviceType={selectedService}
+      />
       <AIAssistantWidget />
     </>
   );
 }
-
-export default Home;

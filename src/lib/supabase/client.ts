@@ -2,10 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { useNotificationStore } from '../store';
 
-// Single source of truth for Supabase configuration
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error(
+    'Missing VITE_SUPABASE_URL and/or VITE_SUPABASE_ANON_KEY environment variables'
+  );
+}
+
 const SUPABASE_CONFIG = {
-  url: import.meta.env.VITE_SUPABASE_URL || 'https://asdthnxphqjpxzyhpylr.supabase.co',
-  anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZHRobnhwaHFqcHh6eWhweWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNDg4MDMsImV4cCI6MjA1NDYyNDgwM30.AGjxQM7QkIUA6d0jgJa4uaXQlJX8r9Bya9zC7B7F9qc'
+  url: SUPABASE_URL,
+  anonKey: SUPABASE_ANON_KEY,
 };
 
 // Create Supabase client with enhanced configuration

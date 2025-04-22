@@ -1,21 +1,18 @@
+import React from 'react';
 import { Phone, Video } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export function Hero() {
+interface HeroProps {
+  onBookNow: (serviceType: string) => void;
+}
+
+export function Hero({ onBookNow }: HeroProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
   if (typeof isAuthenticated !== 'boolean') return null;
-
-  const handleConsultation = () => {
-    try {
-      navigate(isAuthenticated ? '/consultation' : '/login', { state: isAuthenticated ? undefined : { from: '/consultation' } });
-    } catch (error) {
-      console.error('Navigation error:', error);
-    }
-  };
 
   const handleCreateAccount = () => {
     navigate('/register');
@@ -40,7 +37,7 @@ export function Hero() {
 
           <div className="mt-10 flex flex-wrap justify-center gap-4 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
             <Button
-              onClick={handleConsultation}
+              onClick={() => onBookNow('consultation')}
               variant="primary"
               size="lg"
               icon={Phone}

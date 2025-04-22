@@ -1,28 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 
 export function ConsultationList() {
   const navigate = useNavigate();
+
+  const { user } = useAuth();
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadConsultations() {
+      const { data, error } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('user_id', user?.id || '')
+        .order('date', { ascending: false });
+      if (error) {
+        console.error('Error fetching consultations:', error);
+      } else {
+        setConsultations(data || []);
+      }
+      setLoading(false);
+    }
+    if (user?.id) {
+      loadConsultations();
+    }
+  }, [user?.id]);
+
+  if (loading) {
+    return <p>Loading consultations…</p>;
+  }
+
   const handleConsultationClick = (consultationId: string) => {
     navigate(`/client/consultations/${consultationId}`);
   };
   
-  // TODO: replace mock data with real fetch when Supabase is connected
-  const consultations = [
-    {
-      id: '1',
-      title: 'Tax Planning',
-      description: 'Discuss tax reduction strategies',
-      date: '2025-04-22T14:00:00Z',
-    },
-    {
-      id: '2',
-      title: 'Business Structuring',
-      description: 'Entity formation and compliance',
-      date: '2025-04-23T10:30:00Z',
-    },
-  ];
 
   if (consultations.length === 0) {
     return (
