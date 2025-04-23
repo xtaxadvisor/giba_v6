@@ -1,4 +1,5 @@
 import { useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
+import { supabase } from '../../lib/supabase/client'
 import { 
   Home, 
   FileText, 
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useState } from 'react';
+import ProfileForm from '../../components/client/ProfileForm';
 
 const menuItems = [
   { title: 'Dashboard', href: '/client', icon: Home },
@@ -42,45 +44,24 @@ const ClientLayout = ({ children, title, description }: ClientLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [formCompleted, setFormCompleted] = useState(false);
+  const [userType, setUserType] = useState<'personal'|'business'>('personal');
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    businessName: '',
+    service: '',
+  });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleLogout = () => {
     navigate('/');
   };
 
   if (!formCompleted) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md">
-          <h2 className="text-xl font-semibold text-center mb-4">Welcome! Please complete this form:</h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setFormCompleted(true);
-            }}
-            className="space-y-4"
-          >
-            <input
-              type="text"
-              placeholder="Full Name"
-              required
-              className="w-full border px-4 py-2 rounded"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              required
-              className="w-full border px-4 py-2 rounded"
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Continue
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+    return <ProfileForm onComplete={() => setFormCompleted(true)} />;
   }
 
   return (

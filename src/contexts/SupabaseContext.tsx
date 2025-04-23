@@ -77,12 +77,16 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   // ✅ Sign In
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
         password
       });
 
       if (error) throw error;
+      // on successful sign-in, load the user profile
+      if (data.session?.user) {
+        await fetchUserProfile(data.session.user.id);
+      }
       addNotification('Successfully signed in', 'success');
     } catch (error) {
       console.error('Sign in error:', error);

@@ -1,7 +1,10 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import type { User } from '../types';
 import { supabase } from '@/lib/supabase/client';
-
+export interface AuthContextType {
+  // Other properties and methods
+  signIn: (credentials: { email: string; password: string }) => Promise<void>;
+}
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -73,6 +76,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     register,
     logout,
+    signIn: function (credentials: { email: string; password: string; }): Promise<void> {
+      throw new Error('Function not implemented.');
+    }
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

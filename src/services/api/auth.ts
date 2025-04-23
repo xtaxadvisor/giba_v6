@@ -11,17 +11,25 @@ export const authService = {
   // ✅ Sign In
   async signIn(email: string, password: string): Promise<User | null> {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const {
+        data: { session, user },
+        error,
+      } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
         password,
       });
-
       if (error) throw error;
-
+      if (!user) {
+        useNotificationStore.getState().addNotification(
+          'Authentication succeeded but no user data was returned',
+          'error'
+        );
+        return null;
+      }
       const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
-        .eq('auth_id', data.user.id)
+        .eq('auth_id', user.id)
         .maybeSingle();
 
       if (profileError || !profile) {

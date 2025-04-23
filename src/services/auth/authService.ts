@@ -45,18 +45,19 @@ export class AuthService {
       let lastError: AuthError | null = null;
       for (let attempt = 0; attempt < this.MAX_RETRIES; attempt++) {
         try {
-          const { data, error } = await supabase.auth.signInWithPassword({
+          const { data: signInData, error } = await supabase.auth.signInWithPassword({
             email: normalizedEmail,
             password
           });
-
           if (error) throw error;
+          if (!signInData.user) throw new Error('No user returned from signIn');
+          const user = signInData.user;
 
           // Get user profile
           const { data: profile, error: profileError } = await supabase
             .from('users')
             .select('*')
-            .eq('auth_id', data.user.id)
+            .eq('auth_id', user.id)
             .maybeSingle();
 
           if (profileError) throw profileError;

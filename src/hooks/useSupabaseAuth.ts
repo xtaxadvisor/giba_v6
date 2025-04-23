@@ -77,12 +77,18 @@ const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }): JSX.El
   };
 
   const signIn = async (email: string, password: string): Promise<void> => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.toLowerCase().trim(),
       password,
     });
 
     if (error) throw error;
+
+    // fetch and set the full user profile
+    if (data?.session?.user) {
+      await fetchUserProfile(data.session.user.id);
+    }
+
     addNotification('Signed in successfully', 'success');
   };
 

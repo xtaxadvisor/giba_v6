@@ -15,8 +15,8 @@ export default function ClientPortal() {
   return ( 
   <ClientLayout>
     <button
-      onClick={logout}
-      className="logout-button mb-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+      onClick={() => logout()}
+      className="logout-button mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
     >
       Logout
     </button>
