@@ -13,7 +13,7 @@ export const handler = async (event) => {
     // Validate request method
     if (event.httpMethod !== 'POST') {
       return {
-        ...createErrorResponse(405, 'Method not allowed'),
+        ...createErrorResponse('Method not allowed', 405),
         headers: corsHeaders
       };
     }
@@ -56,10 +56,11 @@ export const handler = async (event) => {
   } catch (error) {
     console.error('Email test error:', error);
     return {
-      ...createErrorResponse(
-        500,
-        'Email service test failed',
-        process.env.NODE_ENV === 'development' ? error : undefined
+        ...createErrorResponse(
+        process.env.NODE_ENV === 'development' && error instanceof Error
+          ? error.message
+          : 'Email service test failed',
+        500
       ),
       headers: getCorsHeaders(event)
     };

@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 export class AWSEmailService {
@@ -9,8 +11,8 @@ export class AWSEmailService {
     this.sesClient = new SESClient({
       region: 'us-east-1',
       credentials: {
-        accessKeyId: '6073-9277-5096',
-        secretAccessKey: 'yAKIAY223OHO4DH34ZU5J'
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
       }
     });
   }

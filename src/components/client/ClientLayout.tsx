@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useState } from 'react';
-import ProfileForm from '../../components/client/ProfileForm';
+import ProfileForm from '../../pages/client/ClientForm';
 
 const menuItems = [
   { title: 'Dashboard', href: '/client', icon: Home },
@@ -61,7 +61,16 @@ const ClientLayout = ({ children, title, description }: ClientLayoutProps) => {
   };
 
   if (!formCompleted) {
-    return <ProfileForm onComplete={() => setFormCompleted(true)} />;
+    return (
+      <ProfileForm
+        initialData={formData}
+        onSubmit={(data) => {
+          setFormData(data);
+          setFormCompleted(true);
+        }}
+        onCancel={() => setFormCompleted(false)}
+      />
+    );
   }
 
   return (

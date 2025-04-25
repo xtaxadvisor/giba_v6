@@ -1,23 +1,24 @@
 {
-  "references": [],
   "compilerOptions": {
     "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "typeRoots": ["./src/types", "./node_modules/@types"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "declaration": false,
-    "emitDeclarationOnly": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "dist/types"]
+  "include": ["src", "vite.config.ts", "vite.config.js"],
+  "exclude": ["node_modules", "dist"]
 }

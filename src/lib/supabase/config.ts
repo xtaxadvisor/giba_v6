@@ -23,7 +23,7 @@ const supabaseClient = createClient<Database>(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true,
+      detectSessionInUrl: false,
       storage: localStorage,
       storageKey: 'supabase.auth.token'
     },
