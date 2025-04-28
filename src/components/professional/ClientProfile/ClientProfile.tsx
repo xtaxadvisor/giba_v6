@@ -54,18 +54,20 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
           <p className="text-gray-500">{client.company}</p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" icon={Edit} onClick={() => setIsEditModalOpen(true)}>
+          <Button
+            variant="outline"
+            icon={Edit}
+            aria-label="Edit Client Profile"
+            onClick={() => setIsEditModalOpen(true)}
+          >
             Edit Profile
           </Button>
           <Button
             variant="outline"
             icon={Trash2}
             className="text-red-600 hover:text-red-700"
-            onClick={() => {
-              if (window.confirm('Are you sure you want to delete this client?')) {
-                deleteClient(clientId);
-              }
-            }}
+            aria-label="Delete Client"
+            onClick={() => handleDeleteClient(clientId)}
           >
             Delete Client
           </Button>
@@ -115,7 +117,8 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
         title="Edit Client Profile"
       >
         <ClientForm
-          initialData={client}
+          initialData={client}  // Pass the client data to the form 
+
           onSubmit={handleUpdateClient}
           onCancel={() => setIsEditModalOpen(false)}
         />
@@ -123,3 +126,27 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
     </div>
   );
 }
+  const handleDeleteClient = (clientId: string) => {
+    if (window.confirm('Are you sure you want to delete this client?')) {
+      deleteClient(clientId);
+    }
+  };
+  async function deleteClient(clientId: string) {
+    try {
+      const response = await fetch(`/api/clients/${clientId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete client');
+      }
+
+      alert('Client deleted successfully');
+      // Optionally, redirect or refresh the page after deletion
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      alert('An error occurred while deleting the client. Please try again.');
+    }
+  }
+

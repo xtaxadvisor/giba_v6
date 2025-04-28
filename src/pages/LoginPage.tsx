@@ -13,19 +13,23 @@ export default function SignInForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (signInError) {
-      setError(signInError.message);
-    } else {
-      // On successful login, redirect to client dashboard
-      navigate('/client/dashboard');
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) {
+        console.error('SignIn error:', signInError);
+        setError(signInError.message);
+      } else {
+        console.log('SignIn success, session:', data.session);
+        navigate('/client/dashboard');
+      }
+    } catch (err) {
+      console.error('Unexpected error during signIn:', err);
+      setError((err as Error).message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
   };
 

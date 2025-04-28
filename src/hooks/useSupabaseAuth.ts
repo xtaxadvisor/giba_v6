@@ -106,10 +106,16 @@ const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }): JSX.El
   };
 
   const signOut = async (): Promise<void> => {
-    await supabase.auth.signOut();
-    setUser(null);
-    addNotification('Signed out', 'success');
-    navigate('/');
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Supabase signOut error:', error.message || error);
+      addNotification('Error signing out', 'error');
+    } else {
+      setUser(null);
+      addNotification('Signed out successfully', 'success');
+      // Redirect to login
+      navigate('/login');
+    }
   };
 
   return React.createElement(

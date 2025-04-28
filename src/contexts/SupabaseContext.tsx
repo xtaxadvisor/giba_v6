@@ -119,7 +119,11 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   // ✅ Sign Out
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error.message || error);
+        throw error;
+      }
       setUser(null);
       addNotification('Successfully signed out', 'success');
       navigate('/');
