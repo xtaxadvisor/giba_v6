@@ -101,10 +101,18 @@ export function PortalAccess() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {portals.map((portal) => (
-        <PortalButton key={portal.path} {...portal} />
-      ))}
-    </div>
+    <section aria-label="Portal Access Options">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {portals.length > 0 ? (
+          portals.map((portal) => (
+            <PortalButton key={portal.path} {...portal} />
+          ))
+        ) : (
+          <div className="col-span-full text-center text-gray-500">
+            No portals available at this time.
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

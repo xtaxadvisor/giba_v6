@@ -38,7 +38,10 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     } catch (error) {
       console.error('Error fetching user profile:', error);
       setUser(null);
-      await supabase.auth.signOut();
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.error('Error signing out during fetchUserProfile catch:', signOutError.message || signOutError);
+      }
       navigate('/login');
     }
   };
