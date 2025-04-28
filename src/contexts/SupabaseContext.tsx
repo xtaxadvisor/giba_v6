@@ -38,7 +38,10 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
     } catch (error) {
       console.error('Error fetching user profile:', error);
       setUser(null);
-      await supabase.auth.signOut();
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.error('Error signing out during fetchUserProfile catch:', signOutError.message || signOutError);
+      }
       navigate('/login');
     }
   };
@@ -119,10 +122,15 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   // ✅ Sign Out
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      setUser(null);
-      addNotification('Successfully signed out', 'success');
-      navigate('/');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error.message || error);
+        addNotification('Error signing out', 'error');
+      } else {
+        setUser(null);
+        addNotification('Successfully signed out', 'success');
+        navigate('/login');
+      }
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;

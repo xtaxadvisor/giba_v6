@@ -1,6 +1,8 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import type { User } from '../types';
 import { supabase } from '@/lib/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import addNotification from '../components/ui/Notifications';
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
@@ -16,6 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check initial session
@@ -62,8 +65,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Sign out error:', error.message || error);
+      addNotification('Error signing out', 'error');
+    } else {
+      setUser(null);
+      addNotification('Successfully signed out', 'success');
+      navigate('/login');
+    }
   };
 
   const value: AuthContextType = {

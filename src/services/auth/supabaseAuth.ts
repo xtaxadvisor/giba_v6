@@ -50,6 +50,8 @@ export const supabaseAuth = {
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    // Redirect to login after sign out
+    window.location.href = '/login';
   },
 
   async getCurrentUser(): Promise<{ user: User; profile: any } | null> {
