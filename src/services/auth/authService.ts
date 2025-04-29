@@ -55,7 +55,7 @@ export class AuthService {
 
           // Get user profile
           const { data: profile, error: profileError } = await supabase
-            .from('users')
+            .from('profiles')  
             .select('*')
             .eq('auth_id', user.id)
             .maybeSingle();
@@ -113,7 +113,7 @@ export class AuthService {
       if (data.user) {
         // Create user profile
         const { error: profileError } = await supabase
-          .from('users')
+          .from('profiles')  
           .insert({
             auth_id: data.user.id,
             name: userData.name,

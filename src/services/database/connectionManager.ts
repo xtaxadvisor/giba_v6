@@ -45,7 +45,7 @@ class DatabaseConnectionManager {
 
   async healthCheck(): Promise<boolean> {
     try {
-      const { error } = await supabase.from('users').select('count').single();
+      const { error } = await supabase.from('profiles')  .select('count').single();
       return !error;
     } catch {
       return false;

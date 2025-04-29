@@ -111,7 +111,7 @@ export class BookingService {
 
       // Get client email
       const { data: client } = await supabase
-        .from('users')
+        .from('profiles')  
         .select('email')
         .eq('id', bookingData.clientId)
         .maybeSingle();

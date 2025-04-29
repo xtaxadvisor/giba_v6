@@ -22,7 +22,7 @@ export const supabaseAuth = {
     if (data.user) {
       // Create profile in users table
       const { error: profileError } = await supabase
-        .from('users')
+        .from('profiles')  
         .insert({
           auth_id: data.user.id,
           name: userData.name,
@@ -62,7 +62,7 @@ export const supabaseAuth = {
 
     // get profile from users table
     const { data: profile, error: profileError } = await supabase
-      .from('users')
+      .from('profiles')  
       .select('*')
       .eq('auth_id', user.id)
       .maybeSingle();

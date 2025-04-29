@@ -28,7 +28,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   const fetchUserProfile = async (authId: string) => {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')  
         .select('*')
         .eq('auth_id', authId)
        .maybeSingle();

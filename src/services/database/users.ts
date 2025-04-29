@@ -4,7 +4,7 @@ import { User } from '../../types'; // Ensure User is exported from '../../types
 class UserService {
   async getByAuthId(authId: string) {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')  
       .select('*')
       .eq('auth_id', authId)
       .maybeSingle();
@@ -15,7 +15,7 @@ class UserService {
 
   async updateProfile(userId: string, profile: Partial<User>) {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')  
       .update({
         ...profile,
         updated_at: new Date().toISOString()

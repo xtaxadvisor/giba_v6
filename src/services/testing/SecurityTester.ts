@@ -67,7 +67,7 @@ export class SecurityTester {
     try {
       // Test public access
       const { error: publicError } = await supabase
-        .from('users')
+        .from('profiles')  
         .select('count')
         .limit(1)
         .maybeSingle();
@@ -80,7 +80,7 @@ export class SecurityTester {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const { error: authError } = await supabase
-          .from('users')
+          .from('profiles')  
           .select('*')
           .eq('auth_id', session.user.id)
           .maybeSingle();
