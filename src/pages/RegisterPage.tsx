@@ -5,11 +5,16 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { useNotificationStore } from '../lib/store';
-import { mockRegister } from '../lib/mockAuth';
+import { useSupabase } from '../contexts/SupabaseContext';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
+  const supabaseContext = useSupabase();
+  if (!supabaseContext || !supabaseContext.signUp) {
+    throw new Error('Supabase context is not properly initialized.');
+  }
+  const { signUp } = supabaseContext;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -29,11 +34,9 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      await mockRegister({
+      await signUp(formData.email, formData.password, {
         name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role
+        role: formData.role,
       });
       
       addNotification('Registration successful! Please log in.', 'success');

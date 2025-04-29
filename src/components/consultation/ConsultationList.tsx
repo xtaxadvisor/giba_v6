@@ -17,7 +17,7 @@ export function ConsultationList() {
         .from('consultations')
         .select('*')
         .eq('user_id', user?.id || '')
-        .order('date', { ascending: false });
+        .order('consultation_date', { ascending: false })
       if (error) {
         console.error('Error fetching consultations:', error);
       } else {
@@ -71,7 +71,7 @@ export function ConsultationList() {
             <h3 className="text-lg font-medium">{c.title}</h3>
             <p className="text-gray-600">{c.description}</p>
             <p className="text-sm text-gray-500">
-              {new Date(c.date).toLocaleString()}
+            {new Date(c.consultation_date).toLocaleDateString()}
             </p>
           </li>
         ))}
