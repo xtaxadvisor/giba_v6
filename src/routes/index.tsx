@@ -1,12 +1,9 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-<<<<<<< HEAD
-=======
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../contexts/AuthContext'; // Adjust the path as needed
 const queryClient = new QueryClient();
->>>>>>> 33282c48065d0158dd1b70de0c6272d9adf43824
 
 // Eagerly load critical components
 import Home from '../pages/Home';

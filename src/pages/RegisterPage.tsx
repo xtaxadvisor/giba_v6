@@ -5,21 +5,17 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { useNotificationStore } from '../lib/store';
-<<<<<<< HEAD
-import { useSupabase } from '../contexts/SupabaseContext';
-=======
 import { supabase } from '../lib/supabase/client';
 
->>>>>>> 33282c48065d0158dd1b70de0c6272d9adf43824
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
-  const supabaseContext = useSupabase();
-  if (!supabaseContext || !supabaseContext.signUp) {
+  const supabaseContext = supabase;
+  if (!supabaseContext || !supabaseContext.auth || !supabaseContext.auth.signUp) {
     throw new Error('Supabase context is not properly initialized.');
   }
-  const { signUp } = supabaseContext;
+  const { signUp } = supabaseContext.auth;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -47,11 +43,6 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-<<<<<<< HEAD
-      await signUp(formData.email, formData.password, {
-        name: formData.name,
-        role: formData.role,
-=======
       const { data, error } = await supabase.auth.signUp({
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
@@ -61,7 +52,6 @@ export default function RegisterPage() {
             role: formData.role
           }
         }
->>>>>>> 33282c48065d0158dd1b70de0c6272d9adf43824
       });
 
       if (error) {
