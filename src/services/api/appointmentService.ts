@@ -10,16 +10,16 @@ type Appointment = {
 // If 'Appointment' is not exported, verify the correct export name or define the type locally.
 
 export const appointmentService = {
-  getAppointment: async (): Promise<Appointment[]> => {
+  async getAppointment() {
     const response = await api.get<Appointment[]>('/appointments');
-    return response.data;
+    return response;
   },
 
-  getAvailability: async (): Promise<{ time: string; available: boolean }[]> => {
-    return [
+  async getAvailability() {
+    return Promise.resolve([
       { time: '10:00 AM', available: true },
       { time: '11:00 AM', available: false },
-    ];
+    ]);
   },
 
   getAll: () => api.get<Appointment[]>('/appointments'),
