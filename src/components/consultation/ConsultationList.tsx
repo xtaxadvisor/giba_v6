@@ -12,22 +12,24 @@ export function ConsultationList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadConsultations() {
-      const { data, error } = await supabase
-        .from('consultations')
-        .select('*')
-        .eq('user_id', user?.id || '')
-        .order('date', { ascending: false });
-      if (error) {
-        console.error('Error fetching consultations:', error);
-      } else {
-        setConsultations(data || []);
-      }
-      setLoading(false);
+  async function loadConsultations() {
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('id, title, description, consultation_date, consultation_time')
+      .eq('user_id', user?.id || '')
+      .order('consultation_date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching consultations:', error);
+    } else {
+      setConsultations(data || []);
     }
-    if (user?.id) {
-      loadConsultations();
-    }
+    setLoading(false);
+  }
+
+  if (user?.id) {
+    loadConsultations();
+  }
   }, [user?.id]);
 
   if (loading) {
@@ -71,7 +73,7 @@ export function ConsultationList() {
             <h3 className="text-lg font-medium">{c.title}</h3>
             <p className="text-gray-600">{c.description}</p>
             <p className="text-sm text-gray-500">
-              {new Date(c.date).toLocaleString()}
+            {new Date(c.consultation_date).toLocaleDateString()}
             </p>
           </li>
         ))}

@@ -65,29 +65,43 @@ export default function ConsultationBooking() {
             <input type="email" {...register('email', { required: true })} className="w-full p-2 border rounded" placeholder="Enter your email" />
             {errors.email && <span className="text-red-600">Required</span>}
           </div>
-          <div>
-            <label className="block font-medium">Consultation Type</label>
-            <select {...register('consultationType', { required: true })} className="w-full p-2 border rounded">
-              <option value="">Select a type</option>
-              {consultationTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-            {errors.consultationType && <span className="text-red-600">This field is required</span>}
-          </div>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <div className="flex-1">
+              <label className="block font-medium">Consultation Type</label>
+              <select
+                {...register('consultationType', { required: true })}
+                className="w-full p-2 border rounded"
+                aria-label="Select Consultation Type"
+              >
+                <option value="">Select a type</option>
+                {consultationTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              {errors.consultationType && <span className="text-red-600">This field is required</span>}
+            </div>
 
-          <div className="flex gap-4">
             <div className="flex-1">
               <label className="block font-medium">Date</label>
-              <input type="date" {...register('date', { required: true })} className="w-full p-2 border rounded" />
+              <input
+                type="date"
+                {...register('date', { required: true })}
+                className="w-full p-2 border rounded"
+                aria-label="Select Date"
+              />
               {errors.date && <span className="text-red-600">Required</span>}
             </div>
 
             <div className="flex-1">
               <label className="block font-medium">Time</label>
-              <input type="time" {...register('time', { required: true })} className="w-full p-2 border rounded" />
+              <input
+                type="time"
+                {...register('time', { required: true })}
+                className="w-full p-2 border rounded"
+                aria-label="Select Time"
+              />
               {errors.time && <span className="text-red-600">Required</span>}
             </div>
           </div>

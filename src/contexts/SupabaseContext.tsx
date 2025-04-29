@@ -96,12 +96,39 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       throw error;
     }
   };
+  // Move this export outside the SupabaseProvider component
+    const UserProvider = ({ children }: { children: React.ReactNode }) => {
+    const { user, loading, signIn, signUp, signOut } = useSupabase()!;
+    return (
+      <SupabaseContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+        {children}
+      </SupabaseContext.Provider>
+    );
+  };
+  
 
-  // ✅ Sign Up
+  // ✅ Sign Up with strong client-side validation
   const signUp = async (email: string, password: string, userData: { name: string; role: string }) => {
     try {
+      const cleanEmail = email.toLowerCase().trim();
+
+      // Validate email structure
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(cleanEmail)) {
+        throw new Error('Invalid email format. Please provide a valid email address.');
+      }
+
+      // Block placeholder or AWS emails
+      if (
+        cleanEmail.includes('no-reply') ||
+        cleanEmail.includes('verification') ||
+        cleanEmail.includes('amazonaws.com')
+      ) {
+        throw new Error('Invalid email. Please use a valid personal or business email address.');
+      }
+
       const { error } = await supabase.auth.signUp({
-        email: email.toLowerCase().trim(),
+        email: cleanEmail,
         password,
         options: {
           data: {

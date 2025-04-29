@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useNotificationStore } from '../lib/store';
 
 export default function SignInForm() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ export default function SignInForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { addNotification } = useNotificationStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,14 +17,19 @@ export default function SignInForm() {
     setError(null);
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
       if (signInError) {
         console.error('SignIn error:', signInError);
-        setError(signInError.message);
+        if (signInError.message === 'Invalid login credentials') {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(signInError.message || 'An error occurred during login.');
+        }
       } else {
         console.log('SignIn success, session:', data.session);
+        addNotification('Welcome back!', 'success');
         navigate('/client/dashboard');
       }
     } catch (err) {
