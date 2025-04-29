@@ -5,7 +5,12 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { useNotificationStore } from '../lib/store';
+<<<<<<< HEAD
 import { useSupabase } from '../contexts/SupabaseContext';
+=======
+import { supabase } from '../lib/supabase/client';
+
+>>>>>>> 33282c48065d0158dd1b70de0c6272d9adf43824
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -26,22 +31,47 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       addNotification('Passwords do not match', 'error');
+      return;
+    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
+    if (!passwordRegex.test(formData.password)) {
+      addNotification(
+        'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character.',
+        'error'
+      );
       return;
     }
 
     setLoading(true);
     try {
+<<<<<<< HEAD
       await signUp(formData.email, formData.password, {
         name: formData.name,
         role: formData.role,
+=======
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            role: formData.role
+          }
+        }
+>>>>>>> 33282c48065d0158dd1b70de0c6272d9adf43824
       });
-      
-      addNotification('Registration successful! Please log in.', 'success');
+
+      if (error) {
+        throw error;
+      }
+
+      addNotification('Registration successful! Please check your email to verify your account.', 'success');
       navigate('/login');
     } catch (error) {
+      console.error('Signup error:', error);
       addNotification(
         error instanceof Error ? error.message : 'Registration failed. Please try again.',
         'error'

@@ -10,9 +10,9 @@ interface HeroProps {
 
 export function Hero({ onBookNow }: HeroProps) {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
-  if (typeof isAuthenticated !== 'boolean') return null;
+  const { user } = useAuth();
+  const { logout } = useAuth();
+  const isAuthenticated = Boolean(user);
 
   const handleCreateAccount = () => {
     navigate('/register');
@@ -53,6 +53,16 @@ export function Hero({ onBookNow }: HeroProps) {
                 className="px-8 hover-scale"
               >
                 Create new Account 
+              </Button>
+            )}
+            {isAuthenticated && (
+              <Button
+                variant="secondary"
+                size="lg"
+                className="px-8 hover-scale"
+                onClick={() => logout()}
+              >
+                Logout
               </Button>
             )}
           </div>    

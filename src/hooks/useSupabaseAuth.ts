@@ -113,6 +113,7 @@ const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }): JSX.El
     } else {
       setUser(null);
       addNotification('Signed out successfully', 'success');
+      // Redirect to login
       navigate('/login');
     }
   };

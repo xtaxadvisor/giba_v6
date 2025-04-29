@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useNotificationStore } from '../lib/store';
 
 export default function SignInForm() {
   const navigate = useNavigate();
@@ -8,24 +9,34 @@ export default function SignInForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { addNotification } = useNotificationStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (signInError) {
-      setError(signInError.message);
-    } else {
-      // On successful login, redirect to client dashboard
-      navigate('/client/dashboard');
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (signInError) {
+        console.error('SignIn error:', signInError);
+        if (signInError.message === 'Invalid login credentials') {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(signInError.message || 'An error occurred during login.');
+        }
+      } else {
+        console.log('SignIn success, session:', data.session);
+        addNotification('Welcome back!', 'success');
+        navigate('/client/dashboard');
+      }
+    } catch (err) {
+      console.error('Unexpected error during signIn:', err);
+      setError((err as Error).message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
   };
 

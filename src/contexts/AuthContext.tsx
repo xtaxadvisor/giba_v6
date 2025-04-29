@@ -1,16 +1,13 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import type { User } from '../types';
-import { supabase } from '@/lib/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import addNotification from '../components/ui/Notifications';
+import { supabase } from '../lib/supabase/client';
+import type { User } from '../types';
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, userData: { name: string; role: string }) => Promise<void>;
   logout: () => Promise<void>;
-  signIn: (credentials: { email: string; password: string }) => Promise<void>;
+  isAuthenticated: boolean; // Add this property
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,23 +18,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(
-        session?.user && session.user.email
-          ? { ...session.user, email: session.user.email, name: '', createdAt: '', location: '', role: '' }
-          : null
-      );
+      setUser(session?.user ? {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.user_metadata?.name || '',
+        createdAt: session.user.created_at,
+        location: session.user.user_metadata?.location || ''
+      } as User : null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(
-        session?.user && session.user.email
-          ? { ...session.user, email: session.user.email, name: '', createdAt: '', location: '', role: '' }
-          : null
-      );
+      setUser(session?.user ? {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.user_metadata?.name || '',
+        createdAt: session.user.created_at,
+        location: session.user.user_metadata?.location || ''
+      } as User : null);
     });
 
     return () => {
@@ -52,47 +51,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw error;
   };
 
-  const register = async (
-    email: string,
-    password: string,
-    userData: { name: string; role: string }
-  ) => {
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
-    if (error) throw error;
-    // Optionally upsert userData to your profiles table here
-  };
-
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error('Sign out error:', error.message || error);
-      addNotification('Error signing out', 'error');
-    } else {
-      setUser(null);
-      addNotification('Successfully signed out', 'success');
-      navigate('/login');
+      console.error('Supabase logout error:', error.message || error);
     }
+    setUser(null);
+    window.location.href = '/login';
   };
 
-  const value: AuthContextType = {
-    user,
-    loading,
-    isAuthenticated: !!user,
-    login,
-    register,
-    logout,
-    signIn: async ({ email, password }) => login(email, password),
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 };

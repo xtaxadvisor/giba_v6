@@ -1,5 +1,7 @@
 import { useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
-import { supabase } from '../../lib/supabase/client'
+
+import { useAuth } from '@/contexts/AuthContext';
+
 import { 
   Home, 
   FileText, 
@@ -15,7 +17,6 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useState } from 'react';
-import ProfileForm from '../../pages/client/ClientForm';
 
 const menuItems = [
   { title: 'Dashboard', href: '/client', icon: Home },
@@ -56,20 +57,100 @@ const ClientLayout = ({ children, title, description }: ClientLayoutProps) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleLogout = () => {
-    navigate('/');
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
   };
 
   if (!formCompleted) {
     return (
-      <ProfileForm
-        initialData={formData}
-        onSubmit={(data) => {
-          setFormData(data);
-          setFormCompleted(true);
-        }}
-        onCancel={() => setFormCompleted(false)}
-      />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md">
+          <h2 className="text-xl font-semibold text-center mb-4">Welcome! Please complete your profile:</h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setFormCompleted(true);
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-sm font-medium mb-1">I am a</label>
+              <select
+                name="userType"
+                value={userType}
+                onChange={(e) => setUserType(e.target.value as 'personal'|'business')}
+                className="w-full border px-4 py-2 rounded"
+              >
+                <option value="personal">Personal user</option>
+                <option value="business">Business user</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Full Name</label>
+              <input
+                name="fullName"
+                type="text"
+                placeholder="Your full name"
+                required
+                value={formData.fullName}
+                onChange={handleChange}
+                className="w-full border px-4 py-2 rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full border px-4 py-2 rounded"
+              />
+            </div>
+            {userType === 'business' && (
+              <div>
+                <label className="block text-sm font-medium mb-1">Business Name</label>
+                <input
+                  name="businessName"
+                  type="text"
+                  placeholder="Your business name"
+                  required
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  className="w-full border px-4 py-2 rounded"
+                />
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium mb-1">Which service are you interested in?</label>
+              <select
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+                className="w-full border px-4 py-2 rounded"
+              >
+                <option value="">Select a service</option>
+                <option value="tax-planning">Tax Planning</option>
+                <option value="financial-review">Financial Review</option>
+                <option value="investment-advisory">Investment Advisory</option>
+                <option value="business-consulting">Business Consulting</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            >
+              Continue
+            </button>
+          </form>
+        </div>
+      </div>
     );
   }
 

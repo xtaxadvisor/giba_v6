@@ -12,6 +12,7 @@ export function ConsultationList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+<<<<<<< HEAD
     async function loadConsultations() {
       const { data, error } = await supabase
         .from('consultations')
@@ -27,7 +28,26 @@ export function ConsultationList() {
     }
     if (user?.id) {
       loadConsultations();
+=======
+  async function loadConsultations() {
+    const { data, error } = await supabase
+      .from('consultations')
+      .select('id, title, description, consultation_date, consultation_time')
+      .eq('user_id', user?.id || '')
+      .order('consultation_date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching consultations:', error);
+    } else {
+      setConsultations(data || []);
+>>>>>>> 33282c48065d0158dd1b70de0c6272d9adf43824
     }
+    setLoading(false);
+  }
+
+  if (user?.id) {
+    loadConsultations();
+  }
   }, [user?.id]);
 
   if (loading) {
