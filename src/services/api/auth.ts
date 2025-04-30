@@ -27,10 +27,10 @@ export const authService = {
         return null;
       }
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')  
-        .select('*')
-        .eq('auth_id', user.id)
-        .maybeSingle();
+              .from('profiles')  
+              .select('*')
+              .eq('id', user.id)
+              .maybeSingle();
 
       if (profileError || !profile) {
         useNotificationStore.getState().addNotification(
@@ -120,7 +120,7 @@ export const authService = {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')  
       .select('*')
-      .eq('auth_id', user.id)
+      .eq('id', user.id)
       .maybeSingle();
 
     if (profileError || !profile) {

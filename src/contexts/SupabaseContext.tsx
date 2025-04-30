@@ -30,8 +30,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       const { data, error } = await supabase
         .from('profiles')  
         .select('*')
-        .eq('auth_id', authId)
-       .maybeSingle();
+        .eq('id', authId)
+        .maybeSingle();
 
       if (error) throw error;
       setUser(data);

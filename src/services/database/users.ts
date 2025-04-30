@@ -6,7 +6,7 @@ class UserService {
     const { data, error } = await supabase
       .from('profiles')  
       .select('*')
-      .eq('auth_id', authId)
+      .eq('id', authId)
       .maybeSingle();
 
     if (error) throw error;

@@ -76,13 +76,13 @@ export class SecurityTester {
         results.issues.push('RLS failed: Public access not restricted');
       }
 
-      // Test authenticated access
+      // Test authenticated access: `profiles.id` should match `auth.users.id`
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         const { error: authError } = await supabase
           .from('profiles')  
           .select('*')
-          .eq('auth_id', session.user.id)
+          .eq('id', session.user?.id || '00000000-0000-0000-0000-000000000000') // fallback for safety
           .maybeSingle();
 
         if (authError) {

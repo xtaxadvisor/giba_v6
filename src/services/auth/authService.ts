@@ -57,7 +57,7 @@ export class AuthService {
           const { data: profile, error: profileError } = await supabase
             .from('profiles')  
             .select('*')
-            .eq('auth_id', user.id)
+            .eq('id', user.id)
             .maybeSingle();
 
           if (profileError) throw profileError;
