@@ -6,7 +6,9 @@ import {
   Clock,
   Edit,
   Trash2,
+  ArrowLeft,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
@@ -29,6 +31,7 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
   const [activeTab, setActiveTab] = useState('info');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { client, isLoading, updateClient, deleteClient } = useClient(clientId);
+  const navigate = useNavigate();
 
   if (isLoading) return <LoadingSpinner />;
   if (!client) return <div className="p-4 text-red-600">Client not found</div>;
@@ -67,6 +70,15 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
 
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="text-blue-600 hover:text-blue-800 mb-2 inline-flex items-center"
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" />
+        Back
+      </button>
+
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>

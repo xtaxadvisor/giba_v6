@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { supabase } from '../../src/lib/supabase/client';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,18 +44,31 @@ const handler: Handler = async (event, context) => {
       };
     }
 
-    // 🚀 This is where you would insert the message into a DB
-    const fakeMessage = {
-      id: randomUUID(),
-      recipientId,
-      content,
-      attachments: attachments || [],
-      createdAt: new Date().toISOString(),
-    };
+    const { data: inserted, error } = await supabase
+      .from('messages')
+      .insert([
+        {
+          id: randomUUID(),
+          recipient_id: recipientId,
+          content,
+          attachments,
+          created_at: new Date().toISOString(),
+        }
+      ])
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Database insert failed', detail: error.message }),
+        headers: corsHeaders,
+      };
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Message received', data: fakeMessage }),
+      body: JSON.stringify({ message: 'Message stored', data: inserted }),
       headers: corsHeaders,
     };
   } catch (err) {
@@ -67,3 +81,16 @@ const handler: Handler = async (event, context) => {
 };
 
 export { handler };
+
+// Example client-side message sender:
+/*
+await fetch('/.netlify/functions/messages', {
+  method: 'POST',
+  body: JSON.stringify({
+    content: message,
+    recipientId: recipientId,
+    attachments: attachments || []
+  }),
+  headers: { 'Content-Type': 'application/json' }
+});
+*/
