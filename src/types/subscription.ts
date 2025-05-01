@@ -1,4 +1,3 @@
-
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -17,4 +16,9 @@ export interface Subscription {
   currentPeriodStart: string;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
+  currency?: 'USD' | 'EUR' | 'BRL';
+  trialEnd?: string;
+  graceUntil?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
 }
