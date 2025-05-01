@@ -18,40 +18,39 @@ export class BookingService {
 
   async getAvailability(date: string, professionalId: string): Promise<TimeSlot[]> {
     try {
-      const { data, error } = await supabase
+      const startOfDay = `${date}T00:00:00.000Z`;
+      const endOfDay = `${date}T23:59:59.999Z`;
+
+      const { data: existingBookings, error } = await supabase
         .from('consultations')
         .select('start_time, end_time')
         .eq('professional_id', professionalId)
-        .gte('start_time', `${date}T00:00:00`)
-        .lte('start_time', `${date}T23:59:59`);
+        .gte('start_time', startOfDay)
+        .lte('start_time', endOfDay);
 
       if (error) throw error;
 
-      // Generate time slots
       const slots: TimeSlot[] = [];
-      const startHour = 9; // 9 AM
-      const endHour = 17; // 5 PM
-      const slotDuration = 30; // 30 minutes
+      const startHour = 9;
+      const endHour = 17;
+      const slotDuration = 30;
 
       for (let hour = startHour; hour < endHour; hour++) {
         for (let minute = 0; minute < 60; minute += slotDuration) {
-          const time = new Date(date);
-          time.setHours(hour, minute);
+          const slotStart = new Date(`${date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00.000Z`);
+          const slotEnd = new Date(slotStart.getTime() + slotDuration * 60000);
 
-          const endTime = new Date(time);
-          endTime.setMinutes(endTime.getMinutes() + slotDuration);
-
-          const isBooked = data?.some(booking => {
+          const isBooked = existingBookings?.some(booking => {
             const bookingStart = new Date(booking.start_time);
             const bookingEnd = new Date(booking.end_time);
-            return time >= bookingStart && time < bookingEnd;
+            return slotStart < bookingEnd && slotEnd > bookingStart;
           });
 
           if (!isBooked) {
             slots.push({
-              startTime: time.toISOString(),
-              endTime: endTime.toISOString(),
-              available: true
+              startTime: slotStart.toISOString(),
+              endTime: slotEnd.toISOString(),
+              available: true,
             });
           }
         }
