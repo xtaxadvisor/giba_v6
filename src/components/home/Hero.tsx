@@ -37,14 +37,21 @@ export function Hero({ onBookNow }: HeroProps) {
     </p>
 
     <div className="mt-10 flex flex-wrap justify-center gap-4 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
+      {/* First step in client onboarding-to-calendar flow: redirect to profile setup */}
       <Button
-        onClick={() => onBookNow('consultation')}
+        onClick={() => {
+          try {
+            navigate('/client/profile');
+          } catch (error) {
+            console.error('Navigation failed:', error);
+          }
+        }}
         variant="primary"
         size="lg"
         icon={Phone}
         className="px-8 hover-scale"
       >
-        Get Started with a FREE TaxConsultation
+        Get Started with a FREE Tax Consultation
       </Button> 
        {!isAuthenticated && (
         <Button
@@ -54,10 +61,21 @@ export function Hero({ onBookNow }: HeroProps) {
           className="px-8 hover-scale"
         >
           Create FREE Account 
-        </Button>
+        </Button> 
       )}
+      <Button
+        onClick={() => onBookNow('video')}
+        variant="secondary"
+        size="lg"
+        icon={Video}
+        className="px-8 hover-scale"
+      >
+        Book a Video Consultation
+      </Button>
     </div>
   </div>
 </div>
   );
 }
+//   );
+// }
