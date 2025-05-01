@@ -54,6 +54,7 @@ export interface Thread {
         avatarUrl?: string;
       };
     };
+<<<<<<< HEAD
   export interface MessageThread {
     id: string;
     title: string;
@@ -83,4 +84,34 @@ export interface Thread {
     isShared: boolean; // Indicates if the thread is shared
     isSaved: boolean; // Indicates if the thread is saved
     // Missing recipientId
+=======
+export interface MessageThread {
+  id: string;
+  title: string;
+  lastMessage: string; // Last message content
+  createdAt: string; // Timestamp of thread creation
+  updatedAt: string; // Timestamp of last update
+  participants: string[]; // List of participant IDs
+  recipientId: string; // ID of the user receiving the thread
+  isPinned: boolean; // Indicates if the thread is pinned
+  isArchived: boolean; // Indicates if the thread is archived
+  isFavorite: boolean; // Indicates if the thread is marked as favorite
+  isMuted: boolean; // Indicates if the thread is muted
+  isReported: boolean; // Indicates if the thread is reported
+  isFollowed: boolean; // Indicates if the thread is followed
+  isBlocked: boolean; // Indicates if the thread is blocked
+  isStarred: boolean; // Indicates if the thread is starred
+  isSubscribed: boolean; // Indicates if the thread is subscribed
+  isDeleted: boolean; // Indicates if the thread is deleted
+  isDraft: boolean; // Indicates if the thread is a draft
+  isSent: boolean; // Indicates if the thread is sent
+  isReceived: boolean; // Indicates if the thread is received
+  isRead: boolean; // Indicates if the thread is read
+  isDelivered: boolean; // Indicates if the thread is delivered
+  isSeen: boolean; // Indicates if the thread is seen
+  isReplied: boolean; // Indicates if the thread is replied
+  isForwarded: boolean; // Indicates if the thread is forwarded
+  isShared: boolean; // Indicates if the thread is shared
+  isSaved: boolean; // Indicates if the thread is saved
+>>>>>>> 6c9ca0690d78f9046084d6a8e6eca28a36da4027
 }

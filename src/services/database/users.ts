@@ -15,7 +15,11 @@ class UserService {
 
   async updateProfile(userId: string, profile: Partial<User>) {
     const { data, error } = await supabase
+<<<<<<< HEAD
       .from('profiles')
+=======
+      .from('profiles')  
+>>>>>>> 6c9ca0690d78f9046084d6a8e6eca28a36da4027
       .update({
         ...profile,
         updated_at: new Date().toISOString()
