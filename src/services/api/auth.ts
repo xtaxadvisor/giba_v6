@@ -27,17 +27,10 @@ export const authService = {
         return null;
       }
       const { data: profile, error: profileError } = await supabase
-<<<<<<< HEAD
-        .from('profiles')  
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-=======
               .from('profiles')  
               .select('*')
               .eq('id', user.id)
               .maybeSingle();
->>>>>>> 6c9ca0690d78f9046084d6a8e6eca28a36da4027
 
       if (profileError || !profile) {
         useNotificationStore.getState().addNotification(
