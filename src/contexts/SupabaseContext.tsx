@@ -27,6 +27,11 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
   
   const fetchUserProfile = async (authId: string) => {
     try {
+      if (!authId || authId.trim() === '') {
+        console.warn('No valid authId provided to fetchUserProfile. Skipping profile fetch.');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('profiles')  
         .select('*')

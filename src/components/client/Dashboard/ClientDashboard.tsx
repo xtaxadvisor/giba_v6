@@ -1,5 +1,7 @@
 import { TrendingUp, AlertCircle, Calendar, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/Card'; // use alias if configured
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 interface ClientDashboardProps {
   title: string;
@@ -78,6 +80,17 @@ export function ClientDashboard() {
     }
   ];
 
+  const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
+  useEffect(() => {
+    const fetchDocs = async () => {
+      const { data, error } = await supabase.storage.from('client-documents').list();
+      if (!error && data) {
+        setUploadedDocs(data.map((doc) => doc.name));
+      }
+    };
+    fetchDocs();
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Financial Health Score */}
@@ -146,6 +159,40 @@ export function ClientDashboard() {
               </span>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Upload New Document */}
+      <section className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Upload a Document</h3>
+        <input
+          type="file"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const filePath = `${Date.now()}_${file.name}`;
+            supabase.storage
+              .from('client-documents')
+              .upload(filePath, file)
+              .then(({ error }) => {
+                if (error) {
+                  alert('Upload failed: ' + error.message);
+                } else {
+                  alert('Document uploaded successfully!');
+                }
+              });
+          }}
+          className="border border-gray-300 p-2 rounded w-full"
+        />
+        <div className="mt-4">
+          <h4 className="font-semibold mb-2">Uploaded Files</h4>
+          <ul className="list-disc pl-6 text-sm text-gray-700">
+            {uploadedDocs.length === 0 ? (
+              <li>No documents uploaded yet.</li>
+            ) : (
+              uploadedDocs.map((name) => <li key={name}>{name}</li>)
+            )}
+          </ul>
         </div>
       </section>
     </div>

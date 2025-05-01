@@ -13,7 +13,7 @@ export const handler: Handler = async (event) => {
     // Validate request method
     if (event.httpMethod !== 'POST') {
       return {
-        ...createErrorResponse(405, 'Method not allowed'),
+        ...createErrorResponse('Method not allowed', 405),
         headers: corsHeaders
       };
     }
@@ -22,7 +22,7 @@ export const handler: Handler = async (event) => {
     const authHeader = event.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return {
-        ...createErrorResponse(401, 'Unauthorized'),
+        ...createErrorResponse('Unauthorized', 401),
         headers: corsHeaders
       };
     }
@@ -55,9 +55,10 @@ export const handler: Handler = async (event) => {
     console.error('Payment test error:', error);
     return {
       ...createErrorResponse(
-        500,
-        'Payment service test failed',
-        process.env.NODE_ENV === 'development' ? error : undefined
+        process.env.NODE_ENV === 'development' && error instanceof Error
+          ? error.message
+          : 'Payment service test failed',
+        500
       ),
       headers: getCorsHeaders(event)
     };

@@ -24,6 +24,7 @@ export interface Thread {
     id: string;
     title: string;
     participants: string[];
+    recipientId: string; // ID of the message recipient
     lastMessage: string;
     createdAt: string;
     updatedAt: string;

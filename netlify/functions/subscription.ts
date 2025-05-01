@@ -69,7 +69,7 @@ export const handler: Handler = async (event) => {
       case '/.netlify/functions/subscription/subscribe':
         if (event.httpMethod !== 'POST') {
           return {
-            ...createErrorResponse(405, 'Method not allowed'),
+            ...createErrorResponse('Method not allowed', 405),
             headers: corsHeaders
           };
         }
@@ -90,19 +90,34 @@ export const handler: Handler = async (event) => {
 
       default:
         return {
-          ...createErrorResponse(404, 'Not found'),
+          ...createErrorResponse('Not found', 404),
           headers: corsHeaders
         };
     }
   } catch (error) {
     console.error('Subscription error:', error);
     return {
-      ...createErrorResponse(
-        500,
-        'Subscription processing failed',
-        process.env.NODE_ENV === 'development' ? error : undefined
+        ...createErrorResponse(
+        process.env.NODE_ENV === 'development' && error instanceof Error
+          ? error.message
+          : 'Internal server error',
+        500
       ),
       headers: getCorsHeaders(event)
     };
   }
 };
+// Note: In a real-world scenario, you would replace the mock subscription creation with actual logic to create a subscription using a payment processor like Stripe or PayPal.
+// You would also handle errors and edge cases more robustly, including validating the plan ID and payment method ID.
+//
+// Additionally, you would implement proper authentication and authorization checks to ensure that only authorized users can create subscriptions.
+// This example is simplified for demonstration purposes.
+//
+// The code includes a mock subscription creation process and a basic structure for handling CORS and responses.
+// The handler function processes incoming requests, checks the HTTP method, and returns appropriate responses based on the request path.
+// The subscription plans are hardcoded for demonstration purposes, but in a real application, you would likely fetch this data from a database or an external API.
+// The error handling is basic, and in a production environment, you would want to log errors more systematically and possibly notify developers or administrators of issues.
+// The code is structured to be easily extendable, allowing for the addition of more subscription-related features in the future.
+// The handler function is designed to be deployed as a serverless function on Netlify, making it easy to integrate with a frontend application.
+// The code is written in TypeScript, which provides type safety and better tooling support compared to plain JavaScript.
+// The use of async/await syntax makes the code more readable and easier to follow, especially when dealing with asynchronous operations like network requests.

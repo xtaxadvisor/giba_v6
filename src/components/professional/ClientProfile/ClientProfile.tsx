@@ -38,6 +38,26 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
     setIsEditModalOpen(false);
   };
 
+  const handleDeleteClient = async (clientId: string) => {
+    if (window.confirm('Are you sure you want to delete this client?')) {
+      try {
+        const response = await fetch(`/api/clients/${clientId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete client');
+        }
+
+        alert('Client deleted successfully');
+        window.location.reload(); // Optionally replace with router navigation if needed
+      } catch (error) {
+        console.error('Error deleting client:', error);
+        alert('An error occurred while deleting the client. Please try again.');
+      }
+    }
+  };
+
   const tabs = [
     { id: 'info', label: 'Overview', icon: User },
     { id: 'documents', label: 'Documents', icon: FileText },
@@ -135,27 +155,3 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
     </div>
   );
 }
-  const handleDeleteClient = (clientId: string) => {
-    if (window.confirm('Are you sure you want to delete this client?')) {
-      deleteClient(clientId);
-    }
-  };
-  async function deleteClient(clientId: string) {
-    try {
-      const response = await fetch(`/api/clients/${clientId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete client');
-      }
-
-      alert('Client deleted successfully');
-      // Optionally, redirect or refresh the page after deletion
-      window.location.reload();
-    } catch (error) {
-      console.error('Error deleting client:', error);
-      alert('An error occurred while deleting the client. Please try again.');
-    }
-  }
-

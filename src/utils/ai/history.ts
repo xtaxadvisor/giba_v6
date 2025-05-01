@@ -21,9 +21,12 @@ export function saveMessageToHistory(message: AIMessage): void {
 
 export function getMessageHistory(): AIMessageWithTimestamp[] {
   const messages = aiStorage.get<AIMessage[]>(HISTORY_KEY) || [];
-  return messages.map(message => ({
+  return messages.map((message): AIMessageWithTimestamp => ({
     ...message,
-    timestamp: 'timestamp' in message && typeof message.timestamp === 'string' ? message.timestamp : new Date().toISOString()
+    timestamp:
+      typeof (message as any).timestamp === 'string'
+        ? (message as any).timestamp
+        : new Date().toISOString()
   }));
 }
 
