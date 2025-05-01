@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { messageService } from '../services/api/message';
+import { messageService } from '../services/api/messages';
 import { useNotificationStore } from '../lib/store';
 // Removed unused and non-existent 'Message' import
 

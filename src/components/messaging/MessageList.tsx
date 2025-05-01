@@ -10,7 +10,7 @@ export function MessageItem(props: { message: { id: string; senderId: string; re
     </div>
   );
 }
-export function MessageList() {
+export function MessageList({ recipientId }: { recipientId: string }) {
   const { messages, isLoading } = useMessages();
 
   if (isLoading) {
@@ -21,9 +21,15 @@ export function MessageList() {
     return <p>No messages available.</p>;
   }
 
+  const filteredMessages = messages.filter(msg => msg.recipientId === recipientId);
+
+  if (filteredMessages.length === 0) {
+    return <p>No messages available.</p>;
+  }
+
   return (
     <div className="space-y-4">
-      {messages.map((message) => (
+      {filteredMessages.map((message) => (
         <MessageItem
           key={message.id}
           message={{

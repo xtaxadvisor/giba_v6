@@ -11,6 +11,11 @@ import { supabase } from '../lib/supabase/client';
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
+  const supabaseContext = supabase;
+  if (!supabaseContext || !supabaseContext.auth || !supabaseContext.auth.signUp) {
+    throw new Error('Supabase context is not properly initialized.');
+  }
+  const { signUp } = supabaseContext.auth;
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',

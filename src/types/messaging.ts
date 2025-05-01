@@ -24,6 +24,7 @@ export interface Thread {
     id: string;
     title: string;
     participants: string[];
+    recipientId: string; // ID of the message recipient
     lastMessage: string;
     createdAt: string;
     updatedAt: string;
@@ -60,6 +61,7 @@ export interface Thread {
     createdAt: string; // Timestamp of thread creation
     updatedAt: string; // Timestamp of last update
     participants: string[]; // List of participant IDs
+    recipientId: string; // ID of the message recipient
     isPinned: boolean; // Indicates if the thread is pinned
     isArchived: boolean; // Indicates if the thread is archived
     isFavorite: boolean; // Indicates if the thread is marked as favorite

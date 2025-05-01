@@ -1,6 +1,7 @@
 import { FileText, Download } from 'lucide-react';
 import { formatTimeAgo } from '../../utils/date';
 import type { Message, Attachment } from '../../types';
+import { useSession } from '@supabase/auth-helpers-react';
 
 interface MessageItemProps {
   message: Message; // Ensure consistent type for the 'message' property
@@ -8,7 +9,9 @@ interface MessageItemProps {
 // Removed duplicate and unused MessageItem function
 
 export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-  const isOwnMessage = message.senderId === 'currentUserId'; // Replace with actual current user ID logic
+  const session = useSession();
+  const currentUserId = session?.user?.id;
+  const isOwnMessage = message.senderId === currentUserId;
 
   return (
     <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>

@@ -27,9 +27,9 @@ export const authService = {
         return null;
       }
       const { data: profile, error: profileError } = await supabase
-        .from('users')
+        .from('profiles')  
         .select('*')
-        .eq('auth_id', user.id)
+        .eq('id', user.id)
         .maybeSingle();
 
       if (profileError || !profile) {
@@ -69,7 +69,7 @@ export const authService = {
 
       if (data.user) {
         const { error: profileError } = await supabase
-          .from('users')
+          .from('profiles')  
           .insert({
             auth_id: data.user.id,
             name: userData.name,
@@ -118,9 +118,9 @@ export const authService = {
     if (userError || !user) return null;
 
     const { data: profile, error: profileError } = await supabase
-      .from('users')
+      .from('profiles')  
       .select('*')
-      .eq('auth_id', user.id)
+      .eq('id', user.id)
       .maybeSingle();
 
     if (profileError || !profile) {

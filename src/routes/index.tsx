@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../contexts/AuthContext'; // Adjust the path as needed
@@ -9,7 +9,6 @@ const queryClient = new QueryClient();
 import Home from '../pages/Home';
 import { ForgotPasswordForm } from '../components/auth/ForgotPasswordForm';
 import { ResetPasswordForm } from '../components/auth/ResetPasswordForm';
-
 
 // Lazy load other components
 const LoginPage = React.lazy(() => import('../pages/LoginPage'));
@@ -166,4 +165,3 @@ export function AppRoutes() {
     </Routes>
   );
 }
-// Note: The above code is a simplified version of the original code.

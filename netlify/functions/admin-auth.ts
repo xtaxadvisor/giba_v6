@@ -14,7 +14,7 @@ export const handler: Handler = async (event) => {
     // Validate request method
     if (event.httpMethod !== 'POST') {
       return {
-        ...createErrorResponse(405, 'Method not allowed'),
+        ...createErrorResponse('Method not allowed', 405),
         headers: corsHeaders
       };
     }
@@ -23,7 +23,7 @@ export const handler: Handler = async (event) => {
     const authHeader = event.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return {
-        ...createErrorResponse(401, 'Missing or invalid authorization'),
+        ...createErrorResponse('Missing or invalid authorization', 401),
         headers: corsHeaders
       };
     }
@@ -40,7 +40,7 @@ export const handler: Handler = async (event) => {
       }
     } catch (error) {
       return {
-        ...createErrorResponse(400, 'Invalid request body'),
+        ...createErrorResponse('Invalid request body', 400),
         headers: corsHeaders
       };
     }
@@ -49,7 +49,7 @@ export const handler: Handler = async (event) => {
     const isValid = await validateCredentials(username, password);
     if (!isValid) {
       return {
-        ...createErrorResponse(401, 'Invalid credentials'),
+        ...createErrorResponse('Invalid credentials', 401),
         headers: corsHeaders
       };
     }
@@ -71,10 +71,9 @@ export const handler: Handler = async (event) => {
     }
 
     return {
-      ...createErrorResponse(
-        500,
-        'Internal server error',
-        process.env.NODE_ENV === 'development' ? error : undefined
+        ...createErrorResponse(
+        process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+        500
       ),
       headers: getCorsHeaders(event)
     };

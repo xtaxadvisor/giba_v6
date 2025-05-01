@@ -23,7 +23,7 @@ export const messageService = {
     api.get<Message[]>(`/messages/threads/${threadId}`),
 
   send: (data: SendMessageDTO) => 
-    api.post<Message>('/messages', data),
+    api.post<Message>('messages', data),
 
   markAsRead: (messageId: string) => 
     api.put<void>(`/messages/${messageId}/read`),

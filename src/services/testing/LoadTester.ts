@@ -26,7 +26,7 @@ export class LoadTester {
     for (let i = 0; i < queries; i++) {
       const start = performance.now();
       try {
-        await supabase.from('users').select('count').limit(1).single();
+        await supabase.from('profiles')  .select('count').limit(1).single();
         successful++;
         const time = performance.now() - start;
         times.push(time);

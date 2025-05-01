@@ -62,9 +62,9 @@ const SupabaseProvider: React.FC<SupabaseProviderProps> = ({ children }): JSX.El
   const fetchUserProfile = async (authId: string): Promise<void> => {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')  
         .select('*')
-        .eq('auth_id', authId)
+        .eq('id', user?.id)
        .maybeSingle();
 
       if (error) throw error;

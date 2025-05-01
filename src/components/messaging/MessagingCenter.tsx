@@ -2,12 +2,14 @@ import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { useMessages } from '../../hooks/useMessages';
 
-export function MessagingCenter() {
+export function MessagingCenter({ recipientId }: { recipientId: string }) {
   const { sendMessage, isSending } = useMessages();
 
   const handleSendMessage = (content: string, attachments?: File[]) => {
+    if (!recipientId) return;
+
     sendMessage({
-      recipientId: 'some-recipient-id', // Replace with the actual recipient ID
+      recipientId,
       content,
       attachments: attachments?.map(file => file.name) // In a real app, you'd upload files
     });
@@ -20,7 +22,7 @@ export function MessagingCenter() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        <MessageList />
+        <MessageList recipientId={recipientId} />
       </div>
 
       <MessageInput 
