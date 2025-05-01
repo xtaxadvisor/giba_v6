@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase'; // Updated import
+import { supabase } from '../../lib/supabase';
 import { awsEmailService } from '../email/awsEmail';
 import { authorizeNetService } from '../payment/authorizeNet';
 import { useNotificationStore } from '../../lib/store';
@@ -27,17 +27,14 @@ export class BookingService {
 
       if (error) throw error;
 
-      // Generate time slots
       const slots: TimeSlot[] = [];
-      const startHour = 9; // 9 AM
-      const endHour = 17; // 5 PM
-      const slotDuration = 30; // 30 minutes
+      const startHour = 9;
+      const endHour = 17;
+      const slotDuration = 30;
 
       for (let hour = startHour; hour < endHour; hour++) {
         for (let minute = 0; minute < 60; minute += slotDuration) {
-          const time = new Date(date);
-          time.setHours(hour, minute);
-
+          const time = new Date(`${date}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
           const endTime = new Date(time);
           endTime.setMinutes(endTime.getMinutes() + slotDuration);
 
@@ -51,7 +48,7 @@ export class BookingService {
             slots.push({
               startTime: time.toISOString(),
               endTime: endTime.toISOString(),
-              available: true
+              available: true,
             });
           }
         }
@@ -78,52 +75,49 @@ export class BookingService {
     };
   }) {
     try {
-      // Process payment first
       const paymentResult = await authorizeNetService.processPayment({
         amount: bookingData.paymentDetails.amount,
         cardNumber: bookingData.paymentDetails.cardNumber,
         expirationDate: bookingData.paymentDetails.expirationDate,
-        cardCode: bookingData.paymentDetails.cardCode
+        cardCode: bookingData.paymentDetails.cardCode,
       });
 
       if (!paymentResult.success) {
         throw new Error('Payment failed');
       }
 
-      // Create booking record
+      const startTime = new Date(`${bookingData.date}T${bookingData.time}`);
+      const endTime = new Date(startTime.getTime() + 60 * 60 * 1000);
+
       const { data: booking, error: bookingError } = await supabase
         .from('consultations')
         .insert({
           client_id: bookingData.clientId,
           professional_id: bookingData.professionalId,
           type: bookingData.service,
-          start_time: `${bookingData.date}T${bookingData.time}`,
-          end_time: new Date(
-            new Date(`${bookingData.date}T${bookingData.time}`).getTime() + 60 * 60 * 1000
-          ).toISOString(),
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
           status: 'scheduled',
-          payment_id: paymentResult.transactionId
+          payment_id: paymentResult.transactionId,
         })
         .select()
-       .maybeSingle();
+        .maybeSingle();
 
       if (bookingError) throw bookingError;
 
-      // Get client email
       const { data: client } = await supabase
-        .from('profiles')  
+        .from('profiles')
         .select('email')
         .eq('id', bookingData.clientId)
         .maybeSingle();
 
-      // Send confirmation email
       if (client?.email) {
         await awsEmailService.sendBookingConfirmation(client.email, {
           service: bookingData.service,
           date: bookingData.date,
           time: bookingData.time,
-          professional: 'Your Tax Professional', // Get actual name from professional record
-          price: bookingData.paymentDetails.amount
+          professional: 'Your Tax Professional',
+          price: bookingData.paymentDetails.amount,
         });
       }
 

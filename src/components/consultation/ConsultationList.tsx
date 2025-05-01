@@ -15,7 +15,7 @@ export function ConsultationList() {
   async function loadConsultations() {
     const { data, error } = await supabase
       .from('consultations')
-      .select('id, title, description, consultation_date, consultation_time')
+      .select('id, description, consultation_date, consultation_time')
       .eq('user_id', user?.id || '')
       .order('consultation_date', { ascending: false });
 
@@ -70,7 +70,7 @@ export function ConsultationList() {
             className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
             onClick={() => handleConsultationClick(c.id)}
           >
-            <h3 className="text-lg font-medium">{c.title}</h3>
+            <h3 className="text-lg font-medium">{c.description}</h3>
             <p className="text-gray-600">{c.description}</p>
             <p className="text-sm text-gray-500">
             {new Date(c.consultation_date).toLocaleDateString()}

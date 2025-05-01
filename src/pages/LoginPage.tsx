@@ -61,6 +61,7 @@ export default function SignInForm() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          autoComplete="email"
           className="w-full border-gray-300 rounded p-2"
         />
       </div>
@@ -74,6 +75,7 @@ export default function SignInForm() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
+          autoComplete="current-password"
           className="w-full border-gray-300 rounded p-2"
         />
       </div>
