@@ -55,6 +55,17 @@ export function Hero({ onBookNow }: HeroProps) {
           >
             Get Started with a FREE Tax Consultation
           </Button> 
+          <Button
+            onClick={() => {
+              const el = document.getElementById('pricing');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            variant="primary"
+            size="lg"
+            className="px-8 hover-scale"
+          >
+            View Pricing Plans
+          </Button>
           {!isAuthenticated && (
             <>
               <Button
@@ -80,5 +91,3 @@ export function Hero({ onBookNow }: HeroProps) {
     </div>
   );
 }
-
-
