@@ -15,7 +15,7 @@ export function ConsultationList() {
   async function loadConsultations() {
     const { data, error } = await supabase
       .from('consultations')
-      .select('id, description, consultation_date, consultation_time')
+      .select('id, consultation_date, consultation_time')
       .eq('user_id', user?.id || '')
       .order('consultation_date', { ascending: false });
 

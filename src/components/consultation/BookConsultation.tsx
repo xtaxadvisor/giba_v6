@@ -20,7 +20,7 @@ export function BookConsultation() {
       const startTime = new Date(`${rawData.date}T${rawData.time}`);
       const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // +1 hour by default
 
-      await scheduleConsultation({
+      const booking = await scheduleConsultation({
         type: rawData.type,
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
@@ -28,6 +28,8 @@ export function BookConsultation() {
         is_virtual: rawData.is_virtual === 'true',
         client_id: user?.id,
       });
+
+      console.log('Booking result:', booking);
 
       navigate('confirmation');
     } catch (error) {

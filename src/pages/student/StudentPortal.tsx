@@ -5,6 +5,7 @@ import { StudentLayout } from '../../components/student/StudentLayout';
 import { LearningResources } from '../../components/student/LearningResources';
 import { PracticeExercises } from '../../components/student/PracticeExercises/PracticeExercises';
 import { ProgressTracking } from '../../components/student/ProgressTracking/ProgressTracking';
+import MessagingPortal from '../messaging/MessagingPortal';
 
 export default function StudentPortal() {
   const { logout } = useAuth();
@@ -21,6 +22,7 @@ export default function StudentPortal() {
         <Route path="/learning-resources" element={<LearningResources />} />
         <Route path="/practice-exercises" element={<PracticeExercises />} />
         <Route path="/progress-tracking" element={<ProgressTracking />} />
+        <Route path="/messages" element={<MessagingPortal />} />
         {/* Add more routes as needed */}
       </Routes>
       <Outlet />

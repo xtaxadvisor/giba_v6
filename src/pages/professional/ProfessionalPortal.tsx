@@ -5,7 +5,7 @@ import { Analytics } from '../../components/professional/Analytics';
 import { TaskManager } from '../../components/professional/TaskManager';
 import { Reports } from '../../components/professional/Reports';
 import { Billing } from '../../components/professional/Billing';
-import { Messages } from '../../components/dashboard/Messages';
+import MessagingInbox from '../messaging/MessagingInbox';
 import { Documents } from '../../components/dashboard/Documents';
 import { Calendar } from '../../components/dashboard/Calendar';
 import { Settings } from '../../components/dashboard/Settings';
@@ -23,7 +23,7 @@ export default function ProfessionalPortal() {
         <Route path="/tasks" element={<TaskManager />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/billing" element={<Billing />} />
-        <Route path="/messages" element={<Messages />} />
+        <Route path="/messages" element={<MessagingInbox />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/settings" element={<Settings />} />

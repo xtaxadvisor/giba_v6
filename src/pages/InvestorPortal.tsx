@@ -3,6 +3,7 @@ import { InvestorDashboard } from '../components/investor/InvestorDashboard';
 import { VideoLibrary } from '../components/investor/VideoLibrary';
 import InvestorLayout from '../components/investor/InvestorLayout';
 import InvestorForum from './investor/InvestorForum';
+import MessagingPortal from './messaging/MessagingPortal';
 
 
 export default function InvestorPortal() {
@@ -12,7 +13,7 @@ export default function InvestorPortal() {
         <Route index element={<InvestorDashboard />} /> {' '} 
         <Route path="dashboard" element={<InvestorDashboard />} />
         <Route path="documents" element={<InvestorDashboard />} />
-        <Route path="messages" element={<InvestorDashboard />} />
+        <Route path="messages" element={<MessagingPortal />} />
         <Route path="appointments" element={<InvestorDashboard />} />
         <Route path="consultations" element={<InvestorDashboard />} />
         <Route path="finances" element={<InvestorDashboard />} />

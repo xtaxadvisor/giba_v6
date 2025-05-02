@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import ClientLayout from '../../components/client/ClientLayout';
 import { ClientDashboard } from '../../components/client/Dashboard/ClientDashboard';
 import { Documents } from '../../components/dashboard/Documents';
-import { Messages } from '../../components/dashboard/Messages';
+import MessagingPortal from '../../pages/messaging/MessagingPortal';
 import { Calendar } from '../../components/dashboard/Calendar';
 import { Settings } from '../../components/dashboard/Settings';
 import { ConsultationList } from '../../components/consultation/ConsultationList';
@@ -23,7 +23,7 @@ export default function ClientPortal() {
     <Routes>
       <Route index element={<ClientDashboard />} />
       <Route path="documents" element={<Documents />} />
-      <Route path="messages" element={<Messages />} />
+      <Route path="messages" element={<MessagingPortal />} />
       <Route path="appointments" element={<Calendar />} />
       <Route path="consultations" element={<ConsultationList />} />
       <Route path="finances" element={<ClientInsights />} />

@@ -28,12 +28,16 @@ export class AWSEmailService {
     html?: string;
     replyTo?: string;
     attachments?: Array<{ filename: string; content: Buffer }>;
+    cc?: string[];
+    bcc?: string[];
   } = {}) {
     try {
       const command = new SendEmailCommand({
         Source: this.defaultSender,
         Destination: {
-          ToAddresses: [to]
+          ToAddresses: [to],
+          ...(options.cc && options.cc.length > 0 ? { CcAddresses: options.cc } : {}),
+          ...(options.bcc && options.bcc.length > 0 ? { BccAddresses: options.bcc } : {})
         },
         Message: {
           Subject: { Data: subject },
@@ -46,6 +50,9 @@ export class AWSEmailService {
       });
 
       await this.sesClient.send(command);
+      console.log('Email sent to:', to, 'Subject:', subject);
+      // Optionally log this in Supabase:
+      // await supabase.from('email_logs').insert([{ to, subject, timestamp: new Date().toISOString() }]);
       return true;
     } catch (error) {
       console.error('Email sending error:', error);
@@ -72,6 +79,48 @@ export class AWSEmailService {
         <li>Price: $${bookingDetails.price.toFixed(2)}</li>
       </ul>
       <p>If you need to reschedule or cancel, please contact us at least 24 hours before your appointment.</p>
+    `;
+
+    return this.sendEmail(to, subject, '', { html });
+  }
+
+  async sendRescheduleNotice(to: string, details: {
+    service: string;
+    oldDate: string;
+    newDate: string;
+    professional: string;
+  }) {
+    const subject = 'Reschedule Notice - ProTaXAdvisors';
+    const html = `
+      <h2>Consultation Rescheduled</h2>
+      <p>Your consultation has been rescheduled. Here are the updated details:</p>
+      <ul>
+        <li>Service: ${details.service}</li>
+        <li>Old Date: ${details.oldDate}</li>
+        <li>New Date: ${details.newDate}</li>
+        <li>Professional: ${details.professional}</li>
+      </ul>
+      <p>If you need further changes, please contact our support team.</p>
+    `;
+
+    return this.sendEmail(to, subject, '', { html });
+  }
+
+  async sendCancellationNotice(to: string, details: {
+    service: string;
+    date: string;
+    professional: string;
+  }) {
+    const subject = 'Consultation Cancelled - ProTaXAdvisors';
+    const html = `
+      <h2>Consultation Cancelled</h2>
+      <p>The following consultation has been cancelled:</p>
+      <ul>
+        <li>Service: ${details.service}</li>
+        <li>Date: ${details.date}</li>
+        <li>Professional: ${details.professional}</li>
+      </ul>
+      <p>Contact us if you have any questions or wish to reschedule.</p>
     `;
 
     return this.sendEmail(to, subject, '', { html });

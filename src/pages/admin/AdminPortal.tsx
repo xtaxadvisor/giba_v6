@@ -6,6 +6,7 @@ import { UserManagement } from '../../components/admin/users/UserManagement';
 import { AdminSettings } from '../../components/admin/settings/AdminSettings';
 import { NotFoundPage } from '../../components/shared/NotFoundPage';
 import { AdminProtectedRoute } from '../../components/admin/auth/AdminProtectedRoute';
+import MessagingInbox from '../messaging/MessagingInbox';
 
 export default function AdminPortal() {
   return (
@@ -16,6 +17,7 @@ export default function AdminPortal() {
           <Route path="team" element={<TeamManagement />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="messages" element={<MessagingInbox />} />
           <Route path="404" element={<NotFoundPage />} />
           <Route path="*" element={<Navigate to="404" replace />} />
         </Routes>

@@ -62,6 +62,25 @@ class EmailService {
       }
     );
   }
+
+  async sendBookingConfirmation(email: string, details: {
+    consultationType: string;
+    date: string;
+    notes: string;
+  }) {
+    const html = `
+      <h2>Consultation Confirmed</h2>
+      <p><strong>Type:</strong> ${details.consultationType}</p>
+      <p><strong>Date:</strong> ${details.date}</p>
+      <p><strong>Notes:</strong> ${details.notes || 'None'}</p>
+    `;
+    return this.sendEmail(
+      email,
+      'Your Consultation is Confirmed',
+      `Your ${details.consultationType} consultation is confirmed for ${details.date}.`,
+      { html }
+    );
+  }
 }
 
 export const emailService = EmailService.getInstance();
