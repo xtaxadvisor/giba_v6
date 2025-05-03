@@ -38,6 +38,13 @@ export default function ConsultationForm({ onSubmit, onCancel, professionals }: 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (!formData.date) {
+      toast.error("Please select a date before submitting.");
+      setLoading(false);
+      return;
+    }
+
     const startTime = new Date(`${formData.date}T${formData.time}`);
     const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
 
@@ -63,6 +70,7 @@ export default function ConsultationForm({ onSubmit, onCancel, professionals }: 
       });
       // Display a success notification (update this logic if needed)
       toast.success('Consultation scheduled successfully!');
+      toast.info('You will receive a confirmation email with the meeting details.');
       navigate('/client/consultation/confirmation');
     } catch (err) {
       if (err instanceof Error && err.name === 'NavigatorLockAcquireTimeoutError') {

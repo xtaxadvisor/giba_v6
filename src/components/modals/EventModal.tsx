@@ -6,7 +6,6 @@ export interface EventModalProps {
   onClose: () => void;
   event: any;
   onSubmit: (event: any) => void;
-  selectedDate: Date | null;
   setSelectedEvent: (event: any) => void;
   setIsEventModalOpen: (isOpen: boolean) => void; // Added this property
 }

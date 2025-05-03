@@ -86,7 +86,13 @@ export const supabaseAuth = {
   onAuthStateChange(
     callback: (sessionUser: { user: User; profile: any } | null, error?: AuthError) => void
   ) {
-    return supabase.auth.onAuthStateChange(async (_event, session) => {
+    return supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        // Session expired or invalid refresh token
+        window.location.href = '/login';
+        return callback(null, undefined);
+      }
+
       if (session?.user) {
         try {
           const current = await this.getCurrentUser();
@@ -94,8 +100,6 @@ export const supabaseAuth = {
         } catch (err: any) {
           callback(null, err);
         }
-      } else {
-        callback(null, undefined);
       }
     });
   }

@@ -20,7 +20,7 @@ export function ConsultationList() {
       .order('consultation_date', { ascending: false });
 
     if (error) {
-      console.error('Error fetching consultations:', error);
+      console.error('Error fetching consultations:', error?.message || error);
     } else {
       setConsultations(data || []);
     }
