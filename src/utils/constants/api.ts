@@ -16,7 +16,9 @@ export const API_ENDPOINTS = {
 } as const;
 
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_URL || '/.netlify/functions',
+  BASE_URL: typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
+    ? import.meta.env.VITE_API_URL
+    : process.env.VITE_API_URL || '/.netlify/functions',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 } as const;

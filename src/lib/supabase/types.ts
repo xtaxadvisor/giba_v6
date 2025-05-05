@@ -10,6 +10,12 @@ export interface MenuItem {
     href: string;
     icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 } // Added missing closing brace
+export interface ConsultationFormData {
+  type: string;
+  startTime: string;
+  endTime?: string;
+  notes?: string;
+}
 export interface consultation { 
   id: number;
   client_id: string;
@@ -21,6 +27,7 @@ export interface consultation {
   created_at: string;
   updated_at: string;
   }
+  
   export interface consultationList { 
     consultations: consultation[];
     }

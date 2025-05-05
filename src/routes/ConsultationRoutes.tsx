@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ConsultationLayout } from '@/components/consultation/ConsultationLayout';
 import { ConsultationList } from '@/components/consultation/ConsultationList';
-import BookConsultation    from '@/components/consultation/BookConsultation';
+import BookConsultation    from '@/components/consultation/ConsultationBookingForm';
 import ConsultationDetail from '@/components/consultation/ConsultationDetail';
 import ConfirmationPage   from '@/components/consultation/ConfirmationPage';
 

@@ -43,6 +43,13 @@ export interface RegisterData extends AuthCredentials {
   name: string;
   role: string;
 }
+// Define the ConsultationFormData type
+export type ConsultationFormData = {
+  type: string;
+  startTime: string;
+  endTime?: string;
+  notes?: string;
+};
 // Add the definition and export for UpdateEventDTO if missing
 export interface UpdateEventDTO {
   id: string;

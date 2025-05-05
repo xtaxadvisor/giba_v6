@@ -26,7 +26,7 @@ const TaxCalculator = React.lazy(() => import('../pages/calculator/TaxCalculator
 const TaxForms = React.lazy(() => import('../pages/forms/TaxForms'));
 const TermsAndConditions = React.lazy(() => import('../pages/legal/TermsAndConditions'));
 const MessagingPortal = React.lazy(() => import('../pages/messaging/MessagingPortal'));
-const BookConsultation: React.LazyExoticComponent<React.FC> = React.lazy(() => import('../components/consultation/BookConsultation'));
+const BookConsultation: React.LazyExoticComponent<React.FC> = React.lazy(() => import('../components/consultation/ConsultationBookingForm'));
 const ConfirmationPage = React.lazy(() => import('../components/consultation/ConfirmationPage'));
 
 export function AppRoutes() {

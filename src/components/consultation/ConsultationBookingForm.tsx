@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Video, MapPin } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -7,12 +7,29 @@ import { Select } from '../ui/Select';
 import { useConsultation } from '../../hooks/useConsultation';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'react-toastify';
+import { supabase } from '../../lib/supabase/client';
 
-export function BookConsultation() {
+export function ConsultationBookingForm() {
   const navigate = useNavigate();
   const { isScheduling, scheduleConsultation } = useConsultation();
-  const { user } = useAuth(); // Assuming you have access to user.id here
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [assignedProfessionalId, setAssignedProfessionalId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAssignedProfessional = async () => {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('assigned_professional_id')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (data?.assigned_professional_id) {
+        setAssignedProfessionalId(data.assigned_professional_id);
+      }
+    };
+    fetchAssignedProfessional();
+  }, [user?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +54,7 @@ export function BookConsultation() {
         notes: rawData.notes,
         is_virtual: rawData.is_virtual === 'true',
         client_id: user?.id,
-        assigned_professional_id: 'placeholder-professional-id'
+        assigned_professional_id: assignedProfessionalId ?? ''
       });
 
       console.log('Booking result:', booking);
@@ -51,7 +68,7 @@ export function BookConsultation() {
           date: `${rawData.date} ${rawData.time}`
         })
       });
-      toast.success('Consultation booked! A confirmation email will be sent.');
+      toast.success(`Your ${rawData.type} consultation has been scheduled for ${rawData.date} at ${rawData.time}. A confirmation email will follow.`);
 
       navigate('confirmation');
     } catch (error) {
@@ -162,4 +179,4 @@ export function BookConsultation() {
   );
 }
 
-export default BookConsultation;
+export default ConsultationBookingForm;
