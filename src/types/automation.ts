@@ -3,10 +3,10 @@ export interface TriggerConfig {
   startDate?: string;
   startTime?: string;
   event?: string;
-  condition?: {
+  condition: {
     field: string;
     operator: string;
-    value: any;
+    value: string;
   };
 }
 

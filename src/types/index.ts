@@ -63,6 +63,7 @@ export interface Reply {
 
 // Consultation type
 export interface Consultation {
+  [x: string]: any;
   id: string;
   startTime: string | number | Date;
   endTime: string;

@@ -1,15 +1,19 @@
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { useMessages } from '../../hooks/useMessages';
+import { useSession } from '../../contexts/AuthContext';
 
 export function MessagingCenter({ recipientId }: { recipientId: string }) {
   const { sendMessage, isSending } = useMessages();
+  const { session } = useSession();
+  const senderId = session?.user?.id;
 
   const handleSendMessage = (content: string, attachments?: File[]) => {
-    if (!recipientId) return;
+    if (!recipientId || !senderId) return;
 
     sendMessage({
       recipientId,
+      senderId, // Assuming senderId is needed for the message  
       content,
       attachments: attachments?.map(file => file.name) // In a real app, you'd upload files
     });

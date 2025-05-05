@@ -11,11 +11,27 @@ interface ProcessingStatusProps {
 export function ProcessingStatus({ steps, startTime }: ProcessingStatusProps) {
   const processingTime = calculateProcessingTime(startTime);
 
+  const completedSteps = steps.filter(step => step.status === 'completed').length;
+  const progressPercent = Math.round((completedSteps / steps.length) * 100);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-500">Processing Time</span>
         <span className="text-sm text-gray-900">{processingTime}</span>
+      </div>
+
+      <div>
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm font-medium text-gray-500">Progress</span>
+          <span className="text-sm text-gray-700">{progressPercent}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
       </div>
 
       <div className="relative">

@@ -1,10 +1,20 @@
 import { api } from '../api';
 import { Message } from '../../types';
 
+/**
+ * Data Transfer Object for sending a message.
+ */
 export interface SendMessageDTO {
+  /** ID of the message recipient */
   recipientId: string;
+  /** Content of the message */
   content: string;
+  /** Optional array of attachment URLs or identifiers */
   attachments?: string[];
+  /** Optional ID of the thread to which this message belongs */
+  threadId?: string;
+  /** ID of the message sender */
+  senderId: string;
 }
 
 export interface MessageThread {
@@ -16,18 +26,23 @@ export interface MessageThread {
 }
 
 export const messageService = {
-  getThreads: () => 
+  /** Fetches all threads involving the user */
+  getThreads: () =>
     api.get<MessageThread[]>('/messages/threads'),
 
-  getThread: (threadId: string) => 
+  /** Fetches full message history for a thread */
+  getThread: (threadId: string) =>
     api.get<Message[]>(`/messages/threads/${threadId}`),
 
-  send: (data: SendMessageDTO) => 
+  /** Sends a message to another user, starting or continuing a thread */
+  send: (data: SendMessageDTO) =>
     api.post<Message>('messages', data),
 
-  markAsRead: (messageId: string) => 
+  /** Marks a message as read by the current user */
+  markAsRead: (messageId: string) =>
     api.put<void>(`/messages/${messageId}/read`),
 
-  delete: (messageId: string) => 
+  /** Permanently deletes a message */
+  delete: (messageId: string) =>
     api.delete<void>(`/messages/${messageId}`),
 };

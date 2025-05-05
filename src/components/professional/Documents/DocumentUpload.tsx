@@ -1,3 +1,4 @@
+import { supabase } from '../../../lib/supabase/client';
 import React, { useState, useRef } from 'react';
 import { Upload, X, File, Plus } from 'lucide-react';
 import { Button } from '../../ui/Button';
@@ -13,6 +14,7 @@ export function DocumentUpload({ onUpload, onClose }: DocumentUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addNotification } = useNotificationStore();
 
@@ -55,13 +57,34 @@ export function DocumentUpload({ onUpload, onClose }: DocumentUploadProps) {
       return;
     }
 
+    setIsUploading(true);
     try {
-      // Handle file upload
-      onUpload(new DataTransfer().files); // Pass the selected files to the onUpload callback
+      for (const file of files) {
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .upload(`uploads/${Date.now()}_${file.name}`, file);
+
+        if (error) {
+          addNotification(`Failed to upload ${file.name}`, 'error');
+        } else {
+          // Insert metadata to a separate table
+          await supabase.from('document_metadata').insert({
+            file_name: file.name,
+            path: data.path,
+            tags,
+            uploaded_at: new Date().toISOString(),
+          });
+
+          addNotification(`${file.name} uploaded successfully`, 'success');
+        }
+      }
+
       onClose();
-      addNotification('Files uploaded successfully', 'success');
-    } catch (error) {
-      addNotification('Error uploading files', 'error');
+    } catch (err) {
+      console.error(err);
+      addNotification('An unexpected error occurred during upload.', 'error');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -169,8 +192,18 @@ export function DocumentUpload({ onUpload, onClose }: DocumentUploadProps) {
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" icon={Upload}>
-          Upload Files
+        <Button type="submit" variant="primary" icon={Upload} disabled={isUploading}>
+          {isUploading ? (
+            <span className="flex items-center">
+              <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+              </svg>
+              Uploading...
+            </span>
+          ) : (
+            'Upload Files'
+          )}
         </Button>
       </div>
     </form>

@@ -53,20 +53,47 @@ export function EventTrigger({ config, onChange }: EventTriggerProps) {
       )}
 
       {config.type === 'condition' && (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Input
             type="text"
-            label="Condition Expression"
-            value={(config as any).condition || ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              onChange({ 
-                ...config, 
-                condition: { 
-                  ...config.condition, 
-                  field: e.target.value, 
-                  operator: config.condition?.operator || '', 
-                  value: config.condition?.value || '' 
-                } 
+            label="Field"
+            value={config.condition?.field || ''}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                condition: {
+                  field: e.target.value || '',
+                  operator: config.condition?.operator || '',
+                  value: config.condition?.value || '',
+                },
+              })
+            }
+          />
+          <Input
+            type="text"
+            label="Operator"
+            value={config.condition?.operator || ''}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                condition: {
+                  ...config.condition,
+                  operator: e.target.value,
+                },
+              })
+            }
+          />
+          <Input
+            type="text"
+            label="Value"
+            value={config.condition?.value || ''}
+            onChange={(e) =>
+              onChange({
+                ...config,
+                condition: {
+                  ...config.condition,
+                  value: e.target.value,
+                },
               })
             }
           />

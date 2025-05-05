@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Video, MapPin } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -5,16 +6,25 @@ import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { useConsultation } from '../../hooks/useConsultation';
 import { useAuth } from '../../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 export function BookConsultation() {
   const navigate = useNavigate();
   const { isScheduling, scheduleConsultation } = useConsultation();
   const { user } = useAuth(); // Assuming you have access to user.id here
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     const rawData = Object.fromEntries(formData);
+
+    if (!rawData.type || !rawData.date || !rawData.time) {
+      toast.error('Please fill in all required fields: type, date, and time.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const startTime = new Date(`${rawData.date}T${rawData.time}`);
@@ -27,14 +37,28 @@ export function BookConsultation() {
         notes: rawData.notes,
         is_virtual: rawData.is_virtual === 'true',
         client_id: user?.id,
+        assigned_professional_id: 'placeholder-professional-id'
       });
 
       console.log('Booking result:', booking);
 
+      await fetch('/.netlify/functions/sendConfirmationEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email,
+          consultationType: rawData.type,
+          date: `${rawData.date} ${rawData.time}`
+        })
+      });
+      toast.success('Consultation booked! A confirmation email will be sent.');
+
       navigate('confirmation');
     } catch (error) {
       console.error('Error scheduling consultation:', error);
-      // Optional: Add notification here if you want
+      toast.error('Something went wrong while booking. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,9 +151,9 @@ export function BookConsultation() {
               type="submit"
               variant="primary"
               icon={Video}
-              disabled={isScheduling}
+              disabled={isScheduling || isLoading}
             >
-              Schedule Consultation
+              {isLoading ? 'Scheduling...' : 'Schedule Consultation'}
             </Button>
           </div>
         </form>

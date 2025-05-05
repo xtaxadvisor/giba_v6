@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { Calendar, Clock, FileText, MessageSquare } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -8,7 +9,10 @@ function ConsultationDetail() {
   return (
     <div>
       <button
-        onClick={() => navigate('/client/consultations')}
+        onClick={() => {
+          toast.info("Returning to consultation list...");
+          navigate('/client/consultations');
+        }}
         className="text-blue-600 hover:underline mb-4"
       >
         ← Back to Consultations

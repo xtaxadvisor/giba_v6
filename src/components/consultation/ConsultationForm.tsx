@@ -60,6 +60,16 @@ export default function ConsultationForm({ onSubmit, onCancel, professionals }: 
           date: '',
           time: ''
         });
+
+        await fetch('/.netlify/functions/sendConfirmationEmail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user?.email,
+            consultationType: formData.type,
+            date: startTime.toISOString()
+          })
+        });
       });
       setFormData({
         professionalId: '',

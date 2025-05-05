@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 type FormData = {
   name: string;
@@ -37,6 +38,17 @@ export default function ConsultationBooking() {
       // Example: Replace with API/Supabase call
       console.log(data);
 
+      await fetch('/.netlify/functions/sendConfirmationEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: data.email,
+          consultationType: data.consultationType,
+          date: `${data.date} ${data.time}`
+        })
+      });
+      toast.success('Your booking has been submitted. A confirmation email will be sent.');
+
       setBookings((prev) => [...prev, data]);
       setSubmitted(true);
       reset();
@@ -52,7 +64,18 @@ export default function ConsultationBooking() {
       <h2 className="text-2xl font-bold mb-4 text-center">Book a Consultation</h2>
 
       {submitted ? (
-        <p className="text-green-600 font-semibold text-center">Your request has been submitted!</p>
+        <div className="bg-green-50 border border-green-300 rounded p-4 text-center">
+          <h3 className="text-green-700 font-semibold text-lg mb-2">Thank you!</h3>
+          <p className="text-green-800">
+            Your consultation request has been submitted successfully. A confirmation email will be sent to you shortly.
+          </p>
+          <button
+            onClick={() => setSubmitted(false)}
+            className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          >
+            Book Another Consultation
+          </button>
+        </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>

@@ -10,50 +10,45 @@ export interface Reply {
     avatarUrl?: string; // Add other properties if needed
   };
 }
+
 export interface Thread {
   id: string;
   title: string;
   content: string;
+  description: string;
+  author: any;
+  participants: string[];
+  recipientId: string;
+  lastMessage: string;
   createdAt: string;
-  likes: number; // Added likes property
+  updatedAt: string;
+  likes: number;
+  replyCount: number;
+  tags: string[];
+  isPinned: boolean;
+  isArchived: boolean;
+  isFavorite: boolean;
+  isMuted: boolean;
+  isReported: boolean;
+  isFollowed: boolean;
+  isBlocked: boolean;
+  isStarred: boolean;
+  isSubscribed: boolean;
+  isDeleted: boolean;
   replies?: Reply[];
 }
 
-export interface Thread {
-    author: any;
-    id: string;
-    title: string;
-    participants: string[];
-    recipientId: string; // ID of the message recipient
-    lastMessage: string;
-    createdAt: string;
-    updatedAt: string;
-    description: string; // Optional field for thread description
-    isPinned: boolean; // Optional field to indicate if the thread is pinned
-    replyCount: number; // Optional field for the number of replies
-    // Ensure the Reply type is defined or imported
-    tags: string[]; // Optional field for tags associated with the thread
-    isArchived: boolean; // Optional field to indicate if the thread is archived
-    isFavorite: boolean; // Optional field to indicate if the thread is marked as favorite
-    isMuted: boolean; // Optional field to indicate if the thread is muted
-    isReported: boolean; // Optional field to indicate if the thread is reported
-    isFollowed: boolean; // Optional field to indicate if the thread is followed
-    isBlocked: boolean; // Optional field to indicate if the thread is blocked
-    isStarred: boolean; // Optional field to indicate if the thread is starred
-    isSubscribed: boolean; // Optional field to indicate if the thread is subscribed
-    replies?: Reply[]; // Optional field for replies
-      isDeleted: boolean; // Optional field to indicate if the thread is deleted
-  }
-  export type DetailedReply = {
-      id: string;
-      content: string;
-      createdAt: string | Date;
-      likes: number;
-      author: {
-        displayName: string;
-        avatarUrl?: string;
-      };
-    };
+export type DetailedReply = {
+  id: string;
+  content: string;
+  createdAt: string | Date;
+  likes: number;
+  author: {
+    displayName: string;
+    avatarUrl?: string;
+  };
+};
+
 export interface MessageThread {
   id: string;
   title: string;

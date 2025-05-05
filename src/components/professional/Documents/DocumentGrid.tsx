@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { LoadingSpinner } from '../../ui/LoadingSpinner';
+import { toast } from 'react-toastify';
 
 export interface DocumentGridProps {
   documents: Array<{
@@ -31,11 +32,22 @@ export interface DocumentGridProps {
   onShare?: (documentId: string) => void; // Added onShare property
 }
 
-export function DocumentGrid({ documents, isLoading, onDelete }: DocumentGridProps) {
+export function DocumentGrid({ documents, isLoading, onDelete, onShare }: DocumentGridProps) {
   if (isLoading) {
     return <LoadingSpinner />;
   }
-// Removed duplicate declaration of DocumentGrid
+
+  const handleView = (doc: typeof documents[number]) => {
+    toast.info(`Viewing "${doc.title}" (Coming soon)`);
+  };
+
+  const handleDownload = (doc: typeof documents[number]) => {
+    toast.info(`Downloading "${doc.title}"`);
+  };
+
+  const handleVersionHistory = (doc: typeof documents[number]) => {
+    toast.info(`Version history for "${doc.title}"`);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -69,22 +81,36 @@ export function DocumentGrid({ documents, isLoading, onDelete }: DocumentGridPro
                   size="sm"
                   icon={MoreVertical}
                   className="text-gray-400 hover:text-gray-500"
+                  aria-haspopup="true"
+                  aria-expanded="false"
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block group-focus:block">
                   <div className="py-1">
-                    <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
+                    <button
+                      onClick={() => handleView(doc)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       View Details
                     </button>
-                    <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
+                    <button
+                      onClick={() => handleDownload(doc)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Download
                     </button>
-                    <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
+                    <button
+                      onClick={() => onShare?.(doc.id)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                    >
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </button>
-                    <button className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
+                    <button
+                      onClick={() => handleVersionHistory(doc)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+                    >
                       <History className="h-4 w-4 mr-2" />
                       Version History
                     </button>

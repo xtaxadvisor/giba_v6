@@ -8,21 +8,26 @@ export default function MessagingPortal() {
   const [recipientId, setRecipientId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAssignedProfessional = async () => {
+    const fetchRecipient = async () => {
       if (session?.user?.id) {
-        const { data, error } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
-          .select('assigned_professional_id')
+          .select('assigned_professional_id, role')
           .eq('id', session.user.id)
           .maybeSingle();
 
-        if (!error && data?.assigned_professional_id) {
-          setRecipientId(data.assigned_professional_id);
+        if (!error && profile) {
+          if (profile.role === 'client' && profile.assigned_professional_id) {
+            setRecipientId(profile.assigned_professional_id);
+          } else if (profile.role === 'professional') {
+            // Future logic: fetch clients or show inbox overview
+            setRecipientId(null); // Placeholder or default behavior
+          }
         }
       }
     };
 
-    fetchAssignedProfessional();
+    fetchRecipient();
   }, [session?.user?.id]);
 
   return (

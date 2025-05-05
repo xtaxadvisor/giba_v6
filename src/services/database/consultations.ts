@@ -34,10 +34,20 @@ class ConsultationService extends DatabaseService<'consultations'> {
   }
 
   async updateStatus(consultationId: string, status: Consultation['status']) {
-    return this.update(consultationId, {
+    const updateResult = await this.update(consultationId, {
       status,
       updated_at: new Date().toISOString()
     });
+    // Send follow-up email asynchronously (do not block the return)
+    fetch('/.netlify/functions/sendStatusUpdateEmail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        consultationId,
+        newStatus: status
+      })
+    }).catch(() => {});
+    return updateResult;
   }
 }
 

@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { ConsultationCard } from '../ConsultationCard';
 import type { Consultation } from '../../../services/api/consultationService';
 
@@ -24,7 +25,10 @@ export function ConsultationGroup({
           <ConsultationCard
             key={consultation.id}
             consultation={consultation}
-            onJoin={onJoin ? () => onJoin(consultation) : undefined}
+            onJoin={onJoin ? () => {
+              toast.info('Redirecting to your consultation room...');
+              onJoin(consultation);
+            } : undefined}
             onCancel={onCancel ? () => onCancel(consultation) : undefined}
             onReschedule={onReschedule ? () => onReschedule(consultation) : undefined}
           />

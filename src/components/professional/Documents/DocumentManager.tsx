@@ -87,18 +87,23 @@ export function DocumentManager() {
         title="Upload Documents"
       >
         <DocumentUpload
-          onUpload={async (files: FileList) => {
-            const createDocumentDTOs = await Promise.all(
-              Array.from(files).map(async (file) => ({
-                title: file.name,
-                clientId: 'default-client-id', // Replace with actual clientId
-                type: file.type,
-                content: await file.text(), // Convert File to string
-              }))
-            );
-            createDocumentDTOs.forEach((dto) => uploadDocument(dto));
-          }}
           onClose={() => setIsUploadModalOpen(false)}
+          onUpload={(files) => {
+            const documentsToUpload = Array.from(files).map((file) => ({
+              title: file.name,
+              clientId: 'default-client-id', // Replace with actual logic if needed
+              type: file.type,
+              content: file, // Assuming the file content is passed directly
+            }));
+            documentsToUpload.forEach((document) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const base64Content = reader.result as string;
+                uploadDocument({ ...document, content: base64Content });
+              };
+              reader.readAsDataURL(document.content as File);
+            });
+          }}
         />
       </Modal>
     </div>

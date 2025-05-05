@@ -1,5 +1,6 @@
 import ConsultationForm from '@/components/consultation/ConsultationForm';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export default function ConsultationPage() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function ConsultationPage() {
       <ConsultationForm 
         onSubmit={(data) => {
           console.log('Form submitted:', data);
+          toast.success('Consultation booked! A confirmation email will be sent shortly.');
           navigate('/client/consultations');
         }} 
         onCancel={() => {

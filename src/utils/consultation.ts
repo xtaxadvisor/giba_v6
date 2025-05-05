@@ -3,7 +3,12 @@ import type { Consultation } from '../types/index'; // Adjusted the path to matc
 
 export const consultationService = {
   async getConsultations() {
-    return await api.get<Consultation[]>('/consultations');
+    try {
+      return await api.get<Consultation[]>('/consultations');
+    } catch (error) {
+      console.error('Error fetching consultations:', error);
+      throw error;
+    }
   },
 
   async getAvailability() {
@@ -17,18 +22,41 @@ export const consultationService = {
   getAll: () => api.get<Consultation[]>('/consultations'),
 
   getById: async (id: string) => {
-    const response = await api.get<Consultation>(`/consultations/${id}`);
-    return response.data;
+    try {
+      const response = await api.get<Consultation>(`/consultations/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching consultation with ID ${id}:`, error);
+      throw error;
+    }
   },
 
-  create: (data: Partial<Consultation>) => 
-    api.post<Consultation>('/consultations', data),
+  create: async (data: Partial<Consultation>) => {
+    try {
+      return await api.post<Consultation>('/consultations', data);
+    } catch (error) {
+      console.error('Error creating consultation:', error);
+      throw error;
+    }
+  },
 
-  update: (id: string, data: Partial<Consultation>) =>
-    api.put<Consultation>(`/consultations/${id}`, data),
+  update: async (id: string, data: Partial<Consultation>) => {
+    try {
+      return await api.put<Consultation>(`/consultations/${id}`, data);
+    } catch (error) {
+      console.error(`Error updating consultation with ID ${id}:`, error);
+      throw error;
+    }
+  },
 
-  delete: (id: string) =>
-    api.delete<void>(`/consultations/${id}`),
+  delete: async (id: string) => {
+    try {
+      return await api.delete<void>(`/consultations/${id}`);
+    } catch (error) {
+      console.error(`Error deleting consultation with ID ${id}:`, error);
+      throw error;
+    }
+  },
 
   initiateConsultation: async (serviceType: string) => {
     try {

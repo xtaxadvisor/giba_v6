@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { formatTimeAgo } from '../../../../utils/date';
 import type { QueuedDocument } from '../../../../types/documents';
+import { supabase } from '../../../../lib/supabase/client';
 
 interface DocumentQueueProps {
   documents: QueuedDocument[];
@@ -8,9 +11,63 @@ interface DocumentQueueProps {
 }
 
 export function DocumentQueue({ documents, onProcessDocument }: DocumentQueueProps) {
+  const [localDocs, setLocalDocs] = useState(documents);
+
+  const handleProcess = async (id: string) => {
+    setLocalDocs((prev) =>
+      prev.map((doc) =>
+        doc.id === id ? { ...doc, status: 'processing' } : doc
+      )
+    );
+    try {
+      await onProcessDocument(id);
+      toast.success('Document is being processed.');
+    } catch (error) {
+      toast.error('Failed to process document.');
+    }
+  };
+
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const newDocs: QueuedDocument[] = [];
+    for (const file of Array.from(files)) {
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .upload(`queued/${Date.now()}_${file.name}`, file);
+
+      if (error) {
+        toast.error(`Failed to upload ${file.name}`);
+      } else {
+        toast.success(`${file.name} uploaded.`);
+        newDocs.push({
+          id: data.path,
+          name: file.name,
+          queuedAt: new Date().toISOString(),
+          status: 'pending',
+          steps: [], // Default value for steps
+        });
+      }
+    }
+    setLocalDocs((prev) => [...newDocs, ...prev]);
+  };
+
   return (
     <div className="space-y-4">
-      {documents.map((doc) => (
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Document Queue</h2>
+        <label className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm cursor-pointer">
+          Upload Document
+          <input
+            type="file"
+            multiple
+            hidden
+            onChange={handleUpload}
+          />
+        </label>
+      </div>
+      {localDocs.map((doc) => (
         <div key={doc.id} className="bg-white rounded-lg p-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className={`p-2 rounded-full ${
@@ -30,7 +87,7 @@ export function DocumentQueue({ documents, onProcessDocument }: DocumentQueuePro
           </div>
           {doc.status === 'pending' && (
             <button
-              onClick={() => onProcessDocument(doc.id)}
+              onClick={() => handleProcess(doc.id)}
               className="text-blue-600 hover:text-blue-700 text-sm font-medium"
             >
               Process Now

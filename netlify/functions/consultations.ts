@@ -40,7 +40,7 @@ const handler: Handler = async (event) => {
   if (event.httpMethod === 'POST') {
     try {
       const body = JSON.parse(event.body || '{}');
-      const { consultationType, selectedDate, notes } = body;
+      const { consultationType, selectedDate, notes, assigned_professional_id } = body;
 
       if (!consultationType || !selectedDate) {
         return {
@@ -58,6 +58,7 @@ const handler: Handler = async (event) => {
             consultation_type: consultationType,
             consultation_date: selectedDate,
             notes: notes || '',
+            assigned_professional_id,
             created_at: new Date().toISOString(),
           },
         ])
@@ -89,6 +90,19 @@ const handler: Handler = async (event) => {
         } catch (emailError) {
           console.error('Email sending failed:', emailError);
         }
+      }
+
+      // Add task for professional
+      if (inserted.assigned_professional_id) {
+        await supabase.from('tasks').insert({
+          user_id: inserted.assigned_professional_id,
+          title: 'New Consultation Assigned',
+          description: `Consultation: ${inserted.consultation_type}`,
+          due_date: inserted.consultation_date,
+          linked_consultation_id: inserted.id,
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        });
       }
 
       return {

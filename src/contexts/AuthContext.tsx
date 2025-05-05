@@ -74,3 +74,10 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export function useSession() {
+  const { user } = useAuth();
+  return {
+    session: user ? { user } : null
+  };
+}

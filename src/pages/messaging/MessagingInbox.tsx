@@ -11,6 +11,10 @@ export default function MessagingInbox() {
   const [threads, setThreads] = useState<ThreadPreview[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const handleViewConversation = (senderId: string) => {
+    console.log('Navigate to thread with:', senderId);
+  };
+
   useEffect(() => {
     const fetchThreads = async () => {
       const { data, error } = await supabase
@@ -59,6 +63,12 @@ export default function MessagingInbox() {
               <p className="text-xs text-gray-400 mt-1">
                 Sent at: {new Date(thread.last_sent_at).toLocaleString()}
               </p>
+              <button
+                onClick={() => handleViewConversation(thread.sender_id)}
+                className="mt-2 text-blue-600 hover:underline text-sm"
+              >
+                View Conversation
+              </button>
             </li>
           ))}
         </ul>

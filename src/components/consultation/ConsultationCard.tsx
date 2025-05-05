@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { Calendar, Clock, Video, MapPin } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { formatDate, formatTime } from '../../utils/date';
@@ -22,6 +23,7 @@ export function ConsultationCard({
     Math.abs(new Date(consultation.startTime).getTime() - new Date().getTime()) <= 5 * 60 * 1000; // 5 minutes before
 
   const handleJoinMeeting = () => {
+    toast.info('Redirecting to your consultation room...');
     navigate(`/consultation/${consultation.id}`);
   };
 

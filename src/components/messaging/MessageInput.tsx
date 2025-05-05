@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Send, Paperclip } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { toast } from 'react-toastify';
 
 interface MessageInputProps {
   onSendMessage: (content: string, attachments?: File[]) => void;
@@ -18,6 +19,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
       onSendMessage(message, attachments);
       setMessage('');
       setAttachments([]);
+      toast.success('Message sent!');
     }
   };
 

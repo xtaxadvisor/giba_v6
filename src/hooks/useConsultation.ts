@@ -3,6 +3,7 @@ import { consultationService } from '../services/api/consultationService';
 import { useAuth } from '../contexts/AuthContext';
 import type { Consultation } from '@/types'; // Update path to match the correct Consultation type
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 export function useConsultation(consultationId?: string) {
   const { user } = useAuth();
@@ -14,6 +15,16 @@ export function useConsultation(consultationId?: string) {
       return result as Consultation; // Ensure type compatibility
     },
     onSuccess: (consultation) => {
+      toast.success('Consultation scheduled. A confirmation email will be sent.');
+      fetch('/.netlify/functions/sendConfirmationEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: consultation?.client_email, // Replace 'client_email' with the correct property from the Consultation type
+          consultationType: consultation?.consultation_type,
+          date: consultation?.consultation_date
+        })
+      });
       navigate('/client/consultations/confirmation');
     },
   });
