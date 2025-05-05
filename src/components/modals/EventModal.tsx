@@ -9,6 +9,14 @@ export interface EventModalProps {
   setSelectedEvent: (event: any) => void;
   setIsEventModalOpen: (isOpen: boolean) => void; // Added this property
 }
+export interface EventModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  event: any;
+  onSubmit: (event: any) => void;
+  selectedDate: Date | null; // Added selectedDate property
+  // Other existing properties
+}
 
 const EventModal: React.FC<EventModalProps> = ({
   isOpen,

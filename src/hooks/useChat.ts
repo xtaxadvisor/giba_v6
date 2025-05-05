@@ -106,8 +106,8 @@ export function useChat(consultationId: string) {
       await sendMessageMutation.mutateAsync({
         consultationId,
         content,
-        sender: 'You' // Replace with actual user name/id
-        ,
+        sender: 'You', // Replace with actual user name
+        senderId: 'user-id', // Replace 'user-id' with the actual user ID
         tempMessage: undefined
       });
     } finally {
