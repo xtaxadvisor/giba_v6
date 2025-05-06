@@ -6,13 +6,16 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   private constructor() {
+    if (!process.env.VITE_AWS_SMTP_USERNAME || !process.env.VITE_AWS_SMTP_PASSWORD) {
+      console.warn('SMTP credentials are not set in environment variables.');
+    }
     this.transporter = nodemailer.createTransport({
       host: "email-smtp.us-east-1.amazonaws.com",
       port: 465,
       secure: true,
       auth: {
-        user: import.meta.env.VITE_AWS_SMTP_USERNAME || "gilberto27601@protaxadvisors.tax",
-        pass: import.meta.env.VITE_AWS_SMTP_PASSWORD || "Travelhere2024$"
+        user: process.env.VITE_AWS_SMTP_USERNAME!,
+        pass: process.env.VITE_AWS_SMTP_PASSWORD!
       }
     });
   }
@@ -31,7 +34,7 @@ class EmailService {
   } = {}) {
     try {
       const info = await this.transporter.sendMail({
-        from: import.meta.env.VITE_AWS_SMTP_FROM || 'info@protaxadvisors.tax',
+        from: process.env.VITE_AWS_SMTP_FROM || 'info@protaxadvisors.tax',
         to,
         subject,
         text: body,

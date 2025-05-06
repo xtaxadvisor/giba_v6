@@ -14,16 +14,26 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isOwnMessage = message.senderId === currentUserId;
 
   return (
-    <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex items-start mb-3 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+      {!isOwnMessage && (
+        <img
+          src={message.profileImageUrl || ''}
+          alt={message.senderName || 'User'}
+          className="w-8 h-8 rounded-full mr-2 object-cover bg-gray-300"
+        />
+      )}
       <div
         className={`max-w-lg rounded-lg px-4 py-2 ${
           isOwnMessage ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
         }`}
       >
-        <div>
-          <span className="font-medium">{message.senderId}</span>
-          <span className="text-sm opacity-75 ml-2">
+        <div className="text-sm font-medium flex items-center justify-between">
+          <span>{message.senderName || message.senderId}</span>
+          <span className="text-xs opacity-70 ml-2">
             {formatTimeAgo(message.timestamp)}
+            {isOwnMessage && message.read && (
+              <span className="ml-1 text-green-400">✓✓</span>
+            )}
           </span>
         </div>
         <p className="mt-1">{message.content}</p>

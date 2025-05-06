@@ -160,16 +160,17 @@ export interface Document {
   fileRegion?: string;
   fileS3Url?: string;
 }
-
-// Message type
 export interface Message {
-  id: string;
   senderId: string;
-  recipientId: string;
+  senderName?: string;
   content: string;
   timestamp: string;
+  read?: boolean;
   attachments?: Attachment[];
+  profileImageUrl?: string; // Added property for profile image URL
 }
+// Message type
+
 
 // Attachment type
 export interface Attachment {

@@ -8,6 +8,9 @@ export class AWSEmailService {
   private readonly defaultSender = 'info@protaxadvisors.tax';
 
   private constructor() {
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+      console.warn('AWS SES credentials are not defined in environment variables.');
+    }
     this.sesClient = new SESClient({
       region: 'us-east-1',
       credentials: {
@@ -32,19 +35,25 @@ export class AWSEmailService {
     bcc?: string[];
   } = {}) {
     try {
+      const destination: any = { ToAddresses: [to] };
+      if (options.cc && options.cc.length > 0) {
+        destination.CcAddresses = options.cc;
+      }
+      if (options.bcc && options.bcc.length > 0) {
+        destination.BccAddresses = options.bcc;
+      }
+
+      const messageBody: any = { Text: { Data: body || ' ' } };
+      if (options.html) {
+        messageBody.Html = { Data: options.html };
+      }
+
       const command = new SendEmailCommand({
         Source: this.defaultSender,
-        Destination: {
-          ToAddresses: [to],
-          ...(options.cc && options.cc.length > 0 ? { CcAddresses: options.cc } : {}),
-          ...(options.bcc && options.bcc.length > 0 ? { BccAddresses: options.bcc } : {})
-        },
+        Destination: destination,
         Message: {
           Subject: { Data: subject },
-          Body: {
-            Text: { Data: body },
-            ...(options.html && { Html: { Data: options.html } })
-          }
+          Body: messageBody
         },
         ...(options.replyTo && { ReplyToAddresses: [options.replyTo] })
       });
@@ -72,13 +81,13 @@ export class AWSEmailService {
       <h2>Booking Confirmation</h2>
       <p>Thank you for booking with ProTaXAdvisors. Here are your booking details:</p>
       <ul>
-        <li>Service: ${bookingDetails.service}</li>
-        <li>Date: ${bookingDetails.date}</li>
-        <li>Time: ${bookingDetails.time}</li>
-        <li>Professional: ${bookingDetails.professional}</li>
-        <li>Price: $${bookingDetails.price.toFixed(2)}</li>
+        <li><strong>Service:</strong> ${bookingDetails.service}</li>
+        <li><strong>Date:</strong> ${bookingDetails.date}</li>
+        <li><strong>Time:</strong> ${bookingDetails.time}</li>
+        <li><strong>Professional:</strong> ${bookingDetails.professional}</li>
+        <li><strong>Price:</strong> $${bookingDetails.price.toFixed(2)}</li>
       </ul>
-      <p>If you need to reschedule or cancel, please contact us at least 24 hours before your appointment.</p>
+      <p>Please contact us at least 24 hours prior to reschedule or cancel.</p>
     `;
 
     return this.sendEmail(to, subject, '', { html });
@@ -95,10 +104,10 @@ export class AWSEmailService {
       <h2>Consultation Rescheduled</h2>
       <p>Your consultation has been rescheduled. Here are the updated details:</p>
       <ul>
-        <li>Service: ${details.service}</li>
-        <li>Old Date: ${details.oldDate}</li>
-        <li>New Date: ${details.newDate}</li>
-        <li>Professional: ${details.professional}</li>
+        <li><strong>Service:</strong> ${details.service}</li>
+        <li><strong>Old Date:</strong> ${details.oldDate}</li>
+        <li><strong>New Date:</strong> ${details.newDate}</li>
+        <li><strong>Professional:</strong> ${details.professional}</li>
       </ul>
       <p>If you need further changes, please contact our support team.</p>
     `;
@@ -116,9 +125,9 @@ export class AWSEmailService {
       <h2>Consultation Cancelled</h2>
       <p>The following consultation has been cancelled:</p>
       <ul>
-        <li>Service: ${details.service}</li>
-        <li>Date: ${details.date}</li>
-        <li>Professional: ${details.professional}</li>
+        <li><strong>Service:</strong> ${details.service}</li>
+        <li><strong>Date:</strong> ${details.date}</li>
+        <li><strong>Professional:</strong> ${details.professional}</li>
       </ul>
       <p>Contact us if you have any questions or wish to reschedule.</p>
     `;

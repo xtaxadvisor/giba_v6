@@ -27,22 +27,67 @@ export interface MessageThread {
 
 export const messageService = {
   /** Fetches all threads involving the user */
-  getThreads: () =>
-    api.get<MessageThread[]>('/messages/threads'),
+  getThreads: async () => {
+    try {
+      console.log('[messageService.getThreads]');
+      const result = await api.get<MessageThread[]>('/messages/threads');
+      console.log('[messageService.getThreads] Success:', result);
+      return result;
+    } catch (error) {
+      console.error('[messageService.getThreads] Error:', error);
+      throw error;
+    }
+  },
 
   /** Fetches full message history for a thread */
-  getThread: (threadId: string) =>
-    api.get<Message[]>(`/messages/threads/${threadId}`),
+  getThread: async (threadId: string) => {
+    try {
+      console.log('[messageService.getThread]', threadId);
+      const result = await api.get<Message[]>(`/messages/threads/${threadId}`);
+      console.log('[messageService.getThread] Success:', result);
+      return result;
+    } catch (error) {
+      console.error('[messageService.getThread] Error:', error);
+      throw error;
+    }
+  },
 
   /** Sends a message to another user, starting or continuing a thread */
-  send: (data: SendMessageDTO) =>
-    api.post<Message>('messages', data),
+  send: async (data: SendMessageDTO) => {
+    try {
+      console.log('[messageService.send]', data);
+      const result = await api.post<Message>('messages', data);
+      console.log('[messageService.send] Success:', result);
+      return result;
+    } catch (error) {
+      console.error('[messageService.send] Error:', error);
+      throw error;
+    }
+  },
 
   /** Marks a message as read by the current user */
-  markAsRead: (messageId: string) =>
-    api.put<void>(`/messages/${messageId}/read`),
+  markAsRead: async (messageId: string) => {
+    try {
+      console.log('[messageService.markAsRead]', messageId);
+      const result = await api.put<void>(`/messages/${messageId}/read`);
+      console.log('[messageService.markAsRead] Success:', result);
+      return result;
+    } catch (error) {
+      console.error('[messageService.markAsRead] Error:', error);
+      throw error;
+    }
+  },
 
   /** Permanently deletes a message */
-  delete: (messageId: string) =>
-    api.delete<void>(`/messages/${messageId}`),
+  delete: async (messageId: string) => {
+    try {
+      console.log('[messageService.delete]', messageId);
+      const result = await api.delete<void>(`/messages/${messageId}`);
+      console.log('[messageService.delete] Success:', result);
+      return result;
+    } catch (error) {
+      console.error('[messageService.delete] Error:', error);
+      throw error;
+    }
+  },
 };
