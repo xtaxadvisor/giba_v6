@@ -35,7 +35,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           name: session.user.user_metadata?.name ?? '',
           createdAt: session.user.created_at,
           location: session.user.user_metadata?.location ?? '',
-          role: session.user.user_metadata?.role ?? ''
+          role: session.user.user_metadata?.role ?? '',
+          phone: session.user.user_metadata?.phone ?? '',
         });
         const { role } = session.user.user_metadata ?? {};
         setProfile(role ? { role } : null);
@@ -51,11 +52,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ? {
         id: session.user.id,
-        email: session.user.email,
+        email: session.user.email ?? '',
         name: session.user.user_metadata?.name ?? '',
         createdAt: session.user.created_at,
         location: session.user.user_metadata?.location ?? '',
-        role: session.user.user_metadata?.role ?? ''
+        role: session.user.user_metadata?.role ?? '',
+        phone: session.user.user_metadata?.phone ?? ''
       } as User : null);
       if (session?.user) {
         const { role } = session.user.user_metadata ?? {};

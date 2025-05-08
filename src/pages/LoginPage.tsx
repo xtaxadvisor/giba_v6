@@ -1,31 +1,65 @@
 import { withRoleGuard } from '../lib/auth/withRoleGuard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useNotificationStore } from '../lib/store';
 import { useAuth } from '../contexts/AuthContext';
+import { validatePassword } from '@/utils/validation';
 
 export default function SignInForm() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { addNotification } = useNotificationStore();
   const [searchParams] = useSearchParams();
   const confirmationToken = searchParams.get('confirmation_token');
+  const confirmationResent = searchParams.get('confirmation') === 'resent';
   const { setUser } = useAuth();
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [selectedRole, setSelectedRole] = useState('student');
+  const [location, setLocation] = useState('');
+  const [showResend, setShowResend] = useState(false);
+
+  const handleResendConfirmation = async () => {
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: 'https://protaxadvisors.tax/login?confirmed=true'
+      }
+    });
+    if (error) {
+      setError('Failed to resend confirmation email. Please try again later.');
+    } else {
+      addNotification('Confirmation email resent.', 'success');
+      setShowResend(false);
+      navigate('/login?confirmation=resent');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null); 
+    setShowResend(false);
     try {
       if (isSignUp) {
+        const { isValid, errors } = validatePassword(password);
+        if (!isValid) {
+          setError(errors[0]);
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match.');
+          setLoading(false);
+          return;
+        }
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -40,10 +74,15 @@ export default function SignInForm() {
           id: data.user.id,
           full_name: name,
           role: selectedRole,
+          location
         });
 
         addNotification('Signup successful! Please check your email.', 'success');
         return;
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Attempting sign in with:', email, `Password length: ${password.length}`);
       }
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -52,18 +91,28 @@ export default function SignInForm() {
       });
       if (signInError) {
         console.error('SignIn error:', signInError);
+        if (signInError.message.toLowerCase().includes('email not confirmed')) {
+          setError('Email not confirmed. Please check your inbox or click below to resend confirmation.');
+          setShowResend(true);
+          setLoading(false);
+          return;
+        }
         if (signInError.message === 'Invalid login credentials') {
-          setError('Invalid email or password. Please try again.');
+          setError('Invalid email or password. Please try again. If you have not confirmed your email, please check your inbox or resend the confirmation email.');
         } else {
           setError(signInError.message || 'An error occurred during login.');
         }
       } else {
         console.log('SignIn success, session:', data.session);
+        // Store user session and token securely in localStorage
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        localStorage.setItem('accessToken', data.session?.access_token || '');
+
         // Fetch the user's profile to determine their role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, name, location') // Include 'name' and 'location' in the query
-          .eq('id', data.user.id)
+          .select('role, name, location, phone') // Include 'name', 'location', and 'phone' in the query
+          .eq('uuid', data.user.id)
           .maybeSingle();
 
         if (profileError || !profile) {
@@ -73,12 +122,13 @@ export default function SignInForm() {
         }
 
         setUser({
-          ...data.user,
-          name: profile?.name || '', // Safely access 'name' from profile
-          email: data.user.email ?? '', // Always provide a string for email
-          createdAt: data.user.created_at ?? '', // Map `created_at` to `createdAt`
-          location: profile?.location || '', // Safely access 'location' from profile
-          role: profile.role ?? ''
+          id: data.user.id,
+          email: data.user.email ?? '',
+          name: profile?.name || '',
+          createdAt: data.user.created_at ?? '',
+          location: profile?.location || '',
+          role: profile.role ?? '',
+          phone: profile?.phone || ''
         });
         // Optionally handle profile data here if needed
 
@@ -108,7 +158,23 @@ export default function SignInForm() {
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white shadow rounded">
       <h2 className="text-2xl font-semibold mb-4">{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
+      {confirmationResent && (
+        <div className="mb-4 text-blue-600">
+          Confirmation email sent. Please check your inbox and then log in.
+        </div>
+      )}
       {error && <div className="mb-4 text-red-600">{error}</div>}
+      {showResend && (
+        <div className="mt-2">
+          <button
+            type="button"
+            onClick={handleResendConfirmation}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Resend confirmation email
+          </button>
+        </div>
+      )}
       {confirmationToken && (
         <div className="mb-4 text-green-600">
           Thanks for confirming your email. You can now log in.
@@ -143,6 +209,29 @@ export default function SignInForm() {
               <option value="admin">Admin</option>
             </select>
           </div>
+          <div className="mb-4">
+            <label htmlFor="location" className="block text-sm font-medium mb-1">Location</label>
+            <input
+              id="location"
+              type="text"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              required
+              className="w-full border-gray-300 rounded p-2"
+            />
+          </div>
+          <div className="mb-6">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              required
+              autoComplete="new-password"
+              className="w-full border-gray-300 rounded p-2"
+            />
+          </div>
         </>
       )}
       <div className="mb-4">
@@ -169,7 +258,7 @@ export default function SignInForm() {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
-          autoComplete={isSignUp ? 'new-password' : 'current-password'}
+          autoComplete="new-password"
           className="w-full border-gray-300 rounded p-2"
         />
       </div>
@@ -189,4 +278,21 @@ export default function SignInForm() {
       </button>
     </form>
   );
+
+  // Automatic logout when Supabase session expires
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+        console.log('Session expired. Logging out...');
+        supabase.auth.signOut(); // ensure cleanup
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 }

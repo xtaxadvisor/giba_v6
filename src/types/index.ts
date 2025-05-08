@@ -86,6 +86,12 @@ export interface User {
   location: string;
   avatarUrl?: string;
   displayName?: string;
+  phone: string; // Added phone property
+  phoneVerified?: boolean; // Added phoneVerified property
+  emailVerified?: boolean; // Added emailVerified property
+  profileImageUrl?: string; // Added property for profile image URL
+  profileImage?: string; // Added property for profile image
+  profileImageKey?: string; // Added property for profile image key
 }
 
 // Task type

@@ -5,8 +5,9 @@ import { Button } from '../ui/Button';
 
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { validatePassword } from '@/utils/validation';
 
-export function ConsultationForm() {
+export function RegisterForm() {
   const { user } = useAuth() as { user: { phone?: string } | null };
   const { role: paramRole } = useParams?.() || {};
 
@@ -16,6 +17,8 @@ export function ConsultationForm() {
     date: '',
     phone: user?.phone || '',
     role: paramRole || '',
+    password: '',
+    confirmPassword: '',
   });
 
   useEffect(() => {
@@ -27,8 +30,19 @@ export function ConsultationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.email || !formData.date) {
+    if (!formData.name || !formData.email || !formData.date || !formData.password || !formData.confirmPassword) {
       // Add notification for required fields
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      // Add notification for password mismatch
+      return;
+    }
+
+    const { isValid, errors } = validatePassword(formData.password);
+    if (!isValid) {
+      // Show first error message (you may adapt with toast)
       return;
     }
 
@@ -110,13 +124,35 @@ export function ConsultationForm() {
         </select>
       </div>
 
+      <Input
+        id="password"
+        type="password"
+        label="Password"
+        required
+        autoComplete="new-password"
+        placeholder="Create a secure password"
+        value={formData.password}
+        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+      />
+
+      <Input
+        id="confirmPassword"
+        type="password"
+        label="Confirm Password"
+        required
+        autoComplete="new-password"
+        placeholder="Re-enter your password"
+        value={formData.confirmPassword}
+        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+      />
+
       <Button
         type="submit"
         variant="primary"
         className="w-full"
         disabled={!formData.name || !formData.email || !formData.date}
       >
-        Schedule Consultation
+        Register
       </Button>
     </form>
   );

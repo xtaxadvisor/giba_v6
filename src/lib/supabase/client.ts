@@ -68,9 +68,9 @@ export async function testConnection(retries = 3): Promise<boolean> {
 
       // If that fails, try the RPC test
       const { data, error } = await supabase.rpc('test_connection');
-      
-      if (error) {
-        throw error;
+
+      if (error || !data) {
+        throw error ?? new Error('No data returned from test_connection RPC');
       }
 
       if (!data?.success) {
