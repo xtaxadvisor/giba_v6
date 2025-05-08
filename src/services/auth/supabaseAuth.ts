@@ -1,6 +1,10 @@
-import { supabase } from '../../lib/supabase/client';
+import { supabase as supabaseClient } from '../../lib/supabase/client';
 import type { AuthError, User } from '@supabase/supabase-js';
+import { createClient as supabaseCreateClient } from '@supabase/supabase-js';
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); // Renamed local import to avoid conflict
 export const supabaseAuth = {
   async signUp(email: string, password: string, userData: { 
     name: string;
@@ -24,10 +28,11 @@ export const supabaseAuth = {
       const { error: profileError } = await supabase
         .from('profiles')  
         .insert({
-          auth_id: data.user.id,
-          name: userData.name,
-          email: data.user.email!,
-          role: userData.role
+          uuid: data.user.id,
+          full_name: userData.name,
+          email: data.user.email ?? '',
+          role: userData.role,
+          created_at: new Date().toISOString()
         });
 
       if (profileError) throw profileError;
@@ -104,3 +109,9 @@ export const supabaseAuth = {
     });
   }
 };
+function createClient(SUPABASE_URL: string, SUPABASE_ANON_KEY: string) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase URL and ANON KEY must be provided.');
+  }
+  return supabaseCreateClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}

@@ -7,8 +7,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { Card } from '../ui/Card';
+import { withRoleGuard } from '@/lib/auth/withRoleGuard';
 
-export function ProfessionalDashboard() {
+function ProfessionalDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -219,3 +220,5 @@ export function ProfessionalDashboard() {
     </div>
   );
 }
+
+export default withRoleGuard(ProfessionalDashboard, ['professional']);

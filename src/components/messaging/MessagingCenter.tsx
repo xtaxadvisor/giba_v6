@@ -13,6 +13,7 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [recipientName, setRecipientName] = useState('Recipient');
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!recipientId) return;
@@ -27,6 +28,20 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
         }
       });
   }, [recipientId]);
+
+  useEffect(() => {
+    if (!recipientId || !senderId) return;
+
+    supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('recipient_id', senderId)
+      .eq('sender_id', recipientId)
+      .eq('read', false)
+      .then(({ count }) => {
+        setUnreadCount(count || 0);
+      });
+  }, [recipientId, senderId]);
 
   useEffect(() => {
     if (!recipientId || !senderId) return;
@@ -69,9 +84,11 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
       <div className="border-b border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
         <p className="text-sm text-gray-500">Chatting with: {recipientName || 'Recipient'}</p>
-        <span className="ml-2 inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-          3
-        </span>
+        {unreadCount > 0 && (
+          <span className="ml-2 inline-block bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+            {unreadCount}
+          </span>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
@@ -85,10 +102,18 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
         </div>
       )}
 
-      <MessageInput 
-        onSendMessage={handleSendMessage}
-        isLoading={isSending}
-      />
+      {senderId && recipientId ? (
+        <div className="p-4 border-t border-gray-200">
+          <MessageInput
+            onSendMessage={handleSendMessage}
+            isLoading={isSending}
+          />
+        </div>
+      ) : (
+        <div className="p-4 text-sm text-gray-400 text-center italic">
+          Cannot send messages without a valid sender or recipient.
+        </div>
+      )}
     </div>
   );
 }

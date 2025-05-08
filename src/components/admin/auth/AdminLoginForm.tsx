@@ -5,6 +5,7 @@ import { Input } from '../../ui/Input';
 import { Button } from '../../ui/Button';
 import { useNotificationStore } from '../../../lib/store';
 import { adminAuthService } from '../../../services/auth/adminAuth';
+import { supabase } from '../../../services/auth/supabaseAuth';
 import { isStrongPassword } from '../../../utils/crypto';
 
 export function AdminLoginForm() {
@@ -26,6 +27,7 @@ export function AdminLoginForm() {
     try {
       if (!isStrongPassword(formData.password)) {
         addNotification('Password does not meet security requirements', 'error');
+        setLoading(false);
         return;
       }
 
@@ -33,6 +35,25 @@ export function AdminLoginForm() {
       console.log('Login result:', { success });
       
       if (success) {
+        // Check admin role in Supabase
+        // Get current session/user
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !session || !session.user) {
+          addNotification('Unable to verify user session.', 'error');
+          setLoading(false);
+          return;
+        }
+        const { data: adminProfile, error: adminError } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        if (adminError || !adminProfile) {
+          addNotification('Access denied: not an admin user.', 'error');
+          setLoading(false);
+          return;
+        }
+
         if (!showTOTP) {
           setShowTOTP(true);
           setLoading(false);

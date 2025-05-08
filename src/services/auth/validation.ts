@@ -34,3 +34,32 @@ export function validatePassword(password: string): { isValid: boolean; errors: 
 export function validateEmail(email: string): boolean {
   return z.string().email().safeParse(email).success;
 }
+
+export function validatePhoneNumber(phone: string): boolean {
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 format or basic global mobile format
+  return phoneRegex.test(phone);
+}
+
+const usernameSchema = z.string()
+  .min(3, 'Username must be at least 3 characters')
+  .max(30, 'Username must be no more than 30 characters')
+  .regex(/^[a-zA-Z0-9_]+$/, 'Username may only contain letters, numbers, and underscores')
+  .refine(
+    (username) => !['admin', 'root', 'superuser'].includes(username.toLowerCase()),
+    { message: 'This username is reserved. Please choose another one.' }
+  );
+
+export function validateUsername(username: string): { isValid: boolean; errors: string[] } {
+  const result = usernameSchema.safeParse(username);
+  if (!result.success) {
+    return {
+      isValid: false,
+      errors: result.error.errors.map(err => err.message),
+    };
+  }
+
+  return {
+    isValid: true,
+    errors: [],
+  };
+}

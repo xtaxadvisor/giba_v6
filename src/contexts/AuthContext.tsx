@@ -9,6 +9,13 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   isAuthenticated: boolean; // Add this property
 }
+export interface AuthContextType {
+  user: User | null;
+  profile: { role: string } | null; // Add the profile property
+  // other properties
+  setUser: (user: User | null) => void; // Add this line to define setUser
+    // other properties
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -16,27 +23,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  const [profile, setProfile] = useState<{ role: string } | null>(null);
+  
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ? {
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.user_metadata?.name || '',
-        createdAt: session.user.created_at,
-        location: session.user.user_metadata?.location || ''
-      } as User : null);
+    const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? '',
+          name: session.user.user_metadata?.name ?? '',
+          createdAt: session.user.created_at,
+          location: session.user.user_metadata?.location ?? '',
+          role: session.user.user_metadata?.role ?? ''
+        });
+        const { role } = session.user.user_metadata ?? {};
+        setProfile(role ? { role } : null);
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
       setLoading(false);
-    });
+    };
+
+    fetchSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ? {
         id: session.user.id,
         email: session.user.email,
-        name: session.user.user_metadata?.name || '',
+        name: session.user.user_metadata?.name ?? '',
         createdAt: session.user.created_at,
-        location: session.user.user_metadata?.location || ''
+        location: session.user.user_metadata?.location ?? '',
+        role: session.user.user_metadata?.role ?? ''
       } as User : null);
+      if (session?.user) {
+        const { role } = session.user.user_metadata ?? {};
+        setProfile(role ? { role } : null);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => {
@@ -54,14 +80,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      console.error('Supabase logout error:', error.message || error);
+      throw error;
     }
     setUser(null);
     window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, logout, isAuthenticated: !!user, setUser }}>
       {children}
     </AuthContext.Provider>
   );
