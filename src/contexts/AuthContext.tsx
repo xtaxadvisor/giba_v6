@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ role: string } | null>(null);
-  
+
+  const normalizePhone = (raw: string) => raw.replace(/\D/g, '');
+
   useEffect(() => {
     const fetchSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -36,7 +38,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           createdAt: session.user.created_at,
           location: session.user.user_metadata?.location ?? '',
           role: session.user.user_metadata?.role ?? '',
-          phone: session.user.user_metadata?.phone ?? '',
+          phone: normalizePhone(session.user.user_metadata?.phone ?? ''),
+          avatarUrl: session.user.user_metadata?.avatar_url ?? '',
+          userType: session.user.user_metadata?.user_type ?? '',
         });
         const { role } = session.user.user_metadata ?? {};
         setProfile(role ? { role } : null);
@@ -57,7 +61,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         createdAt: session.user.created_at,
         location: session.user.user_metadata?.location ?? '',
         role: session.user.user_metadata?.role ?? '',
-        phone: session.user.user_metadata?.phone ?? ''
+        phone: normalizePhone(session.user.user_metadata?.phone ?? ''),
+        avatarUrl: session.user.user_metadata?.avatar_url ?? '',
+        userType: session.user.user_metadata?.user_type ?? '',
       } as User : null);
       if (session?.user) {
         const { role } = session.user.user_metadata ?? {};

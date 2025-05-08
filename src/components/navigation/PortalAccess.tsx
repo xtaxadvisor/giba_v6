@@ -61,55 +61,73 @@ function PortalButton({ title, description, icon: Icon, path }: PortalButtonProp
 }
 
 export function PortalAccess() {
-  const portals: PortalButtonProps[] = [
+  const { user } = useAuth();
+
+  const portals: (PortalButtonProps & { allowedRoles: string[] })[] = [
     {
       title: 'Client Portal',
       description: 'Access your documents and manage your financial information securely.',
       icon: Database,
       path: '/client',
+      allowedRoles: ['client'],
     },
     {
       title: 'Professional Portal',
       description: 'Dedicated workspace for financial professionals.',
       icon: Users,
       path: '/professional',
+      allowedRoles: ['professional'],
     },
     {
       title: 'Investors Club Portal',
       description: 'Access investment tools and market insights.',
       icon: TrendingUp,
       path: '/investor',
+      allowedRoles: ['investor'],
     },
     {
       title: 'Student Portal',
       description: 'Access educational resources and financial learning materials.',
       icon: BookOpen,
       path: '/student',
+      allowedRoles: ['student'],
     },
     {
       title: 'Admin Portal',
       description: 'Comprehensive system administration and management.',
       icon: Shield,
       path: '/admin',
+      allowedRoles: ['admin'],
     },
     {
       title: 'Secure Messaging',
       description: 'End-to-end encrypted communication platform.',
       icon: MessageSquare,
       path: '/messages',
+      allowedRoles: ['client', 'professional', 'investor', 'student', 'admin'],
     },
   ];
+
+  const visiblePortals = user?.role
+    ? portals.filter(p => p.allowedRoles.includes(user.role))
+    : [];
+
+  if (user?.role && visiblePortals.length === 0) {
+    console.warn(`No portals available for role: ${user.role}`);
+  }
 
   return (
     <section aria-label="Portal Access Options">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {portals.length > 0 ? (
-          portals.map((portal) => (
+        {visiblePortals.length > 0 ? (
+          visiblePortals.map((portal) => (
             <PortalButton key={portal.path} {...portal} />
           ))
         ) : (
           <div className="col-span-full text-center text-gray-500">
-            No portals available at this time.
+            {user?.role
+              ? `No portals are currently available for your role: "${user.role}". Please contact support if you believe this is incorrect.`
+              : 'Please sign in to view available portals.'}
           </div>
         )}
       </div>

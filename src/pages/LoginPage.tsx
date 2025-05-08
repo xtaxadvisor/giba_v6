@@ -111,8 +111,8 @@ export default function SignInForm() {
         // Fetch the user's profile to determine their role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, name, location, phone') // Include 'name', 'location', and 'phone' in the query
-          .eq('uuid', data.user.id)
+          .select('role, full_name, location, phone') // Include 'full_name', 'location', and 'phone' in the query
+          .eq('id', data.user.id)
           .maybeSingle();
 
         if (profileError || !profile) {
@@ -124,7 +124,7 @@ export default function SignInForm() {
         setUser({
           id: data.user.id,
           email: data.user.email ?? '',
-          name: profile?.name || '',
+          name: profile?.full_name || '',
           createdAt: data.user.created_at ?? '',
           location: profile?.location || '',
           role: profile.role ?? '',

@@ -146,7 +146,7 @@ export function ClientProfile({ clientId }: ClientProfileProps) {
 {activeTab === 'documents' && clientId && clientId.trim() !== '' && (
   <ClientDocuments clientId={clientId} />
 )}
-{activeTab === 'communication' && clientId && <ClientCommunication clientId={clientId} />}
+{activeTab === 'communication' && clientId && <ClientCommunication recipientId={clientId} clientId={''} />}
 {activeTab === 'history' && clientId && <ClientHistory clientId={clientId} />}
         </div>
       </div>

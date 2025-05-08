@@ -118,7 +118,7 @@ export function Header() {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={() => navigate('/register')}
+                  onClick={() => navigate('/register/client')}
                   className="hover-scale"
                 >
                   Get Started
@@ -219,7 +219,7 @@ export function Header() {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={() => navigate('/register')}
+                  onClick={() => navigate('/register/client')}
                   className="w-full"
                 >
                   Get Started

@@ -69,7 +69,7 @@ export const supabaseAuth = {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')  
       .select('*')
-      .eq('uuid', user.id)
+      .eq('id', user.id)
       .maybeSingle();
     if (profileError) throw profileError;
 

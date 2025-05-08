@@ -1,7 +1,9 @@
 import React from 'react';
 interface ClientCommunicationProps {
   clientId: string;
+  recipientId: string; // Add this property
 }
+
 
 // Removed duplicate function definition
 export const ClientCommunication: React.FC<ClientCommunicationProps> = ({ clientId }) => {
