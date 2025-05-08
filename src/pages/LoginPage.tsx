@@ -122,14 +122,15 @@ export default function SignInForm() {
         }
 
         setUser({
-          id: data.user.id,
-          email: data.user.email ?? '',
-          name: profile?.full_name || '',
-          createdAt: data.user.created_at ?? '',
-          location: profile?.location || '',
-          role: profile.role ?? '',
-          phone: profile?.phone || ''
-        });
+                  id: data.user.id,
+                  email: data.user.email ?? '',
+                  name: profile?.full_name || '',
+                  createdAt: data.user.created_at ?? '',
+                  location: profile?.location || '',
+                  role: profile.role ?? '',
+                  phone: profile?.phone || '',
+                  userType: profile.role ?? '' // Add userType property
+                });
         // Optionally handle profile data here if needed
 
         addNotification('Welcome back!', 'success');

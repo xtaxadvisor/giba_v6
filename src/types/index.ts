@@ -92,6 +92,7 @@ export interface User {
   profileImageUrl?: string; // Added property for profile image URL
   profileImage?: string; // Added property for profile image
   profileImageKey?: string; // Added property for profile image key
+  userType: string;
 }
 
 // Task type
