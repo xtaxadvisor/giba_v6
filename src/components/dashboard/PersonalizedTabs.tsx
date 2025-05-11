@@ -22,7 +22,7 @@ interface TabConfig {
 }
 
 export function PersonalizedTabs() {
-  const { user } = useAuth();
+  const { user }: { user: { id: string; role?: string; name?: string } | null } = useAuth();
   const [activeTab, setActiveTab] = React.useState('');
 
   const getTabs = (): TabConfig[] => {
@@ -70,9 +70,9 @@ export function PersonalizedTabs() {
     <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-        <h2 className="text-2xl font-bold">Welcome back, {user.name}!</h2>
+        <h2 className="text-2xl font-bold">Welcome back, {user.name ?? 'User'}!</h2>
         <p className="mt-1 text-blue-100">
-          {user.role.charAt(0).toUpperCase() + user.role.slice(1)} Account
+          {(user.role ?? '').charAt(0).toUpperCase() + (user.role ?? '').slice(1)} Account
         </p>
       </div>
 

@@ -1,117 +1,103 @@
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase/client';
-import type { User } from '../types';
+import React, { useState, useContext } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/lib/supabase/client';
+import { USER_ROLES } from '@/utils/constants/roleRoutes';
+
 export interface AuthContextType {
   user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isAuthenticated: boolean; // Add this property
-}
-export interface AuthContextType {
-  user: User | null;
+  logout: () => void;
+  setUser: (user: User | null) => void;
   profile: { role: string } | null; // Add the profile property
+  isAuthenticated: boolean; // Added this property
+  loading: boolean; // Add the loading property
   // other properties
-  setUser: (user: User | null) => void; // Add this line to define setUser
-    // other properties
 }
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export interface User {
+  id: string;
+  email?: string;
+  fullName?: string;
+  createdAt?: string;
+  location?: string;
+  role?: string;
+  phone?: string;
+  avatarUrl?: string;
+  userType?: string;
+}
+// Add the export for AuthProvider if it is missing
+export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  // Provide authentication context logic here
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const [profile, setProfile] = useState<{ role: string } | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const normalizePhone = (raw: string) => raw.replace(/\D/g, '');
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email ?? '',
-          name: session.user.user_metadata?.name ?? '',
-          createdAt: session.user.created_at,
-          location: session.user.user_metadata?.location ?? '',
-          role: session.user.user_metadata?.role ?? '',
-          phone: normalizePhone(session.user.user_metadata?.phone ?? ''),
-          avatarUrl: session.user.user_metadata?.avatar_url ?? '',
-          userType: session.user.user_metadata?.user_type ?? '',
-        });
-        const { role } = session.user.user_metadata ?? {};
-        setProfile(role ? { role } : null);
-      } else {
-        setUser(null);
-        setProfile(null);
+  React.useEffect(() => {
+    const excludedPaths = ['/register', '/select-role'];
+    const isExcluded = excludedPaths.some((path) => location.pathname.startsWith(path));
+
+    if (!isExcluded && user?.role) {
+      switch (user.role) {
+        case 'admin':
+          navigate('/admin');
+          break;
+        case 'professional':
+          navigate('/professional');
+          break;
+        case 'client':
+          navigate('/client');
+          break;
+        case 'investor':
+          navigate('/investor');
+          break;
+        case 'student':
+          navigate('/student');
+          break;
+        default:
+          break;
       }
-      setLoading(false);
-    };
-
-    fetchSession();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ? {
-        id: session.user.id,
-        email: session.user.email ?? '',
-        name: session.user.user_metadata?.name ?? '',
-        createdAt: session.user.created_at,
-        location: session.user.user_metadata?.location ?? '',
-        role: session.user.user_metadata?.role ?? '',
-        phone: normalizePhone(session.user.user_metadata?.phone ?? ''),
-        avatarUrl: session.user.user_metadata?.avatar_url ?? '',
-        userType: session.user.user_metadata?.user_type ?? '',
-      } as User : null);
-      if (session?.user) {
-        const { role } = session.user.user_metadata ?? {};
-        setProfile(role ? { role } : null);
-      } else {
-        setProfile(null);
-      }
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) throw error;
-  };
-
-  const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
     }
+  }, [user?.role, location.pathname]);
+
+  const logout = () => {
     setUser(null);
-    window.location.href = '/login';
+    setProfile(null);
   };
+
+  const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, logout, isAuthenticated: !!user, setUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        logout,
+        setUser,
+        profile,
+        isAuthenticated,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-};
-
-export function useSession() {
-  const { user } = useAuth();
-  return {
-    session: user ? { user } : null
-  };
 }
+
+
+export const AuthContext = React.createContext<AuthContextType | undefined>({
+  user: null,
+  logout: () => {},
+  setUser: () => {},
+  profile: null,
+  isAuthenticated: false,
+  loading: false,
+});

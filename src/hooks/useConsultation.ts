@@ -1,6 +1,6 @@
 import { useQuery, useMutation, UseMutationResult } from '@tanstack/react-query';
 import { consultationService } from '../services/api/consultationService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Consultation } from '@/types'; // Update path to match the correct Consultation type
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -49,7 +49,7 @@ export function useConsultation(consultationId?: string) {
     consultationQuery.data &&
     user &&
     (
-      ['professional', 'client', 'student', 'investor', 'admin'].includes(user.role) ||
+      ['professional', 'client', 'student', 'investor', 'admin'].includes(user.role ?? '') ||
       consultationQuery.data.clientId === user.id ||
       consultationQuery.data.professionalId === user.id
     );

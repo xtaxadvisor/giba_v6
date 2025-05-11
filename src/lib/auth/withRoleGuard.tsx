@@ -16,7 +16,7 @@ export function withRoleGuard(Component: React.ComponentType, allowedRoles: stri
         addNotification('You are not authorized to access this page.', 'error');
         navigate('/');
       }
-    }, [user, profile]);
+    }, [user, profile, addNotification, navigate]);
 
     return <Component {...props} />;
   };

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
@@ -7,7 +8,14 @@ interface ClientAuthProps {
 }
 
 export function ClientAuth({ children }: ClientAuthProps) {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading state or fetch user data
+    const timer = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
   const location = useLocation();
 
   if (loading) {

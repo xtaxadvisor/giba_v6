@@ -32,7 +32,7 @@ export function VirtualConsultation({ consultationId, onEnd }: VirtualConsultati
     // Check access rights
     if (consultation && user) {
       const hasAccess = 
-        ['professional', 'client', 'student', 'investor', 'admin'].includes(user.role) ||
+        ['professional', 'client', 'student', 'investor', 'admin'].includes(user.role ?? '') ||
         consultation.clientId === user.id ||
         consultation.professionalId === user.id;
 

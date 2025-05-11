@@ -43,7 +43,10 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const {
+        data,
+        error
+      } = await signUp({
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
         options: {

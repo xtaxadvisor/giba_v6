@@ -38,7 +38,7 @@ export interface Settings {
 }
 
 export function Settings() {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: { name?: string; email?: string } | null };
   const { addNotification } = useNotificationStore();
   const [activeSection, setActiveSection] = useState('profile');
   const [loading, setLoading] = useState(false);
@@ -51,8 +51,8 @@ export function Settings() {
   ];
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+    name: user && 'name' in user ? user.name : '',
+    email: user && 'email' in user ? user.email : '',
     phone: '',
     language: 'en',
     timezone: 'UTC',

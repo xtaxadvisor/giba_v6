@@ -5,14 +5,14 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { useConsultation } from '../../hooks/useConsultation';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { supabase } from '../../lib/supabase/client';
 
 export function ConsultationBookingForm() {
   const navigate = useNavigate();
   const { isScheduling, scheduleConsultation } = useConsultation();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: { id: string; role?: string; email?: string } };
   const [isLoading, setIsLoading] = useState(false);
   const [assignedProfessionalId, setAssignedProfessionalId] = useState<string | null>(null);
 
@@ -63,7 +63,7 @@ export function ConsultationBookingForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: user?.email,
+          email: user?.email || 'no-reply@example.com',
           consultationType: rawData.type,
           date: `${rawData.date} ${rawData.time}`
         })

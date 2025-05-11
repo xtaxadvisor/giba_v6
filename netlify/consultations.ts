@@ -7,7 +7,7 @@ export const handler: Handler = async () => {
   const { data, error } = await supabase
     .from('consultations')
     .select('*')
-    .order('consultation_date', { ascending: true });
+    .order('start_time', { ascending: true });
 
   if (error) {
     return {

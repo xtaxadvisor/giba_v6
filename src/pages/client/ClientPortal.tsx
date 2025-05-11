@@ -7,7 +7,7 @@ import { Calendar } from '../../components/dashboard/Calendar';
 import { Settings } from '../../components/dashboard/Settings';
 import { ConsultationList } from '../../components/consultation/ConsultationList';
 import { ClientInsights } from '../../components/client/Dashboard/ClientInsights';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // ✅
 
 export default function ClientPortal() { 
   const { logout } = useAuth();

@@ -1,5 +1,5 @@
 import { Routes, Route, Outlet } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // ✅
 import { StudentDashboard } from '../../components/student/StudentDashboard';
 import { StudentLayout } from '../../components/student/StudentLayout';
 import { LearningResources } from '../../components/student/LearningResources';
@@ -8,7 +8,7 @@ import { ProgressTracking } from '../../components/student/ProgressTracking/Prog
 import MessagingPortal from '../messaging/MessagingPortal';
 
 export default function StudentPortal() {
-  const { logout } = useAuth();
+  const { logout } = useAuth() as { logout: () => void };
   return (
     <StudentLayout>
       <button

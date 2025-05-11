@@ -14,7 +14,7 @@ import './styles/global.css';
 import './index.css';
 
 import { SupabaseProvider } from './contexts/SupabaseContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { useAuth, AuthProvider } from '@/contexts/AuthContext';
 import { AppRoutes } from './routes';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';

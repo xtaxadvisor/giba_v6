@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // ✅
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../ui/Button';
 

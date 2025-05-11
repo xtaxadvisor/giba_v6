@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useNotificationStore } from '../lib/store';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { validatePassword } from '@/utils/validation';
 
 export default function SignInForm() {
@@ -104,14 +104,11 @@ export default function SignInForm() {
         }
       } else {
         console.log('SignIn success, session:', data.session);
-        // Store user session and token securely in localStorage
-        localStorage.setItem('currentUser', JSON.stringify(data.user));
         localStorage.setItem('accessToken', data.session?.access_token || '');
 
-        // Fetch the user's profile to determine their role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('role, full_name, location, phone') // Include 'full_name', 'location', and 'phone' in the query
+          .select('role, full_name, location, phone')
           .eq('id', data.user.id)
           .maybeSingle();
 
@@ -121,19 +118,39 @@ export default function SignInForm() {
           return;
         }
 
-        setUser({
-                  id: data.user.id,
-                  email: data.user.email ?? '',
-                  name: profile?.full_name || '',
-                  createdAt: data.user.created_at ?? '',
-                  location: profile?.location || '',
-                  role: profile.role ?? '',
-                  phone: profile?.phone || '',
-                  userType: profile.role ?? '' // Add userType property
-                });
-        // Optionally handle profile data here if needed
+        console.log('Profile data:', profile);
+
+        const customUser = {
+          id: data.user.id,
+          email: data.user.email || '',
+          fullName: profile?.full_name || '',
+          createdAt: data.user.created_at ?? '',
+          location: profile?.location || '',
+          role: profile.role ?? '',
+          phone: profile?.phone || '',
+          userType: profile.role ?? ''
+        };
+
+        console.log('Custom user:', customUser);
+
+        setUser(customUser);
+        localStorage.setItem('currentUser', JSON.stringify(customUser));
+
+        // Log access to Supabase
+        try {
+          await supabase.from('login_logs').insert({
+            user_id: data.user.id,
+            email: data.user.email,
+            role: profile.role,
+            timestamp: new Date().toISOString(),
+            path_accessed: `/${profile.role}/dashboard`,
+          });
+        } catch (logErr) {
+          console.warn('Failed to log login event:', logErr);
+        }
 
         addNotification('Welcome back!', 'success');
+
         switch (profile.role) {
           case 'professional':
             navigate('/professional/dashboard');
@@ -144,8 +161,15 @@ export default function SignInForm() {
           case 'admin':
             navigate('/admin/dashboard');
             break;
-          default:
+          case 'investor':
+            navigate('/investor/dashboard');
+            break;
+          case 'client':
             navigate('/client/dashboard');
+            break;
+          default:
+            console.warn('Unrecognized role:', profile.role);
+            navigate('/select-role');
         }
       }
     } catch (err) {

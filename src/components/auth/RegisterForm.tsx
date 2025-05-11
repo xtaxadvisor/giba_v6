@@ -4,18 +4,19 @@ import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // ✅
 import { validatePassword } from '@/utils/validation';
 
 export function RegisterForm() {
-  const { user } = useAuth() as { user: { phone?: string } | null };
+  const authContext = useAuth();
+  const user = authContext?.user as { id: string; role?: string; phone?: string } || null;
   const { role: paramRole } = useParams?.() || {};
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     date: '',
-    phone: user?.phone || '',
+    phone: '',
     role: paramRole || '',
     password: '',
     confirmPassword: '',
@@ -25,7 +26,7 @@ export function RegisterForm() {
     if (user?.phone && !formData.phone) {
       setFormData(prev => ({ ...prev, phone: user.phone || '' }));
     }
-  }, [user?.phone]);
+  }, [user?.phone || null]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

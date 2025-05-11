@@ -54,7 +54,7 @@ export function Subscriptions() {
   let isAuthenticated = false;
 
   try {
-    isAuthenticated = useAuth().isAuthenticated;
+    isAuthenticated = useAuth().user !== null; // Assuming 'user' is a valid property in AuthContextType
   } catch (err) {
     console.error('Subscriptions must be used within an AuthProvider.', err);
     return null;

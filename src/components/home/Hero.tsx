@@ -1,7 +1,7 @@
 import React from 'react';
 import { Phone } from 'lucide-react';
 import { Button } from '../ui/Button';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // ✅
 import { useNavigate } from 'react-router-dom';
 
 interface HeroProps {
@@ -11,7 +11,7 @@ interface HeroProps {
 export function Hero({ onBookNow }: HeroProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { logout } = useAuth();
+  const logout = useAuth()?.logout; // Safely access logout
   const isAuthenticated = Boolean(user);
 
   const handleCreateAccount = () => {

@@ -69,7 +69,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
                     <User className="h-5 w-5 text-white" />
                   </div>
-                  <span className="text-gray-700">{user?.name}</span>
+                  <span className="text-gray-700">{user?.id}</span>
                 </button>
                 <div className="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
                   <Link to="/dashboard/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">

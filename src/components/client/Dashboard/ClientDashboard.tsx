@@ -80,16 +80,50 @@ export function ClientDashboard() {
     }
   ];
 
-  const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
+  const [uploadedDocs, setUploadedDocs] = useState<{ name: string; size: number }[]>([]);
+  const [loadingDocs, setLoadingDocs] = useState<boolean>(false);
+
   useEffect(() => {
     const fetchDocs = async () => {
-      const { data, error } = await supabase.storage.from('client-documents').list();
-      if (!error && data) {
-        setUploadedDocs(data.map((doc) => doc.name));
+      setLoadingDocs(true);
+      const { data, error } = await supabase
+        .storage
+        .from('clientdocs')
+        .list('', { limit: 100 });
+
+      if (error) {
+        console.error('Error fetching documents:', error.message);
+        setLoadingDocs(false);
+        return;
       }
+
+      if (data) {
+        setUploadedDocs(data.map((doc) => ({
+          name: doc.name,
+          size: doc.metadata?.size || 0
+        })));
+      }
+      setLoadingDocs(false);
     };
+
     fetchDocs();
   }, []);
+
+  const handleDelete = async (fileName: string) => {
+    const confirmDelete = confirm(`Delete ${fileName}?`);
+    if (!confirmDelete) return;
+
+    const { error } = await supabase.storage
+      .from('clientdocs')
+      .remove([fileName]);
+
+    if (error) {
+      alert('Delete failed: ' + error.message);
+      return;
+    }
+
+    setUploadedDocs((prev) => prev.filter((file) => file.name !== fileName));
+  };
 
   return (
     <div className="space-y-6">
@@ -172,7 +206,7 @@ export function ClientDashboard() {
             if (!file) return;
             const filePath = `${Date.now()}_${file.name}`;
             supabase.storage
-              .from('client-documents')
+              .from('clientdocs')
               .upload(filePath, file)
               .then(({ error }) => {
                 if (error) {
@@ -186,13 +220,29 @@ export function ClientDashboard() {
         />
         <div className="mt-4">
           <h4 className="font-semibold mb-2">Uploaded Files</h4>
-          <ul className="list-disc pl-6 text-sm text-gray-700">
-            {uploadedDocs.length === 0 ? (
-              <li>No documents uploaded yet.</li>
-            ) : (
-              uploadedDocs.map((name) => <li key={name}>{name}</li>)
-            )}
-          </ul>
+          {loadingDocs ? (
+            <p>Loading documents...</p>
+          ) : (
+            <ul className="list-disc pl-6 text-sm text-gray-700">
+              {uploadedDocs.length === 0 ? (
+                <li>No documents uploaded yet.</li>
+              ) : (
+                uploadedDocs.map((file) => (
+                  <li key={file.name} className="flex justify-between items-center">
+                    <span>
+                      {file.name} ({(file.size / 1024).toFixed(1)} KB)
+                    </span>
+                    <button
+                      onClick={() => handleDelete(file.name)}
+                      className="text-sm text-red-500 ml-4 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
         </div>
       </section>
     </div>

@@ -1,19 +1,28 @@
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { useMessages } from '../../hooks/useMessages';
-import { useSession } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 export function MessagingCenter({ recipientId }: { recipientId: string }) {
   const { sendMessage, isSending } = useMessages();
-  const { session } = useSession();
-  const senderId = session?.user?.id;
+  const { user } = useAuth();
+  const senderId = user?.id;
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [recipientName, setRecipientName] = useState('Recipient');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [draft, setDraft] = useState('');
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500">
+        Loading messaging interface...
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (!recipientId) return;
@@ -62,6 +71,30 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
     };
   }, [recipientId, senderId]);
 
+  useEffect(() => {
+    const key = `${senderId}_${recipientId}_draft`;
+
+    async function fetchDraft() {
+      if (!senderId || !recipientId) return;
+
+      const { data, error } = await supabase
+        .from('message_drafts')
+        .select('content')
+        .eq('sender_id', senderId)
+        .eq('recipient_id', recipientId)
+        .maybeSingle();
+
+      if (data?.content) {
+        setDraft(data.content);
+      } else {
+        const local = localStorage.getItem(key);
+        if (local) setDraft(local);
+      }
+    }
+
+    fetchDraft();
+  }, [senderId, recipientId]);
+
   const handleSendMessage = (content: string, attachments?: File[]) => {
     if (!recipientId || !senderId) return;
 
@@ -71,6 +104,11 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
       content,
       attachments: attachments?.map(file => file.name)
     });
+    localStorage.removeItem(`${senderId}_${recipientId}_draft`);
+    supabase.from('message_drafts')
+      .delete()
+      .match({ sender_id: senderId, recipient_id: recipientId });
+    setDraft('');
   };
 
   useEffect(() => {
@@ -102,9 +140,18 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
         </div>
       )}
 
-      {senderId && recipientId ? (
+      {user?.id && recipientId ? (
         <div className="p-4 border-t border-gray-200">
           <MessageInput
+            value={draft}
+            onChange={(val: string) => {
+              setDraft(val);
+              localStorage.setItem(`${senderId}_${recipientId}_draft`, val);
+              if (senderId && recipientId) {
+                supabase.from('message_drafts')
+                  .upsert({ sender_id: senderId, recipient_id: recipientId, content: val }, { onConflict: 'sender_id,recipient_id' });
+              }
+            }}
             onSendMessage={handleSendMessage}
             isLoading={isSending}
           />

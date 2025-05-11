@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext'; // ✅
 import { supabase } from '../../lib/supabase/client';
 import { MessagingCenter } from '../messaging/MessagingCenter';
 

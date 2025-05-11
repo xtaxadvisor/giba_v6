@@ -3,25 +3,21 @@ import { useState } from 'react';
 interface Role {
   id: string;
   name: string;
-  permissions: string[];
-  userCount: number;
+  permissions: string[]; // This property already exists
+  userCount: number; // Number of users associated with the role
+  // Add any additional properties required by useRoles
 }
 import { Shield, Edit2, Trash2, Plus } from 'lucide-react';
 import { Button } from '../../ui/Button';
-  useRoles(); // Call useRoles without destructuring since the elements are unused.
 import { RoleForm } from './RoleForm';
 import { Modal } from '../../ui/Modal'; // Adjust the path if necessary
 import { useRoles } from '../hooks/useRoles';
 
 export function RoleManagement() {
+  const { roles, createRole, updateRole, deleteRole } = useRoles();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<any>(null);
-  const { roles, createRole, updateRole, deleteRole } = useRoles() as {
-    roles: Role[];
-    createRole: (data: any) => Promise<void>;
-    updateRole: (data: any) => Promise<void>;
-    deleteRole: (id: string) => Promise<void>;
-  };
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   const handleSubmit = async (data: any) => {
     if (selectedRole) {
@@ -79,12 +75,12 @@ export function RoleManagement() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-2">
-                        {role.permissions.map((permission) => (
+                        {role.permissions.map((permission: string) => (
                           <span
-                            key={permission}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          key={permission}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                           >
-                            {permission}
+                          {permission}
                           </span>
                         ))}
                       </div>
@@ -98,7 +94,7 @@ export function RoleManagement() {
                         size="sm"
                         icon={Edit2}
                         onClick={() => {
-                          setSelectedRole(role);
+                          setSelectedRole(role as Role);
                           setIsModalOpen(true);
                         }}
                         className="mr-2"

@@ -9,7 +9,11 @@ interface MessageInputProps {
   onSendMessage: (content: string, attachments?: File[]) => void;
   isLoading?: boolean;
   user?: { id: string };
+  value: string;
+  onChange: (val: string) => void;
 }
+
+
 
 export function MessageInput({ onSendMessage, isLoading, user }: MessageInputProps) {
   const [message, setMessage] = useState('');
