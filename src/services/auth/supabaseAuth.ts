@@ -23,21 +23,6 @@ export const supabaseAuth = {
 
     if (error) throw error;
     
-    if (data.user) {
-      // Create profile in users table
-      const { error: profileError } = await supabase
-        .from('profiles')  
-        .insert({
-          uuid: data.user.id,
-          full_name: userData.name,
-          email: data.user.email ?? '',
-          role: userData.role,
-          created_at: new Date().toISOString()
-        });
-
-      if (profileError) throw profileError;
-    }
-
     return data;
   },
 
@@ -49,6 +34,35 @@ export const supabaseAuth = {
     if (error) console.error("Sign‑in failed:", error.message);
     else console.log("Signed in user:", data.user);
     if (error) throw error;
+
+    // Check if profile exists and insert if not
+    if (data?.user) {
+      const { data: existingProfile, error: existingProfileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      if (existingProfileError) {
+        console.warn('Could not check profile existence:', existingProfileError.message);
+      } else if (!existingProfile) {
+        const { error: profileInsertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            full_name: data.user.user_metadata?.name ?? '',
+            role: data.user.user_metadata?.role ?? '',
+            email: data.user.email ?? '',
+            created_at: new Date().toISOString()
+          });
+
+        if (profileInsertError) {
+          console.error('Failed to insert profile:', profileInsertError.message);
+        } else {
+          console.log('Profile inserted successfully for user:', data.user.id);
+        }
+      }
+    }
     return data;
   },
 

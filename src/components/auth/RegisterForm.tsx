@@ -3,7 +3,11 @@ import { Mail, User } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabase = createClient('https://asdthnxphqjpxzyhpylr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZHRobnhwaHFqcHh6eWhweWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNDg4MDMsImV4cCI6MjA1NDYyNDgwM30.AGjxQM7QkIUA6d0jgJa4uaXQlJX8r9Bya9zC7B7F9qc');
 import { useAuth } from '@/contexts/AuthContext'; // ✅
 import { validatePassword } from '@/utils/validation';
 
@@ -53,8 +57,20 @@ export function RegisterForm() {
       return;
     }
 
-    window.location.href = "/consultation/confirmation";
-    // Add logic to schedule consultation
+    const navigate = useNavigate();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password
+    });
+
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      alert("This email is already registered. Please log in or use 'forgot password' to reset.");
+      return;
+    }
+
+    alert("Registration successful! Please check your email to confirm your account before signing in.");
+    navigate("/login");
   };
 
   return (
@@ -90,7 +106,7 @@ export function RegisterForm() {
         value={formData.email}
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         required
-        autoComplete="email"
+        autoComplete="username"
         placeholder="you@example.com"
       />
 
@@ -155,6 +171,7 @@ export function RegisterForm() {
       >
         Register
       </Button>
-    </form>
-  );
-}
+        </form>
+      );
+    }
+    

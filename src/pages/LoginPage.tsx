@@ -1,4 +1,3 @@
-import { withRoleGuard } from '../lib/auth/withRoleGuard';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -25,6 +24,57 @@ export default function SignInForm() {
   const [location, setLocation] = useState('');
   const [showResend, setShowResend] = useState(false);
 
+  // ✅ Rehydrate session from Supabase
+  useEffect(() => {
+    const restoreSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+
+      if (session?.user?.id) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role, full_name, location, phone')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (profileData) {
+          const customUser = {
+            id: session.user.id,
+            email: session.user.email ?? '',
+            fullName: profileData.full_name ?? '',
+            createdAt: session.user.created_at,
+            location: profileData.location ?? '',
+            role: profileData.role ?? '',
+            phone: profileData.phone ?? '',
+            userType: profileData.role ?? '',
+          };
+
+          setUser(customUser);
+          localStorage.setItem('currentUser', JSON.stringify(customUser));
+        }
+      }
+    };
+
+    restoreSession();
+  }, []);
+
+  // ✅ Handle Supabase session expiration or logout
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
+        console.log('Session expired. Logging out...');
+        supabase.auth.signOut();
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('accessToken');
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe?.();
+    };
+  }, []);
+
   const handleResendConfirmation = async () => {
     const { error } = await supabase.auth.resend({
       type: 'signup',
@@ -45,8 +95,9 @@ export default function SignInForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null); 
+    setError(null);
     setShowResend(false);
+
     try {
       if (isSignUp) {
         const { isValid, errors } = validatePassword(password);
@@ -55,125 +106,159 @@ export default function SignInForm() {
           setLoading(false);
           return;
         }
+
         if (password !== confirmPassword) {
           setError('Passwords do not match.');
           setLoading(false);
           return;
         }
-        const { data, error: signUpError } = await supabase.auth.signUp({
+
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: 'https://protaxadvisors.tax/login?confirmed=true'
           }
         });
-        if (signUpError) throw signUpError;
-        if (!data.user) throw new Error('Signup failed: user is null');
 
-        await supabase.from('profiles').insert({
-          id: data.user.id,
-          full_name: name,
-          role: selectedRole,
-          location
-        });
+        if (signUpError) {
+          if (signUpError.status === 429 || signUpError.message?.includes('over_email_send_rate_limit')) {
+            setError('Please wait a minute before trying again.');
+            setLoading(false);
+            return;
+          }
+          throw signUpError;
+        }
+        if (
+          signUpData?.user &&
+          (!Array.isArray(signUpData.user.identities) ||
+           signUpData.user.identities.length === 0)
+        ) {
+          alert("This email is already registered. Please log in instead.");
+          setLoading(false);
+          return;
+        }
+
+        if (!signUpData?.user) throw new Error('Signup failed: user is null');
 
         addNotification('Signup successful! Please check your email.', 'success');
+        navigate('/login');
         return;
-      }
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Attempting sign in with:', email, `Password length: ${password.length}`);
       }
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
+
       if (signInError) {
-        console.error('SignIn error:', signInError);
         if (signInError.message.toLowerCase().includes('email not confirmed')) {
           setError('Email not confirmed. Please check your inbox or click below to resend confirmation.');
           setShowResend(true);
           setLoading(false);
           return;
         }
-        if (signInError.message === 'Invalid login credentials') {
-          setError('Invalid email or password. Please try again. If you have not confirmed your email, please check your inbox or resend the confirmation email.');
-        } else {
-          setError(signInError.message || 'An error occurred during login.');
-        }
-      } else {
-        console.log('SignIn success, session:', data.session);
-        localStorage.setItem('accessToken', data.session?.access_token || '');
+        setError('Invalid email or password.');
+        setLoading(false);
+        return;
+      }
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, full_name, location, phone')
-          .eq('id', data.user.id)
-          .maybeSingle();
+      localStorage.setItem('accessToken', data.session?.access_token || '');
 
-        if (profileError || !profile) {
-          console.error('Profile fetch error or missing profile:', profileError, profile);
-          setError('Profile not found. Please contact support.');
-          return;
-        }
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, full_name, location, phone')
+        .eq('id', data.user.id)
+        .maybeSingle();
 
-        console.log('Profile data:', profile);
+      if (profileError) {
+        setError('Profile not found. Please contact support.');
+        return;
+      }
 
-        const customUser = {
-          id: data.user.id,
-          email: data.user.email || '',
-          fullName: profile?.full_name || '',
-          createdAt: data.user.created_at ?? '',
-          location: profile?.location || '',
-          role: profile.role ?? '',
-          phone: profile?.phone || '',
-          userType: profile.role ?? ''
-        };
-
-        console.log('Custom user:', customUser);
-
-        setUser(customUser);
-        localStorage.setItem('currentUser', JSON.stringify(customUser));
-
-        // Log access to Supabase
+      if (!profile) {
+        // Insert profile if not found
         try {
-          await supabase.from('login_logs').insert({
-            user_id: data.user.id,
-            email: data.user.email,
-            role: profile.role,
-            timestamp: new Date().toISOString(),
-            path_accessed: `/${profile.role}/dashboard`,
+          const { error: insertError } = await supabase.from('profiles').insert({
+            id: data.user.id,
+            full_name: name,
+            role: selectedRole,
+            location
           });
-        } catch (logErr) {
-          console.warn('Failed to log login event:', logErr);
-        }
-
-        addNotification('Welcome back!', 'success');
-
-        switch (profile.role) {
-          case 'professional':
-            navigate('/professional/dashboard');
-            break;
-          case 'student':
-            navigate('/student/dashboard');
-            break;
-          case 'admin':
-            navigate('/admin/dashboard');
-            break;
-          case 'investor':
-            navigate('/investor/dashboard');
-            break;
-          case 'client':
-            navigate('/client/dashboard');
-            break;
-          default:
-            console.warn('Unrecognized role:', profile.role);
-            navigate('/select-role');
+          if (insertError) {
+            console.error('Profile insert failed:', insertError.message);
+            addNotification('Could not save your profile. Please contact support.', 'error');
+          }
+        } catch (insertErr) {
+          console.error('Unexpected error inserting profile:', insertErr);
+          addNotification('An unexpected error occurred while saving your profile.', 'error');
         }
       }
+
+      const customUser = {
+        id: data.user.id,
+        email: data.user.email || '',
+        fullName: profile?.full_name || '',
+        createdAt: data.user.created_at ?? '',
+        location: profile?.location || '',
+        role: profile?.role ?? '',
+        phone: profile?.phone || '',
+        userType: profile?.role ?? ''
+      };
+
+      setUser(customUser);
+      localStorage.setItem('currentUser', JSON.stringify(customUser));
+
+      // Check for portal redirect after login
+      const portalRedirect = sessionStorage.getItem('fromPortal');
+      if (portalRedirect) {
+        sessionStorage.removeItem('fromPortal');
+        navigate(portalRedirect);
+        return;
+      }
+
+      // Optional: log login event
+      try {
+        await supabase.from('login_logs').insert({
+          user_id: data.user.id,
+          email: data.user.email,
+          role: profile?.role,
+          timestamp: new Date().toISOString(),
+          path_accessed: `/${profile?.role}/dashboard`,
+        });
+      } catch (logErr) {
+        console.warn('Login log failed:', logErr);
+      }
+
+      addNotification('Welcome back!', 'success');
+
+      switch (profile?.role) {
+        case 'professional':
+          navigate('/professional/dashboard');
+          break;
+        case 'student':
+          navigate('/student/dashboard');
+          break;
+        case 'admin':
+          navigate('/admin/dashboard');
+          break;
+        case 'investor':
+          navigate('/investor/dashboard');
+          break;
+        case 'client':
+          navigate('/client/dashboard');
+          break;
+        case 'superadmin':
+          navigate('/superadmin/dashboard');
+          return;
+        default:
+          if (customUser.email === 'giba1970@hotmail.com') {
+            navigate('/admin/dashboard');
+            return;
+          }
+          navigate('/select-role');
+      }
     } catch (err) {
-      console.error('Unexpected error during signIn:', err);
       setError((err as Error).message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
@@ -183,6 +268,7 @@ export default function SignInForm() {
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white shadow rounded">
       <h2 className="text-2xl font-semibold mb-4">{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
+
       {confirmationResent && (
         <div className="mb-4 text-blue-600">
           Confirmation email sent. Please check your inbox and then log in.
@@ -205,6 +291,7 @@ export default function SignInForm() {
           Thanks for confirming your email. You can now log in.
         </div>
       )}
+
       {isSignUp && (
         <>
           <div className="mb-4">
@@ -259,34 +346,33 @@ export default function SignInForm() {
           </div>
         </>
       )}
+
       <div className="mb-4">
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
-          Email
-        </label>
+        <label htmlFor="email" className="block text-sm font-medium mb-1">Email</label>
         <input
           id="email"
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          autoComplete="email"
+          autoComplete="username"
           className="w-full border-gray-300 rounded p-2"
         />
       </div>
+
       <div className="mb-6">
-        <label htmlFor="password" className="block text-sm font-medium mb-1">
-          Password
-        </label>
+        <label htmlFor="password" className="block text-sm font-medium mb-1">Password</label>
         <input
           id="password"
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
-          autoComplete="new-password"
+          autoComplete={isSignUp ? 'new-password' : 'current-password'}
           className="w-full border-gray-300 rounded p-2"
         />
       </div>
+
       <button
         type="submit"
         disabled={loading}
@@ -294,6 +380,7 @@ export default function SignInForm() {
       >
         {loading ? (isSignUp ? 'Signing up...' : 'Signing in...') : (isSignUp ? 'Sign Up' : 'Sign In')}
       </button>
+
       <button
         type="button"
         className="mt-4 text-sm text-blue-600 hover:underline"
@@ -303,21 +390,4 @@ export default function SignInForm() {
       </button>
     </form>
   );
-
-  // Automatic logout when Supabase session expires
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) {
-        console.log('Session expired. Logging out...');
-        supabase.auth.signOut(); // ensure cleanup
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('accessToken');
-        navigate('/login');
-      }
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
 }

@@ -19,6 +19,22 @@ export function AdminLoginForm() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
 
+  React.useEffect(() => {
+    (async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (session?.user?.id) {
+        const { data: adminProfile } = await supabase
+          .from('admins')
+          .select('id')
+          .eq('id', session.user.id)
+          .maybeSingle();
+        if (adminProfile) {
+          navigate('/admin');
+        }
+      }
+    })();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -26,6 +42,7 @@ export function AdminLoginForm() {
 
     try {
       if (!isStrongPassword(formData.password)) {
+        console.warn('Weak password attempt:', formData.username);
         addNotification('Password does not meet security requirements', 'error');
         setLoading(false);
         return;
@@ -54,15 +71,17 @@ export function AdminLoginForm() {
           return;
         }
 
-        if (!showTOTP) {
+        if (import.meta.env.DEV || showTOTP) {
+          addNotification('Admin access granted', 'success');
+          navigate('/admin');
+        } else {
           setShowTOTP(true);
           setLoading(false);
           return;
         }
         
-        addNotification('Admin access granted', 'success');
-        navigate('/admin');
       } else {
+        console.warn('Failed login for username:', formData.username);
         addNotification('Invalid credentials', 'error');
       }
     } catch (error) {

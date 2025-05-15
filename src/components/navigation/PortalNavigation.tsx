@@ -6,7 +6,14 @@ import { useMemo } from 'react';
 export function PortalNavigation() {
   const location = useLocation();
   const { user } = useAuth();
-  const availablePortals = useMemo(() => getAvailablePortals(), []);
+  const availablePortals = useMemo(() => {
+    console.log('[getAvailablePortals input]', user?.role);
+    const result = getAvailablePortals(user?.role);
+    console.log('[getAvailablePortals output]', result);
+    return result;
+  }, [user?.role]);
+  console.log('[PortalNavigation] user:', user);
+  console.log('[PortalNavigation] availablePortals:', availablePortals);
 
   if (availablePortals.length === 0) {
     return <div className="text-sm text-gray-500 px-3">No portals available.</div>;

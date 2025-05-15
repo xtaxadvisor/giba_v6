@@ -14,9 +14,6 @@ export function Hero({ onBookNow }: HeroProps) {
   const logout = useAuth()?.logout; // Safely access logout
   const isAuthenticated = Boolean(user);
 
-  const handleCreateAccount = () => {
-    navigate('/register');
-  };
 
   return (
     <div>
@@ -41,13 +38,7 @@ export function Hero({ onBookNow }: HeroProps) {
         <div className="mt-10 flex flex-wrap justify-center gap-4 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
           {/* First step in client onboarding-to-calendar flow: redirect to profile setup */}
           <Button
-            onClick={() => {
-              try {
-                navigate('/client/profile');
-              } catch (error) {
-                console.error('Navigation failed:', error);
-              }
-            }}
+            onClick={() => onBookNow('consultation')}
             variant="primary"
             size="lg"
             icon={Phone}
@@ -69,7 +60,7 @@ export function Hero({ onBookNow }: HeroProps) {
           {!isAuthenticated && (
             <>
               <Button
-                onClick={handleCreateAccount}
+                onClick={() => onBookNow('consultation')}
                 variant="primary"
                 size="lg"
                 className="px-8 hover-scale"
@@ -77,7 +68,7 @@ export function Hero({ onBookNow }: HeroProps) {
                 Create FREE Account
               </Button>
               <Button
-                onClick={handleCreateAccount}
+                onClick={() => onBookNow('consultation')}
                 variant="primary"
                 size="lg"
                 className="px-8 hover-scale"

@@ -3,20 +3,21 @@ import { Calculator, Clock, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { calculateServicesCost, ServiceTypes, type ServiceRequest } from '../../utils/serviceCalculator';
+import { calculateServicesCost, ServiceTypeKeys, ServiceRequest } from '../../utils/serviceCalculator';
 import { formatCurrency } from '../../utils/format';
 import { useNotificationStore } from '../../lib/store';
 
 export function ServiceCalculator() {
   const [services, setServices] = useState<ServiceRequest[]>([{
-    type: ServiceTypes.TAX_PLANNING,
-    hours: 1
+    serviceType: ServiceTypeKeys.TAX_PLANNING,
+    hours: 1,
+    quantity: 1
   }]);
   const [result, setResult] = useState<any>(null);
   const { addNotification } = useNotificationStore();
 
   const handleAddService = () => {
-    setServices([...services, { type: ServiceTypes.TAX_PLANNING, hours: 1 }]);
+    setServices([...services, { hours: 1, serviceType: 'tax_planning', quantity: 1 }]);
   };
 
   const handleRemoveService = (index: number) => {
@@ -87,14 +88,14 @@ export function ServiceCalculator() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
                 label="Service Type"
-                value={service.type}
-                onChange={(value) => handleServiceChange(index, 'type', value)}
+                value={service.serviceType}
+                onChange={(value) => handleServiceChange(index, 'serviceType', value)}
                 options={[
-                  { value: ServiceTypes.TAX_PLANNING, label: 'Tax Planning' },
-                  { value: ServiceTypes.FINANCIAL_REVIEW, label: 'Financial Review' },
-                  { value: ServiceTypes.INVESTMENT_ADVISORY, label: 'Investment Advisory' },
-                  { value: ServiceTypes.BUSINESS_CONSULTING, label: 'Business Consulting' },
-                  { value: ServiceTypes.TAX_PREPARATION, label: 'Tax Preparation' }
+                  { value: ServiceTypeKeys.TAX_PLANNING, label: 'Tax Planning' },
+                  { value: ServiceTypeKeys.FINANCIAL_REVIEW, label: 'Financial Review' },
+                  { value: ServiceTypeKeys.INVESTMENT_ADVISORY, label: 'Investment Advisory' },
+                  { value: ServiceTypeKeys.BUSINESS_CONSULTING, label: 'Business Consulting' },
+                  { value: ServiceTypeKeys.TAX_PREPARATION, label: 'Tax Preparation' }
                 ]}
               />
 
