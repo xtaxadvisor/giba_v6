@@ -32,7 +32,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.Guest]: 'Guest',
   [Role.Unauthenticated]: 'Unauthenticated',
   [Role.Loading]: 'Loading',
-  [Role.Messaging]: 'Messaging',
+  [Role.Messaging]: 'Messaging Portal',
 };
 
 export const ROLE_ICONS: Record<Role, LucideIcon> = {
@@ -204,7 +204,7 @@ export function PortalAccess() {
     {
       title: ROLE_LABELS[Role.Messaging],
       description: 'End-to-end communication platform.',
-      icon: ROLE_ICONS[Role.Client], // default icon
+      icon: ROLE_ICONS[Role.Messaging],
       path: '/messaging',
       allowedRoles: [
         Role.Client,
@@ -219,7 +219,10 @@ export function PortalAccess() {
   ];
 
 
-  const visiblePortals = portals;
+  const visiblePortals =
+    userRole === Role.Unauthenticated || userRole === Role.Guest
+      ? portals
+      : portals.filter((portal) => portal.allowedRoles.includes(userRole));
 
   console.log('user:', user);
   console.log('resolvedRole:', resolvedRole);

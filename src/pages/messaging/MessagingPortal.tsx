@@ -16,12 +16,28 @@ export default function MessagingPortal() {
           .eq('id', session.user.id)
           .maybeSingle();
 
+        if (error) {
+          console.error('Failed to fetch user profile:', error.message);
+        }
+
         if (!error && profile) {
           if (profile.role === 'client' && profile.assigned_professional_id) {
             setRecipientId(profile.assigned_professional_id);
           } else if (profile.role === 'professional') {
-            // Future logic: fetch clients or show inbox overview
-            setRecipientId(null); // Placeholder or default behavior
+            // Example placeholder: use first client ID in future logic
+            const { data: clients, error: clientsError } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('assigned_professional_id', session.user.id);
+
+            if (clientsError) {
+              console.error('Failed to fetch assigned clients:', clientsError.message);
+            } else if (clients && clients.length > 0) {
+              // Set the first client ID for now
+              setRecipientId(clients[0].id);
+            } else {
+              console.log('No assigned clients found.');
+            }
           }
         }
       }
@@ -34,7 +50,11 @@ export default function MessagingPortal() {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <MessagingCenter recipientId={recipientId || ''} />
+          {recipientId !== null ? (
+            <MessagingCenter recipientId={recipientId} />
+          ) : (
+            <div className="p-6 text-gray-500 text-center">Loading conversation...</div>
+          )}
         </div>
       </div>
     </div>
