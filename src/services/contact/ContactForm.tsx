@@ -8,8 +8,8 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await submitContactForm({ name, email, message });
-    if (result.success) {
+    const success = await submitContactForm({ name, email, message });
+    if (success) {
       alert("Thank you! We received your message.");
       setName('');
       setEmail('');

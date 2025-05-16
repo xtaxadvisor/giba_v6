@@ -83,8 +83,8 @@ function PortalButton({ title, description, icon: Icon, path, role, currentUserR
   };
 
   return (
-    <div className={`${[Role.Admin, Role.Superadmin].includes(role) ? 'lg:col-span-1 w-full lg:w-1/2' : 'w-full'}`}>
-      <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group min-h-[20px] flex flex-col ${isActiveRole ? 'border-2 border-blue-600' : ''}`}>
+    <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-between h-full min-h-[280px] transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group">
+      <div>
         <div className="flex items-center mb-4">
           <div className="p-2 bg-blue-50 rounded-lg">
             <Icon className="h-4 w-4 text-blue-600 transition-transform group-hover:scale-110 duration-200" />
@@ -99,11 +99,11 @@ function PortalButton({ title, description, icon: Icon, path, role, currentUserR
         <div className="flex-grow">
           <p className="text-gray-600">{description}</p>
         </div>
-        <div className="mt-6">
-          <Button variant="primary" onClick={handleAccess} className="w-full">
-            Access Portal
-          </Button>
-        </div>
+      </div>
+      <div className="mt-auto">
+        <Button variant="primary" onClick={handleAccess} className="w-full">
+          Access Portal
+        </Button>
       </div>
     </div>
   );
@@ -192,12 +192,20 @@ export function PortalAccess() {
       allowedRoles: [Role.Student, Role.Superadmin],
       role: Role.Student,
     },
+      {
+        title: ROLE_LABELS[Role.Guest],
+        description: 'Access public resources.',
+        icon: ROLE_ICONS[Role.Guest],
+        path: '/guest',
+        allowedRoles: [Role.Guest],
+        role: Role.Guest,
+      },
+       
     {
-      title: 'Secure Messaging',
+      title: ROLE_LABELS[Role.Messaging],
       description: 'End-to-end communication platform.',
       icon: ROLE_ICONS[Role.Client], // default icon
       path: '/messaging',
-    
       allowedRoles: [
         Role.Client,
         Role.Professional,
@@ -206,7 +214,7 @@ export function PortalAccess() {
         Role.Admin,
         Role.Superadmin,
       ],
-      role: Role.Client,
+      role: Role.Messaging ,
     },
   ];
 
@@ -224,23 +232,14 @@ export function PortalAccess() {
   ) : null;
 
   return (
-    <section aria-label="Portal Access Options">
+    <section aria-label="Portal Access Options" className="px-4 sm:px-6 lg:px-8">
       {loadingNote}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Admin and Superadmin portals in a shared row */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:gap-4 lg:col-span-1">
-          {visiblePortals
-            .filter((p) => [Role.Admin, Role.Superadmin].includes(p.role))
-            .map((portal) => (
-              <PortalButton key={portal.path} {...portal} currentUserRole={userRole} />
-            ))}
-        </div>
-        {/* All other portals */}
-        {visiblePortals
-          .filter((p) => ![Role.Admin, Role.Superadmin].includes(p.role))
-          .map((portal) => (
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {visiblePortals.map((portal) => (
             <PortalButton key={portal.path} {...portal} currentUserRole={userRole} />
           ))}
+        </div>
       </div>
     </section>
   );
