@@ -11,13 +11,14 @@ export function ServiceCalculator() {
   const [services, setServices] = useState<ServiceRequest[]>([{
     serviceType: ServiceTypeKeys.TAX_PLANNING,
     hours: 1,
-    quantity: 1
+    quantity: 1,
+    addons: []
   }]);
   const [result, setResult] = useState<any>(null);
   const { addNotification } = useNotificationStore();
 
   const handleAddService = () => {
-    setServices([...services, { hours: 1, serviceType: 'tax_planning', quantity: 1 }]);
+    setServices([...services, { hours: 1, serviceType: 'tax_planning', quantity: 1, addons: [] }]);
   };
 
   const handleRemoveService = (index: number) => {

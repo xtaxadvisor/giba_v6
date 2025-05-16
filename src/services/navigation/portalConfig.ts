@@ -1,4 +1,4 @@
-import { Shield, TrendingUp, MessageSquare, BookOpen, User } from 'lucide-react';
+import { Shield, TrendingUp, MessageSquare, BookOpen, User, ShieldCheck } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface PortalConfig {
@@ -13,7 +13,9 @@ export interface PortalConfig {
   messaging?: boolean;
   documents?: boolean;
   subFeatures?: string[];
+  role?: string;
   subFeatureDescriptions?: string[];
+  allowedRoles?: string[];
 }
 
 export const PORTAL_CONFIGS: Record<string, PortalConfig> = {
@@ -135,9 +137,17 @@ export const PORTAL_CONFIGS: Record<string, PortalConfig> = {
   messages: {
     id: 'messages',
     title: 'Secure Messaging',
-    description: 'End-to-end encrypted communication platform.',
-    icon: MessageSquare,
+    description: 'End-to-end communication platform.',
+    icon: ShieldCheck,
     path: '/messages',
+    allowedRoles: [
+      'Client',
+      'Professional',
+      'Investor',
+      'Student',
+      'Admin',
+      'Superadmin'
+    ],
     features: [
       'End-to-End Encryption',
       'File Sharing',

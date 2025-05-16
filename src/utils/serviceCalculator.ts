@@ -16,7 +16,26 @@ export interface ServiceRequest {
   serviceType: ServiceType;
   quantity: number;
   hours: number;
+  addons: Addon[]; // Define Addon type if missing
+    
 }
+// Add the definition and export of AddonBreakdown if missing
+export interface AddonBreakdown {
+  name: string;
+  quantity: number;
+  total: number; 
+}
+// Removed duplicate declaration of ServiceType to avoid redeclaration error
+
+// Define the Addon type if it is missing
+export interface Addon {
+  name: string;
+  price: number;
+  quantity?: number; 
+  breakdown?: AddonBreakdown;
+  }
+
+
   
 
 

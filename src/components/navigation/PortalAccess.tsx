@@ -1,4 +1,5 @@
 import React from 'react';
+import { ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Users, Database, TrendingUp, MessageSquare, BookOpen } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -18,6 +19,7 @@ export enum Role {
   Guest = 'guest',
   Unauthenticated = 'unauthenticated',
   Loading = 'loading',
+  Messaging = 'messaging',
 }
 
 export const ROLE_LABELS: Record<Role, string> = {
@@ -30,6 +32,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.Guest]: 'Guest',
   [Role.Unauthenticated]: 'Unauthenticated',
   [Role.Loading]: 'Loading',
+  [Role.Messaging]: 'Messaging',
 };
 
 export const ROLE_ICONS: Record<Role, LucideIcon> = {
@@ -42,7 +45,9 @@ export const ROLE_ICONS: Record<Role, LucideIcon> = {
   [Role.Guest]: MessageSquare,
   [Role.Unauthenticated]: MessageSquare,
   [Role.Loading]: MessageSquare,
+  [Role.Messaging]: ShieldCheck, // Add this line
 };
+
 
 interface PortalButtonProps {
   title: string;
@@ -79,10 +84,10 @@ function PortalButton({ title, description, icon: Icon, path, role, currentUserR
 
   return (
     <div className={`${[Role.Admin, Role.Superadmin].includes(role) ? 'lg:col-span-1 w-full lg:w-1/2' : 'w-full'}`}>
-      <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group min-h-[180px] flex flex-col justify-between ${isActiveRole ? 'border-2 border-blue-600' : ''}`}>
+      <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group min-h-[20px] flex flex-col ${isActiveRole ? 'border-2 border-blue-600' : ''}`}>
         <div className="flex items-center mb-4">
           <div className="p-2 bg-blue-50 rounded-lg">
-            <Icon className="h-6 w-6 text-blue-600 transition-transform group-hover:scale-110 duration-200" />
+            <Icon className="h-4 w-4 text-blue-600 transition-transform group-hover:scale-110 duration-200" />
           </div>
           <h3 className="ml-3 text-xl font-semibold text-gray-900">{ROLE_LABELS[role]}</h3>
           {isActiveRole && (
@@ -91,10 +96,14 @@ function PortalButton({ title, description, icon: Icon, path, role, currentUserR
             </span>
           )}
         </div>
-        <p className="text-gray-600 mb-6">{description}</p>
-        <Button variant="primary" onClick={handleAccess} className="w-full">
-          Access Portal
-        </Button>
+        <div className="flex-grow">
+          <p className="text-gray-600">{description}</p>
+        </div>
+        <div className="mt-6">
+          <Button variant="primary" onClick={handleAccess} className="w-full">
+            Access Portal
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -185,9 +194,10 @@ export function PortalAccess() {
     },
     {
       title: 'Secure Messaging',
-      description: 'End-to-end encrypted communication platform.',
-      icon: ROLE_ICONS[Role.Client],
-      path: '/messages',
+      description: 'End-to-end communication platform.',
+      icon: ROLE_ICONS[Role.Client], // default icon
+      path: '/messaging',
+    
       allowedRoles: [
         Role.Client,
         Role.Professional,

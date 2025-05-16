@@ -6,7 +6,8 @@ const ServiceQuote = () => {
 
   const mockServiceRequest: ServiceRequest[] = [
     {
-      type: 'tax-planning',
+      serviceType: 'tax_planning',
+      quantity: 1,
       hours: 2,
       addons: [
         { name: 'Priority Handling', price: 50, quantity: 1 }

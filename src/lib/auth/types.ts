@@ -10,6 +10,14 @@ export type Message = {
   timestamp: string;
   attachments?: Attachment[];
 };
+// types.ts
+export type SendMessageDTO = {
+  senderId: string;
+  recipientId: string;
+  content: string;
+  attachments?: File[];
+  read: boolean;
+};
 
 // Define and export the Attachment type
 export type Attachment = {

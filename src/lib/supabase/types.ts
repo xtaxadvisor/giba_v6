@@ -55,6 +55,14 @@ export interface UpdateEventDTO {
   endDate: string;
   location?: string;
 }
+// types.ts
+export type SendMessageDTO = {
+  senderId: string;
+  recipientId: string;
+  content: string;
+  attachments?: File[];
+  read: boolean;
+};
   // Existing exports in the types file
 export type Thread = {
   id: string;

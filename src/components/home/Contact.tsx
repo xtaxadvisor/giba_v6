@@ -1,10 +1,24 @@
 import { Mail, Phone, MapPin } from 'lucide-react';
 import { Form } from '../ui/Form';
 import { Card } from '../ui/Card';
+import { supabase } from '../../lib/supabase/client';
 
 export function Contact() {
-  const handleSubmit = (data: Record<string, string>) => {
-    console.log('Form submitted:', data);
+  const handleSubmit = async (data: Record<string, string>) => {
+    const { name, email, message } = data;
+
+    const { error } = await supabase
+      .from('messages')
+      .insert({
+        content: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+        created_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error("❌ Supabase insert failed:", error.message);
+    } else {
+      console.log("✅ Message saved to Supabase");
+    }
   };
 
   const formFields = [

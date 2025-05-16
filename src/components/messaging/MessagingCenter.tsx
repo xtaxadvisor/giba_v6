@@ -1,13 +1,37 @@
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
-import { useMessages } from '../../hooks/useMessages';
+import { useMessages as useMessagesHook } from '../../hooks/useMessages';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
+// Define the SendMessageDTO type
+type SendMessageDTO = {
+  senderId: string;
+  recipientId: string;
+  content: string;
+  attachments?: File[]; // Optional attachments property
+  read: boolean;
+};
+
+export function useMessages() {
+// Removed duplicate interface declaration
+  
+    const sendMessage = async (message: SendMessageDTO): Promise<{ error?: string | null }> => {
+    try {
+      // Simulate sending a message (replace with actual implementation)
+      console.log('Sending message:', message);
+      return { error: null };
+    } catch (err) {
+      return { error: (err as Error).message };
+    }
+  };
+
+  return { sendMessage, isSending: false };
+}
 export function MessagingCenter({ recipientId }: { recipientId: string }) {
-  const { sendMessage, isSending } = useMessages();
+  const { sendMessage, isSending } = useMessagesHook();
   const { user } = useAuth();
   const senderId = user?.id;
   const messageEndRef = useRef<HTMLDivElement | null>(null);
@@ -15,6 +39,7 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
   const [recipientName, setRecipientName] = useState('Recipient');
   const [unreadCount, setUnreadCount] = useState(0);
   const [draft, setDraft] = useState('');
+  const [lastSent, setLastSent] = useState<string | null>(null);
 
   if (!user) {
     return (
@@ -36,7 +61,7 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
           setRecipientName(data.full_name);
         }
       });
-  }, [recipientId]);
+  }, [recipientId, messageEndRef]);
 
   useEffect(() => {
     if (!recipientId || !senderId) return;
@@ -95,21 +120,67 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
     fetchDraft();
   }, [senderId, recipientId]);
 
-  const handleSendMessage = (content: string, attachments?: File[]) => {
-    if (!recipientId || !senderId) return;
+const handleSendMessage = async (messageContent: string, attachments?: File[]) => {
+  if (!recipientId || !senderId) return;
 
-    sendMessage({
-      recipientId,
-      senderId,
-      content,
-      attachments: attachments?.map(file => file.name)
-    });
-    localStorage.removeItem(`${senderId}_${recipientId}_draft`);
-    supabase.from('message_drafts')
+  const message = {
+    senderId,
+    recipientId,
+    content: messageContent,
+    attachments,
+    read: false
+  } as SendMessageDTO;
+
+  const { error } = await sendMessage(message);
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  localStorage.removeItem(`${senderId}_${recipientId}_draft`);
+  const { error: delError } = await supabase.from('message_drafts')
+    .delete()
+    .match({ sender_id: senderId, recipient_id: recipientId });
+  if (delError) {
+    console.error("Error deleting draft from Supabase:", delError);
+  }
+  setDraft('');
+
+  setLastSent(new Date().toISOString());
+  const sentLog = {
+    id: Date.now(),
+    content: messageContent,
+    timestamp: new Date().toISOString(),
+    recipientId,
+    senderId,
+  };
+  const historyKey = `sent_messages_${senderId}_${recipientId}`;
+  const prevMessages = JSON.parse(localStorage.getItem(historyKey) || '[]');
+  localStorage.setItem(historyKey, JSON.stringify([...prevMessages, sentLog]));
+};
+  const deleteDraftAndLogMessage = async () => {
+    const { error: delError } = await supabase.from('message_drafts')
       .delete()
       .match({ sender_id: senderId, recipient_id: recipientId });
+    if (delError) {
+      console.error("Error deleting draft from Supabase:", delError);
+    }
     setDraft('');
+
+    setLastSent(new Date().toISOString());
+    const sentLog = {
+      id: Date.now(),
+      content: draft,
+      timestamp: new Date().toISOString(),
+      recipientId,
+      senderId,
+    };
+    const historyKey = `sent_messages_${senderId}_${recipientId}`;
+    const prevMessages = JSON.parse(localStorage.getItem(historyKey) || '[]');
+    localStorage.setItem(historyKey, JSON.stringify([...prevMessages, sentLog]));
   };
+
+  deleteDraftAndLogMessage();
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -144,17 +215,35 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
         <div className="p-4 border-t border-gray-200">
           <MessageInput
             value={draft}
-            onChange={(val: string) => {
+            onChange={async (val: string) => {
               setDraft(val);
               localStorage.setItem(`${senderId}_${recipientId}_draft`, val);
               if (senderId && recipientId) {
-                supabase.from('message_drafts')
-                  .upsert({ sender_id: senderId, recipient_id: recipientId, content: val }, { onConflict: 'sender_id,recipient_id' });
+                // Save draft to Supabase
+                const { error: upsertError } = await supabase.from('message_drafts')
+                  .upsert(
+                    { sender_id: senderId, recipient_id: recipientId, content: val },
+                    { onConflict: 'sender_id,recipient_id' }
+                  );
+                if (upsertError) {
+                  console.error("Error upserting draft to Supabase:", upsertError);
+                }
+                // Broadcast typing status
+                supabase.channel('typing-status').send({
+                  type: 'broadcast',
+                  event: 'typing',
+                  payload: { senderId },
+                });
               }
             }}
             onSendMessage={handleSendMessage}
             isLoading={isSending}
           />
+          {lastSent && (
+            <div className="text-xs text-green-600 px-4 pb-2 italic">
+              Last message sent at {new Date(lastSent).toLocaleTimeString()}
+            </div>
+          )}
         </div>
       ) : (
         <div className="p-4 text-sm text-gray-400 text-center italic">
@@ -162,5 +251,5 @@ export function MessagingCenter({ recipientId }: { recipientId: string }) {
         </div>
       )}
     </div>
-  );
-}
+    );
+    };

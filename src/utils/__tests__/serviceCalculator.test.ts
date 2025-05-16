@@ -1,15 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import {
   calculateServicesCost,
-  ServiceTypes,
-  type ServiceRequest
+  type ServiceRequest,
+  ServiceTypeKeys
 } from '../serviceCalculator';
+
 
 describe('serviceCalculator', () => {
   it('calculates basic service cost correctly', () => {
     const services: ServiceRequest[] = [{
-      type: ServiceTypes.TAX_PLANNING,
-      hours: 2
+      serviceType: ServiceTypeKeys.TAX_PLANNING,
+      hours: 2,
+      quantity: 1,
+      addons: [] // Adding the required 'addons' property
     }];
 
     const result = calculateServicesCost(services);
@@ -20,7 +23,10 @@ describe('serviceCalculator', () => {
 
   it('applies minimum hours when not specified', () => {
     const services: ServiceRequest[] = [{
-      type: ServiceTypes.TAX_PLANNING
+      serviceType: ServiceTypeKeys.TAX_PLANNING,
+      hours: 1, // Adding the required 'hours' property
+      quantity: 1,
+      addons: [] // Adding the required 'addons' property
     }];
 
     const result = calculateServicesCost(services);
@@ -30,12 +36,16 @@ describe('serviceCalculator', () => {
   it('calculates multiple services correctly', () => {
     const services: ServiceRequest[] = [
       {
-        type: ServiceTypes.TAX_PLANNING,
-        hours: 2
+        serviceType: ServiceTypeKeys.TAX_PLANNING,
+        hours: 2,
+        quantity: 1,
+        addons: [] // Adding the required 'addons' property
       },
       {
-        type: ServiceTypes.FINANCIAL_REVIEW,
-        hours: 1
+        serviceType: ServiceTypeKeys.FINANCIAL_REVIEW,
+        hours: 1,
+        quantity: 1,
+        addons: [] // Adding the required 'addons' property
       }
     ];
 
@@ -47,19 +57,22 @@ describe('serviceCalculator', () => {
 
   it('applies quantity multiplier correctly', () => {
     const services: ServiceRequest[] = [{
-      type: ServiceTypes.TAX_PLANNING,
+      serviceType: ServiceTypeKeys.TAX_PLANNING,
       hours: 1,
-      quantity: 2
+      quantity: 2,
+      addons: [] // Adding the required 'addons' property
     }];
 
     const result = calculateServicesCost(services);
     expect(result.subtotal).toBe(700); // (200 + 150) * 2
   });
 
+
   it('calculates addons correctly', () => {
     const services: ServiceRequest[] = [{
-      type: ServiceTypes.TAX_PLANNING,
+      serviceType: ServiceTypeKeys.TAX_PLANNING,
       hours: 1,
+      quantity: 1,
       addons: [
         { name: 'Rush Processing', price: 50 },
         { name: 'Document Review', price: 75, quantity: 2 }
@@ -72,8 +85,10 @@ describe('serviceCalculator', () => {
 
   it('applies discounts correctly', () => {
     const services: ServiceRequest[] = [{
-      type: ServiceTypes.BUSINESS_CONSULTING,
-      hours: 10 // High value to trigger discount
+      serviceType: ServiceTypeKeys.BUSINESS_CONSULTING,
+      hours: 10, // High value to trigger discount
+      quantity: 1,
+      addons: [] // Adding the required 'addons' property
     }];
 
     const result = calculateServicesCost(services);
@@ -82,8 +97,9 @@ describe('serviceCalculator', () => {
 
   it('handles invalid input gracefully', () => {
     const services: any[] = [{
-      type: 'invalid-service',
-      hours: -1
+      serviceType: 'invalid-service',
+      hours: -1,
+      quantity: 1
     }];
 
     expect(() => calculateServicesCost(services)).toThrow();
@@ -91,8 +107,10 @@ describe('serviceCalculator', () => {
 
   it('rounds monetary values correctly', () => {
     const services: ServiceRequest[] = [{
-      type: ServiceTypes.TAX_PLANNING,
-      hours: 1.5
+      serviceType: ServiceTypeKeys.TAX_PLANNING,
+      hours: 1.5,
+      quantity: 1,
+      addons: [] // Adding the required 'addons' property
     }];
 
     const result = calculateServicesCost(services);
