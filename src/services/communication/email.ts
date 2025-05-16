@@ -61,6 +61,41 @@ class EmailService {
       throw error;
     }
   }
+
+  /**
+   * Send a confirmation email to a user after they submit a form/message.
+   */
+  async sendUserConfirmation(name: string, to: string) {
+    return this.sendEmail(
+      to,
+      'Thank you for contacting ProTaxAdvisors!',
+      `Hello ${name},\n\nWe received your message and a professional will respond soon.`,
+      {
+        html: `<p>Hello ${name},</p><p>We received your message and a professional will respond soon.</p>`
+      }
+    );
+  }
+
+  /**
+   * Send a confirmation email to a user using a template after form/message submission.
+   */
+  public async sendUserTemplateConfirmation(name: string, to: string) {
+    return this.sendTemplate(
+      to,
+      'user-confirmation-template', // replace with actual template ID if needed
+      { name }
+    );
+  }
 }
 
 export const emailService = EmailService.getInstance();
+
+async function sendUserTemplateConfirmation(name: string, to: string) {
+  try {
+    await emailService.sendUserTemplateConfirmation(name, to);
+    console.log(`Template confirmation email sent to ${to}`);
+  } catch (error) {
+    console.error(`Failed to send template confirmation email to ${to}:`, error);
+    throw error;
+  }
+}
