@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from '@/lib/supabase/client';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing, reactRouterV6Instrumentation } from '@sentry/react';
 import { matchRoutes, createRoutesFromChildren } from 'react-router-dom';
@@ -66,15 +68,17 @@ appRoot.render(
   <React.StrictMode>
     <ChakraProvider theme={chakraTheme}>
       <Sentry.ErrorBoundary fallback={<div className="p-10 text-center text-red-500">Something went wrong.</div>}>
-        <BrowserRouter>
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>
+        <SessionContextProvider supabaseClient={supabase}>
+          <BrowserRouter>
+            <QueryClientProvider client={queryClient}>
               <SupabaseProvider>
-                <AppRoutes />
+                <AuthProvider>
+                  <AppRoutes />
+                </AuthProvider>
               </SupabaseProvider>
-            </AuthProvider>
-          </QueryClientProvider>
-        </BrowserRouter>
+            </QueryClientProvider>
+          </BrowserRouter>
+        </SessionContextProvider>
       </Sentry.ErrorBoundary>
     </ChakraProvider>
   </React.StrictMode>

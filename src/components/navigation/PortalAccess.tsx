@@ -114,8 +114,11 @@ export function PortalAccess() {
 
   const [resolvedRole, setResolvedRole] = React.useState<Role | null>(null);
 
+  const isValidRole = (role: unknown): role is Role =>
+    Object.values(Role).includes(role as Role);
+
   React.useEffect(() => {
-    if (!hydrated || !user || user.role) return;
+    if (!hydrated || !user || isValidRole(user.role)) return;
 
     const fetchRole = async () => {
       const { data, error } = await supabase
@@ -132,8 +135,6 @@ export function PortalAccess() {
     fetchRole();
   }, [hydrated, user]);
 
-  const isValidRole = (role: unknown): role is Role =>
-    Object.values(Role).includes(role as Role);
 
   const userRole = isValidRole(user?.role)
     ? (user.role as Role)

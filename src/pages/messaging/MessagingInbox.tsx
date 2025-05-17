@@ -21,7 +21,7 @@ export default function MessagingInbox() {
     const fetchThreads = async () => {
       const { data, error } = await supabase
         .from('messages')
-        .select('sender_id, content:content, created_at:last_sent_at, profiles:sender_id (full_name)')
+        .select('sender_id, content:content, created_at: profiles:sender_id (full_name)')
         .order('created_at', { ascending: false });
 
       if (error) {

@@ -17,8 +17,17 @@ export const handler = async (event) => {
     }),
   });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('❌ Email send failed:', response.status, errorText);
+    return {
+      statusCode: response.status,
+      body: JSON.stringify({ error: errorText }),
+    };
+  }
+
   return {
-    statusCode: response.ok ? 200 : response.status,
-    body: JSON.stringify({ message: await response.text() }),
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Email sent successfully' }),
   };
 };

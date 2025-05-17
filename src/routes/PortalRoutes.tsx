@@ -7,14 +7,12 @@ import type { VideoLibraryProps } from '@/components/investor/VideoLibrary';
 
 // Lazy load portal components
 const AdminPortal = React.lazy(() => import('../pages/admin/AdminPortal'));
-const InvestorPortal = React.lazy<React.FC<VideoLibraryProps>>(
-  // Use React.FC<VideoLibraryProps> to specify the expected props type for InvestorPortal  
-  () => import('../pages/investor/InvestorPortal')
+const InvestorPortal = React.lazy(() =>
+  import('../pages/investor/InvestorPortal').then(module => ({ default: module.default }))
 );
-const InvestorForum = React.lazy(
-  // Use React.FC<VideoLibraryProps> to specify the expected props type for InvestorPortal    
-  () => import('../pages/investor/InvestorForum')
-  );
+const InvestorForum = React.lazy(() =>
+  import('../pages/investor/InvestorForum').then(module => ({ default: module.default }))
+);
 const InvestorDashboard = React.lazy(
   // Use React.FC<VideoLibraryProps> to specify the expected props type for InvestorPortal
   () => import('../components/investor/InvestorDashboard').then(module => ({ default: module.InvestorDashboard }))
@@ -31,6 +29,26 @@ const MessagingPortal = React.lazy(() => import('../pages/messaging/MessagingPor
 const VideoLibrary = React.lazy(() => import('../pages/videos/VideoLibrary'));
 const VideoDetail = React.lazy(() => import('../pages/videos/VideoDetail'));
 
+
+
+interface InvestorPortalProps {
+  videos: { id: number; title: string; url: string }[];
+}
+
+const InvestorPortalComponent: React.FC<InvestorPortalProps> = ({ videos }) => {
+  return (
+    <div>
+      <h1>Investor Portal</h1>
+      <ul>
+        {videos.map(video => (
+          <li key={video.id}>{video.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export { InvestorPortalComponent };
 export function PortalRoutes() {
   return (
     <Routes>
@@ -50,7 +68,7 @@ export function PortalRoutes() {
         path="/investor/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <InvestorPortal videos={investorvideos} /> 
+            <InvestorPortalComponent videos={investorvideos} /> 
             </React.Suspense>
         }
       />

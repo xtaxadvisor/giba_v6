@@ -19,9 +19,35 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required />
-      <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Your email" required />
-      <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Your message" required />
+      <input
+        type="text"
+        name="name"
+        autoComplete="name"
+        aria-label="Your name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Your name"
+        required
+      />
+      <input
+        type="email"
+        name="email"
+        autoComplete="email"
+        aria-label="Your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Your email"
+        required
+      />
+      <textarea
+        name="message"
+        autoComplete="off"
+        aria-label="Your message"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Your message"
+        required
+      />
       <button type="submit">Send Message</button>
     </form>
   );
