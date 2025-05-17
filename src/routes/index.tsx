@@ -85,7 +85,14 @@ export function AppRoutes() {
       } />
 
       {/* Portal Routes - Auth checks disabled for development */}
-      <Route path="/admin/*" element={<AdminPortal />}>
+      <Route
+        path="/admin/*"
+        element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <AdminPortal />
+          </Suspense>
+        }
+      >
         <Route index element={<div>Admin Dashboard</div>} />
         <Route path="team" element={<div>Team Management</div>} />
         <Route path="ai-monitor" element={<div>AI Monitoring Dashboard</div>} />
@@ -135,13 +142,27 @@ export function AppRoutes() {
         <Route path="videos" element={<div>Investor Videos</div>} />
       </Route>
 
-      <Route path="/student/*" element={<StudentPortal />}>
+      <Route
+        path="/student/*"
+        element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <StudentPortal />
+          </Suspense>
+        }
+      >
         <Route index element={<div>Student Dashboard</div>} />
         <Route path="courses" element={<div>Courses</div>} />
         <Route path="progress" element={<div>Progress Tracker</div>} />
       </Route>
 
-      <Route path="/professional/*" element={<ProfessionalPortal />}>
+      <Route
+        path="/professional/*"
+        element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <ProfessionalPortal />
+          </Suspense>
+        }
+      >
         <Route index element={<div>Professional Dashboard</div>} />
         <Route path="clients" element={<div>Client List</div>} />
         <Route path="analytics" element={<div>Analytics</div>} />
