@@ -6,7 +6,10 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   requiredRole?: UserRole[];
 }
-
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles: string[];
+}
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, isAuthenticated } = useAuth();
 

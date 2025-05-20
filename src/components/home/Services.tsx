@@ -18,7 +18,6 @@ export default function Services({ onBookNow }: ServicesProps) {
   return (
     <div>
       <button onClick={() => onBookNow('serviceType1')}>Book Now</button>
-      <button onClick={() => onBookNow('serviceType2')}>Book Now</button>
       {/* Add more buttons as needed */}
     </div>
   );

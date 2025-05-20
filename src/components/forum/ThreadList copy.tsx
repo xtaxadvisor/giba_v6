@@ -35,7 +35,7 @@ export function ThreadList({ threads, isLoading }: ThreadListProps) {
                 {thread.content}
               </div>
             </div>
-            {thread.isPinned && (
+            {thread.ispinned && (
               <div className="ml-4">
                 <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
                   Pinned
@@ -74,14 +74,20 @@ export function ThreadList({ threads, isLoading }: ThreadListProps) {
 
           <div className="mt-4 flex items-center">
             <img
-              src={thread.author.avatarUrl || 'https://via.placeholder.com/40'}
-              alt={thread.author.displayName}
+              src={typeof thread.author === 'object' && 'avatarUrl' in thread.author 
+                ? thread.author.avatarUrl 
+                : 'https://via.placeholder.com/40'}
+              alt={typeof thread.author === 'object' && 'displayName' in thread.author 
+                ? thread.author.displayName 
+                : 'Unknown Author'}
               className="h-6 w-6 rounded-full"
             />
             <span className="ml-2 text-sm text-gray-600">
-              {thread.author.displayName}
+              {typeof thread.author === 'object' && 'displayName' in thread.author 
+                ? thread.author.displayName 
+                : 'Unknown Author'}
             </span>
-            {thread.author.location && (
+            {typeof thread.author === 'object' && 'location' in thread.author && thread.author.location && (
               <span className="ml-2 text-sm text-gray-500">
                 • {thread.author.location}
               </span>

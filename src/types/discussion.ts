@@ -3,15 +3,30 @@ import type { User } from './user';
 export interface Thread {
   id: string;
   title: string;
+  comments: any[];
   content: string;
-  authorId: string;
-  author: User;
-  tags: string[];
+  category: ThreadCategory; // TODO: change to enum   
   createdAt: string;
-  updatedAt: string;
-  likes: number;
+  updatedAt?: string; 
   replies: number;
-  isPinned: boolean;
+  likes: number;
+  tags: string[];
+  ispinned: boolean;
+  author: {
+    avatarUrl: string;
+    displayName: string;
+    location?: string; // Optional location property
+  };
+}
+
+
+
+
+
+export interface TreadForm {
+  title: string;
+  content: string;
+  tags?: string[];
   category: ThreadCategory;
 }
 

@@ -49,11 +49,10 @@ export function Header() {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div 
-            className="flex items-center cursor-pointer" 
-            onClick={() => navigate('/')}
-          >
-            <span className="text-2xl sm:text-3xl font-bold">
+          <div className="flex-1 flex justify-center items-center cursor-pointer" onClick={() => navigate('/')}>
+            <span className={`text-4xl sm:text-5xl font-extrabold tracking-tight leading-snug transition-all duration-500 ${
+              isScrolled ? 'scale-95 text-gray-800' : 'scale-100'
+            }`}>
               <span className="text-blue-600">PRo</span>
               <span className={isScrolled ? 'text-gray-900' : 'text-gray-800'}>Ta</span>
               <span className="text-blue-600">X</span>
@@ -62,22 +61,34 @@ export function Header() {
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/services" className="text-gray-600 hover:text-blue-600 transition-colors">Services</Link>
-            <Link to="/same-day-services" className="text-gray-600 hover:text-blue-600 transition-colors">Same Day Services</Link>
-            <Link to="/browse-videos" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center">
-              <Video className="h-4 w-4 mr-1" />
-              Video Classes
-            </Link>
-            <Link to="/calculator" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center">
-              <Calculator className="h-4 w-4 mr-1" />
-              Tax Calculator
-            </Link>
-            <Link to="/tax-forms" className="text-gray-600 hover:text-blue-600 transition-colors flex items-center">
-              <FileText className="h-4 w-4 mr-1" />
-              Tax Forms
-            </Link>
-            <a href="#about" className="text-gray-600 hover:text-blue-600 transition-colors">About</a>
-            <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">Contact</a>
+            <div className="relative group">
+              <button className="text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 px-6 py-2 rounded-full shadow transition h-10">
+                Explore
+              </button>
+              <div className="absolute left-0 mt-2 w-64 bg-white shadow-md rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                <Link to="/services" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  All Services
+                </Link>
+                <Link to="/same-day-services" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Same Day Services
+                </Link>
+                <Link to="/video-classes" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Video Classes
+                </Link>
+                <Link to="/tax-calculator" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Tax Calculator
+                </Link>
+                <Link to="/tax-forms" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Tax Forms
+                </Link>
+                <a href="#about" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  About
+                </a>
+                <a href="#contact" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Contact
+                </a>
+              </div>
+            </div>
             
             {isAuthenticated && user?.role === 'admin' && (
               <Link 
@@ -118,7 +129,7 @@ export function Header() {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={() => navigate('/register/client')}
+                  onClick={() => navigate('/register')}
                   className="hover-scale"
                 >
                   Get Started
@@ -152,13 +163,13 @@ export function Header() {
             Same Day Services
           </Link>
           <Link
-            to="/browse-videos"
+            to="/video-classes"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
           >
             Video Classes
           </Link>
           <Link
-            to="/calculator"
+            to="/tax-calculator"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
           >
             Tax Calculator
@@ -219,7 +230,7 @@ export function Header() {
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={() => navigate('/register/client')}
+                  onClick={() => navigate('/register')}
                   className="w-full"
                 >
                   Get Started

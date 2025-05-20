@@ -2,8 +2,11 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import { Form } from '../ui/Form';
 import { Card } from '../ui/Card';
 import { supabase } from '../../lib/supabase/client';
+import { useState } from 'react';
 
 export function Contact() {
+  const [submitted, setSubmitted] = useState(false);
+
   const handleSubmit = async (data: Record<string, string>) => {
     const { name, email, message } = data;
 
@@ -11,13 +14,22 @@ export function Contact() {
       .from('messages')
       .insert({
         content: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       });
 
     if (error) {
       console.error("❌ Supabase insert failed:", error.message);
     } else {
       console.log("✅ Message saved to Supabase");
+      setSubmitted(true);
+
+      // Simulate an email notification (can be replaced with real backend call)
+      console.log(`📨 Sending confirmation email to ${email}...`);
+
+      // Redirect to thank you page after a short delay
+      setTimeout(() => {
+        window.location.href = '/thank-you';
+      }, 1500);
     }
   };
 
@@ -61,13 +73,18 @@ export function Contact() {
               onSubmit={handleSubmit}
               submitText="Send Message"
             />
+            {submitted && (
+              <div className="mt-4 text-green-600 font-medium">
+                ✅ Message sent successfully! Please check your email for confirmation.
+              </div>
+            )}
           </div>
 
           <div className="space-y-8">
             <Card
               icon={Mail}
               title="Email Us"
-              value="gilberto27601@protaxadvisors.tax"
+              value="info@protaxadvisors.tax"
               description="info@protaxadvisors.tax"
             />
             <Card

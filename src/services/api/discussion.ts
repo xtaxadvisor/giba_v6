@@ -1,7 +1,19 @@
 import { db } from '../../lib/firebase';
 import { collection, query, where, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc, Query, DocumentData } from 'firebase/firestore';
 import type { Thread, ThreadFilters } from '../../types/discussion';
-
+// Create the discussion API module
+export async function createThread(data: {
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+}): Promise<void> {
+  // Simulate API call
+  return new Promise((resolve) => {
+    console.log('Thread created:', data);
+    resolve();
+  });
+}
 export const discussionService = {
   async getThreads(filters?: ThreadFilters) {
     try {

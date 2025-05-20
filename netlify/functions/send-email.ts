@@ -1,12 +1,19 @@
 export const handler = async (event) => {
-  const { to, subject, text, html } = JSON.parse(event.body || '{}');
+  const { to, subject, html } = JSON.parse(event.body || '{}');
 
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  if (!to || !subject || !html) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Missing required email fields' }),
+    };
+  }
+
+  const resendApiKey = process.env.RESEND_API_KEY;
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Authorization': `Bearer ${resendApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

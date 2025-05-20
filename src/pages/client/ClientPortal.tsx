@@ -8,6 +8,7 @@ import { Settings } from '../../components/dashboard/Settings';
 import { ConsultationList } from '../../components/consultation/ConsultationList';
 import { ClientInsights } from '../../components/client/Dashboard/ClientInsights';
 import { useAuth } from '@/contexts/AuthContext'; // ✅
+import { Helmet } from 'react-helmet-async';
 
 export default function ClientPortal() { 
   const { logout } = useAuth();
@@ -20,6 +21,10 @@ export default function ClientPortal() {
     >
       Logout
     </button>
+    <Helmet>
+      <title>Client Portal | ProTaxAdvisors</title>
+      <meta name="description" content="Access your dashboard, documents, consultations, and more through the secure ProTaxAdvisors client portal." />
+    </Helmet>
     <Routes>
       <Route index element={<ClientDashboard />} />
       <Route path="documents" element={<Documents />} />

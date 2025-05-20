@@ -24,7 +24,7 @@ interface NotificationState {
     message: string;
     type: 'success' | 'error' | 'info';
   }>;
-  addNotification: (message: string, type: 'success' | 'error' | 'info') => void;
+  addNotification: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeNotification: (id: string) => void;
 }
 
@@ -73,13 +73,15 @@ export const useTaskStore = create<TaskState>((set) => ({
 
 export const useNotificationStore = create<NotificationState>((set) => ({
   notifications: [],
-  addNotification: (message, type) =>
+  addNotification: (message, type = 'info') => {
+    console.log(`Notification added: ${message} [${type}]`);
     set((state) => ({
       notifications: [
         ...state.notifications,
         { id: Math.random().toString(), message, type },
       ],
-    })),
+    }));
+  },
   removeNotification: (id) =>
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),

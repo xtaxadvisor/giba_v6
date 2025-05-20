@@ -38,7 +38,13 @@ export function Hero({ onBookNow }: HeroProps) {
         <div className="mt-10 flex flex-wrap justify-center gap-4 animate-fadeIn" style={{ animationDelay: '0.4s' }}>
           {/* First step in client onboarding-to-calendar flow: redirect to profile setup */}
           <Button
-            onClick={() => onBookNow('consultation')}
+            onClick={() => {
+              if (!isAuthenticated) {
+                navigate('/login');
+              } else {
+                onBookNow('consultation');
+              }
+            }}
             variant="primary"
             size="lg"
             icon={Phone}
@@ -60,7 +66,7 @@ export function Hero({ onBookNow }: HeroProps) {
           {!isAuthenticated && (
             <>
               <Button
-                onClick={() => onBookNow('consultation')}
+                onClick={() => navigate('/register')}
                 variant="primary"
                 size="lg"
                 className="px-8 hover-scale"
@@ -68,7 +74,13 @@ export function Hero({ onBookNow }: HeroProps) {
                 Create FREE Account
               </Button>
               <Button
-                onClick={() => onBookNow('consultation')}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate('/login');
+                  } else {
+                    onBookNow('video-consultation');
+                  }
+                }}
                 variant="primary"
                 size="lg"
                 className="px-8 hover-scale"

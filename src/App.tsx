@@ -1,15 +1,16 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { Providers } from './Providers'; // Ensure the file exists and matches this path
 import AppRoutes from './routes/AppRoutes';
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
-import { supabase } from '@/lib/supabase/client';
 
-export default function App() {
+const App = () => {
   return (
-    <SessionContextProvider supabaseClient={supabase}>
-      <BrowserRouter>
+    <>
+      {console.log("✅ App component is rendering")}
+      <Providers>
         <AppRoutes />
-      </BrowserRouter>
-    </SessionContextProvider>
+      </Providers>
+    </>
   );
-}
+};
+
+export default App;

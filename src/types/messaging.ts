@@ -12,6 +12,8 @@ export interface Reply {
 }
 
 export interface Thread {
+  category: string;
+  comments: never[];
   id: string;
   title: string;
   content: string;

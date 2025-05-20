@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/lib/store';
 import type { User } from '@/types';
@@ -18,12 +17,16 @@ interface SupabaseProviderProps {
 export const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined); // eslint-disable-line @typescript-eslint/no-unused-vars 
 export const useSupabase = () => useContext(SupabaseContext);
 export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
-  // Use SupabaseAuthProvider if needed
-  if (!children) return null; // Ensure children is not null or undefined
+  let addNotification: (message: string, type?: 'error' | 'success' | 'info') => void = () => {};
+  try {
+    const store = useNotificationStore();
+    addNotification = store.addNotification ?? (() => {});
+  } catch (err) {
+    console.warn('🔁 Notification store not ready:', err);
+  }
+
   const [loading, setLoading] = useState<boolean>(true);
   const [user, setUser] = useState<User | null>(null);
-  const navigate = useNavigate();
-  const { addNotification } = useNotificationStore();
   
   const fetchUserProfile = async (authId: string) => {
     try {
@@ -47,7 +50,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       if (signOutError) {
         console.error('Error signing out during fetchUserProfile catch:', signOutError.message || signOutError);
       }
-      navigate('/login');
+      window.location.href = '/login';
     }
   };
   
@@ -80,7 +83,15 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       ignore = true;
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, []);
+
+useEffect(() => {
+  try {
+    addNotification("Notification initialized", "info");
+  } catch (error) {
+    console.warn("Notification store not ready:", error);
+  }
+}, []);
 
   // ✅ Sign In
   const signIn = async (email: string, password: string) => {
@@ -95,20 +106,11 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       if (data.session?.user) {
         await fetchUserProfile(data.session.user.id);
       }
-      addNotification('Successfully signed in', 'success');
+      addNotification("Notification initialized", "info");
     } catch (error) {
       console.error('Sign in error:', error);
       throw error;
     }
-  };
-  // Move this export outside the SupabaseProvider component
-    const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const { user, loading, signIn, signUp, signOut } = useSupabase()!;
-    return (
-      <SupabaseContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
-        {children}
-      </SupabaseContext.Provider>
-    );
   };
   
 
@@ -144,7 +146,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
       });
 
       if (error) throw error;
-      addNotification('Account created successfully. Please check your email.', 'success');
+      addNotification("Notification initialized", "info");
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
@@ -160,8 +162,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
         throw error;
       }
       setUser(null);
-      addNotification('Successfully signed out', 'success');
-      navigate('/');
+      addNotification("Notification initialized", "info");
+      window.location.href = '/';
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;

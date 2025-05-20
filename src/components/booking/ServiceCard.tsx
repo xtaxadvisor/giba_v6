@@ -9,6 +9,10 @@ interface ServiceCardProps {
   features: string[];
   onBook: () => void;
   popular?: boolean;
+  basePrice: number;
+  hourlyRate: number;
+  minimumHours: number;
+ 
 }
 
 export function ServiceCard({
@@ -19,6 +23,7 @@ export function ServiceCard({
   features,
   onBook,
   popular
+  
 }: ServiceCardProps) {
   return (
     <div className={`relative bg-white rounded-2xl shadow-xl transition-transform hover:scale-105 ${

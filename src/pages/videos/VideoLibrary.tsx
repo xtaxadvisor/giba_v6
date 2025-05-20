@@ -1,24 +1,43 @@
 import { useState } from 'react';
 import { VideoCard } from '../../components/video/VideoCard';
 import { VideoFilters } from '../../components/video/VideoFilters';
-import { videoClasses } from '../../data/videoData';
 import { Button } from '../../components/ui/Button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase/client';
 
-// Add the export for investorvideos if missing
-export const investorvideos = [
-  // Example video data
-  { id: 1, title: 'Investment Basics', url: 'https://example.com/video1' },
-  { id: 2, title: 'Advanced Strategies', url: 'https://example.com/video2' },
-];
+const fetchVideos = async () => {
+  const { data, error } = await supabase.from('videos').select('*');
+  if (error) throw error;
+  return data;
+};
 
 export default function VideoLibrary() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const navigate = useNavigate();
 
-  const filteredVideos = videoClasses.filter(video => {
+  const {
+    data: videos = [],
+    isLoading,
+    isError,
+    error
+  } = useQuery({
+    queryKey: ['videos'],
+    queryFn: fetchVideos,
+  });
+
+  if (isError) {
+    console.error('❌ Failed to load videos:', error);
+  }
+
+  console.log('✅ Supabase videos:', videos);
+
+  if (isLoading) return <div className="p-4 text-center text-gray-500">Loading videos...</div>;
+  if (videos.length === 0) return <div className="p-4 text-center text-gray-500">No videos available yet.</div>;
+
+  const filteredVideos = videos.filter(video => {
     const matchesSearch = 
       video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       video.description.toLowerCase().includes(searchTerm.toLowerCase()) ||

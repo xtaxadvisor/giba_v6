@@ -59,7 +59,10 @@ export function PortalRoutes() {
         path="/admin/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <AdminPortal />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Admin Portal...</h2>
+              <AdminPortal />
+            </section>
           </React.Suspense>
         }
       />
@@ -68,15 +71,21 @@ export function PortalRoutes() {
         path="/investor/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <InvestorPortalComponent videos={investorvideos} /> 
-            </React.Suspense>
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Investor Portal...</h2>
+              <InvestorPortalComponent videos={investorvideos} /> 
+            </section>
+          </React.Suspense>
         }
       />
       <Route
         path="/videos"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <VideoLibrary />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Video Library...</h2>
+              <VideoLibrary />
+            </section>
           </React.Suspense>
         } 
       />
@@ -84,7 +93,10 @@ export function PortalRoutes() {
         path="/videos/:videoId"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <VideoDetail />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Video Detail...</h2>
+              <VideoDetail />
+            </section>
           </React.Suspense>
         } 
       />
@@ -93,7 +105,10 @@ export function PortalRoutes() {
         path="/student/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <StudentPortal />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Student Portal...</h2>
+              <StudentPortal />
+            </section>
           </React.Suspense>
         }
       />
@@ -102,7 +117,10 @@ export function PortalRoutes() {
         path="/professional/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <ProfessionalPortal />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Professional Portal...</h2>
+              <ProfessionalPortal />
+            </section>
           </React.Suspense>
         }
       />
@@ -110,7 +128,10 @@ export function PortalRoutes() {
         path="/client/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <ClientPortal />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Client Portal...</h2>
+              <ClientPortal />
+            </section>
           </React.Suspense>
         }
       />
@@ -118,7 +139,10 @@ export function PortalRoutes() {
         path="/messaging/*"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <MessagingPortal />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Messaging Portal...</h2>
+              <MessagingPortal />
+            </section>
           </React.Suspense>
         }
       />
@@ -126,7 +150,10 @@ export function PortalRoutes() {
         path="/browse-videos"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <VideoLibrary />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Video Library...</h2>
+              <VideoLibrary />
+            </section>
           </React.Suspense>
         }
       />
@@ -134,7 +161,10 @@ export function PortalRoutes() {
         path="/browse-videos/:videoId"
         element={
           <React.Suspense fallback={<LoadingSpinner />}>
-            <VideoDetail />
+            <section className="p-6 text-center">
+              <h2 className="text-lg font-bold text-gray-700">Loading Video Detail...</h2>
+              <VideoDetail />
+            </section>
           </React.Suspense>
         }
       />

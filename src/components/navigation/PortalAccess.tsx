@@ -35,6 +35,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   [Role.Messaging]: 'Messaging Portal',
 };
 
+// Ensure ROLE_ICONS is declared before use in portals
 export const ROLE_ICONS: Record<Role, LucideIcon> = {
   [Role.Admin]: Shield,
   [Role.Superadmin]: Shield,
@@ -45,7 +46,7 @@ export const ROLE_ICONS: Record<Role, LucideIcon> = {
   [Role.Guest]: MessageSquare,
   [Role.Unauthenticated]: MessageSquare,
   [Role.Loading]: MessageSquare,
-  [Role.Messaging]: ShieldCheck, // Add this line
+  [Role.Messaging]: ShieldCheck,
 };
 
 
@@ -239,11 +240,17 @@ export function PortalAccess() {
     <section aria-label="Portal Access Options" className="px-4 sm:px-6 lg:px-8">
       {loadingNote}
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {visiblePortals.map((portal) => (
-            <PortalButton key={portal.path} {...portal} currentUserRole={userRole} />
-          ))}
-        </div>
+        {visiblePortals.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {visiblePortals.map((portal) => (
+              <PortalButton key={portal.path} {...portal} currentUserRole={userRole} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500 py-10">
+            No portals available for your role.
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ServiceCard } from '../booking/ServiceCard';
 
 const services = [
   {
@@ -40,24 +41,18 @@ const PricingCards: React.FC = () => {
         </h2>
         <div className="flex flex-wrap lg:flex-nowrap justify-center gap-6">
           {services.map((service, index) => (
-            <div
+            <ServiceCard
               key={index}
-              className="bg-white shadow-lg rounded-lg p-6 w-full md:w-1/4 text-center border border-gray-200"
-            >
-              <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-              <p className="text-2xl font-bold text-blue-700 mb-2">
-                ${service.basePrice.toFixed(2)} + ${service.hourlyRate.toFixed(2)}/hr
-              </p>
-              <p className="text-sm text-gray-500 mb-4">Min {service.minimumHours} hrs</p>
-              <ul className="text-sm text-gray-600 mb-4">
-                {service.features.map((item, idx) => (
-                  <li key={idx}>• {item}</li>
-                ))}
-              </ul>
-              <button className="mt-auto bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                Book Now
-              </button>
-            </div>
+              title={service.title}
+              basePrice={service.basePrice}
+              hourlyRate={service.hourlyRate}
+              minimumHours={service.minimumHours}
+              features={service.features}
+              onBook={() => console.log(`Book ${service.title}`)}
+              description={`Professional ${service.title} service`}
+              price={service.basePrice.toString()}
+              duration={service.minimumHours.toString()}
+            />
           ))}
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import ProfessionalDashboard from "../../components/professional/ProfessionalDashboard";
 import { ClientList } from '../../components/professional/ClientList';
 import { Analytics } from '../../components/professional/Analytics';
@@ -16,6 +17,10 @@ import { ProfessionalLayout } from '../../components/professional/ProfessionalLa
 export default function ProfessionalPortal() {
   return (
     <ProfessionalLayout>
+      <Helmet>
+        <title>Professional Portal | ProTaxAdvisors</title>
+        <meta name="description" content="Manage tasks, clients, reports, and more in your professional dashboard." />
+      </Helmet>
       <Routes>
         <Route path="/" element={<ProfessionalDashboard />} />
         <Route path="/clients" element={<ClientList />} />

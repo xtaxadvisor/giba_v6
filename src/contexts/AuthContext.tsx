@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { USER_ROLES } from '@/utils/constants/roleRoutes';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export interface AuthContextType {
   user: User | null;
@@ -32,7 +32,7 @@ export const AuthContext = React.createContext<AuthContextType | undefined>({
   profile: null,
   isAuthenticated: false,
   loading: false,
-  hydrated: false,
+  hydrated: true,
 });
 
 export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
@@ -40,10 +40,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<{ role: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [hydrated, setHydrated] = useState<boolean>(false);
+  const [hydrated, setHydrated] = useState<boolean>(true);
 
-  const navigate = useNavigate();
-  const location = useLocation();
 useEffect(() => {
   const storedUser = localStorage.getItem('currentUser');
   if (storedUser) {
@@ -59,7 +57,7 @@ useEffect(() => {
     const restoreSession = async () => {
       try {
         const { data, error } = await supabase.auth.getSession();
-        const session = data?.session;
+        let session = data?.session;
 
         if (error) {
           console.error('❌ Supabase session error:', error.message);
@@ -68,7 +66,17 @@ useEffect(() => {
         console.log('🔁 Supabase returned session from getSession():', session);
 
         if (!session) {
-          console.warn('⚠️ No Supabase session found. User not logged in.');
+          const { data: userData, error: userError } = await supabase.auth.getUser();
+          if (userError) {
+            console.warn('⚠️ Fallback getUser error:', userError.message);
+          }
+          if (userData?.user?.id && !session) {
+            console.log('🔄 No session, but user found via getUser fallback:', userData.user);
+            session = { user: userData.user } as any;
+          }
+          if (!session) {
+            console.warn('⚠️ No Supabase session found. User not logged in.');
+          }
         }
 
         if (session?.user?.id) {
@@ -116,7 +124,7 @@ useEffect(() => {
         setUser(null);
         setProfile(null);
         localStorage.removeItem('currentUser');
-        navigate('/login');
+        window.location.href = '/login';
       }
 
       if (event === 'SIGNED_IN' && session?.user?.id) {
@@ -162,31 +170,29 @@ useEffect(() => {
   useEffect(() => {
     if (!hydrated) return;
 
-    const excludedPaths = ['/', '/register', '/login', '/select-role']; // ✅ allow homepage and login
-    const isExcluded = excludedPaths.some((path) => location.pathname.startsWith(path));
+    const publicPaths = ['/login', '/register', '/select-role'];
+    const isOnPublicPath = publicPaths.some((path) => window.location.pathname.startsWith(path));
 
-    if (!isExcluded && user?.role) {
-      switch (user.role) {
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'professional':
-          navigate('/professional');
-          break;
-        case 'client':
-          navigate('/client');
-          break;
-        case 'investor':
-          navigate('/investor');
-          break;
-        case 'student':
-          navigate('/student');
-          break;
-        default:
-          break;
-      }
+    if (isOnPublicPath && user?.role) {
+      const roleRoutes = {
+        admin: '/admin',
+        professional: '/professional',
+        client: '/client',
+        investor: '/investor',
+        student: '/student',
+      };
+      const target = roleRoutes[user.role as keyof typeof roleRoutes];
+      if (target) window.location.href = target;
     }
-  }, [user?.role, location.pathname, hydrated]);
+  }, [user?.role, hydrated]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   const logout = () => {
     supabase.auth.signOut();
@@ -194,7 +200,7 @@ useEffect(() => {
     setProfile(null);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('accessToken');
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   const isAuthenticated = !!user;

@@ -1,4 +1,12 @@
+interface SupabaseMessage {
+  sender_id: string;
+  content: string;
+  created_at: string;
+  read: boolean;
+  profiles?: { full_name: string }[];
+}
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 
 interface ThreadPreview {
@@ -12,17 +20,28 @@ interface ThreadPreview {
 export default function MessagingInbox() {
   const [threads, setThreads] = useState<ThreadPreview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
+  const navigate = useNavigate();
   const handleViewConversation = (senderId: string) => {
-    console.log('Navigate to thread with:', senderId);
+    navigate(`/messaging/${senderId}`);
   };
 
   useEffect(() => {
     const fetchThreads = async () => {
-      const { data, error } = await supabase
+      const pageSize = 10;
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await supabase
         .from('messages')
-        .select('sender_id, content:content, created_at: profiles:sender_id (full_name)')
-        .order('created_at', { ascending: false });
+        .select('sender_id, content, created_at, read, profiles(full_name)', { count: 'exact' });
+
+      const typedData = data as SupabaseMessage[];
+
+      console.log("📦 Message read flags:", typedData?.map(m => ({ sender: m.sender_id, read: m.read })));
 
       if (error) {
         console.error('Failed to load threads:', error);
@@ -30,7 +49,7 @@ export default function MessagingInbox() {
         return;
       }
 
-      if (!data) {
+      if (!typedData) {
         console.warn('No message data returned from supabase');
         setLoading(false);
         return;
@@ -38,34 +57,52 @@ export default function MessagingInbox() {
 
       // Group by sender_id and take only the latest message
       const latestBySender = new Map<string, ThreadPreview>();
-      data.forEach((msg) => {
+      typedData.forEach((msg) => {
         if (!latestBySender.has(msg.sender_id)) {
           const senderName = msg.profiles?.[0]?.full_name ?? msg.sender_id;
+          // Calculate unread messages for this sender
+          const unreadMessages = typedData.filter(
+            (m) => m.sender_id === msg.sender_id && !m.read
+          ).length;
           latestBySender.set(msg.sender_id, {
             sender_id: msg.sender_id,
             sender_name: senderName,
             last_message: msg.content,
             last_sent_at: msg.created_at,
-            unread_count: 3, // hardcoded unread count for now
+            unread_count: unreadMessages
           });
         }
       });
 
-      setThreads(Array.from(latestBySender.values()));
+      setThreads((prev) => [...prev, ...Array.from(latestBySender.values())]);
+      setHasMore(to + 1 < (count ?? 0));
       setLoading(false);
     };
 
     fetchThreads();
-  }, []);
+  }, [page]);
+
+  // Filtering logic for unread/all toggle
+  const visibleThreads = showUnreadOnly
+    ? threads.filter((t) => t.unread_count > 0)
+    : threads;
 
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Client Messages</h1>
+      <div className="mb-4 text-right">
+        <button
+          onClick={() => setShowUnreadOnly(!showUnreadOnly)}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          {showUnreadOnly ? 'Show All Messages' : 'Show Unread Only'}
+        </button>
+      </div>
       {loading ? (
         <p>Loading threads...</p>
       ) : (
         <ul className="space-y-4">
-          {threads.map((thread) => (
+          {visibleThreads.map((thread) => (
             <li
               key={thread.sender_id}
               className="border border-gray-300 rounded p-4 shadow-sm hover:bg-gray-50 transition"
@@ -86,9 +123,40 @@ export default function MessagingInbox() {
               >
                 View Conversation
               </button>
+              <button
+                onClick={async () => {
+                  await supabase
+                    .from('messages')
+                    .update({ read: true })
+                    .eq('sender_id', thread.sender_id)
+                    .eq('read', false);
+
+                  setThreads((prev) =>
+                    prev.map((t) =>
+                      t.sender_id === thread.sender_id
+                        ? { ...t, unread_count: 0 }
+                        : t
+                    )
+                  );
+                }}
+                className="ml-4 text-xs text-gray-500 hover:underline"
+              >
+                Mark as Read
+              </button>
             </li>
           ))}
         </ul>
+      )}
+      {/* Pagination placeholder */}
+      {!loading && hasMore && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setPage((prev) => prev + 1)}
+            className="text-blue-600 hover:underline text-sm"
+          >
+            Load More
+          </button>
+        </div>
       )}
     </div>
   );

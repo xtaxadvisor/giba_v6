@@ -1,19 +1,34 @@
 import type { Thread } from '../../types/messaging'; // Adjust path as needed
 import axios from 'axios';
 
-export const customApi = axios.create({
-  baseURL: 'https://your-api-base-url.com', // Replace with your API base URL
+const customApi = axios.create({
+  baseURL: import.meta.env.VITE_SUPABASE_REST_URL,
   headers: {
-    'Content-Type': 'application/json',
-  },
+    apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+  }
 });
 export const threadService = {
+  
   /**
    * Get all message threads
    */
   getAll: async (): Promise<Thread[]> => {
     const response = await customApi.get<Thread[]>('/threads');
     return response.data;
+  },
+
+  /**
+   * Get a thread by ID
+   * @param id - Thread ID
+   */
+  getById: async (id: string): Promise<Thread> => {
+    const response = await customApi.get<Thread[]>(`/threads?id=eq.${id}`);
+    if (!response.data.length) {
+      throw new Error('Thread not found');
+    }
+    return response.data[0];
   },
 
   /**
@@ -31,5 +46,9 @@ export const threadService = {
    */
   delete: async (id: string): Promise<void> => {
     await customApi.delete(`/threads/${id}`);
+  },
+  update: async (id: string, data: Partial<Thread>): Promise<Thread> => {
+    const response = await customApi.patch<Thread>(`/threads/${id}`, data);
+    return response.data;
   }
 };

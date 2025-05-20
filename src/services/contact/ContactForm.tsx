@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { submitContactForm } from '@/services/contact/submitContact';
+import { supabase } from '@/lib/supabase/client';
 
 export default function ContactForm() {
   const [name, setName] = useState('');
@@ -10,6 +11,40 @@ export default function ContactForm() {
     e.preventDefault();
     const success = await submitContactForm({ name, email, message });
     if (success) {
+      const response = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: email,
+          cc: ['admin@protaxadvisors.tax'],
+          subject: 'We received your message!',
+          html: `<p>Hi ${name},</p><p>Thanks for reaching out to ProTaxAdvisors. One of our experts will follow up with you soon.</p>`,
+        }),
+      });
+
+      const logStatus = response.ok ? 'sent' : 'error';
+
+      await supabase.from('email_logs').insert({
+        recipient: email,
+        cc: 'admin@protaxadvisors.tax',
+        subject: 'We received your message!',
+        sent_at: new Date().toISOString(),
+        context: 'contact_form',
+        status: logStatus,
+        ip_address: window?.location?.hostname || 'unknown'
+      });
+      await supabase.from('messages').insert({
+        name,
+        email,
+        message,
+        status: 'new',
+        assigned_to: 'admin@protaxadvisors.tax',
+        received_at: new Date().toISOString(),
+        context: 'contact_form'
+      });
+
       alert("Thank you! We received your message.");
       setName('');
       setEmail('');

@@ -27,7 +27,7 @@ export function MessageInput({ onSendMessage, isLoading, user }: MessageInputPro
       onSendMessage(message, attachments);
       setMessage('');
       setAttachments([]);
-      toast.success('Message sent!');
+      toast.success('Reply sent!');
     }
   };
 

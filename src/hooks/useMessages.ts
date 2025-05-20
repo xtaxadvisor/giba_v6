@@ -1,15 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { messageService } from '../services/api/messages';
 import { useNotificationStore } from '../lib/store';
-
-// Assuming addNotification is part of useNotificationStore
-const { addNotification } = useNotificationStore();
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 // Removed unused and non-existent 'Message' import
 
 export function useMessages() {
-  const queryClient = useQueryClient(); arguments   
+  const queryClient = useQueryClient();
+  const { addNotification } = useNotificationStore();
   const { data, error, isLoading: isMessagesLoading } = useQuery({
     queryKey: ['messages', 'all'],
     queryFn: async () => {
