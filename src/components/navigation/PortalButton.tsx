@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from '../../pages/Home';
 import ClientPortal from '../../pages/client/ClientPortal';
 import AdminPortal from '../../pages/admin/AdminPortal';
-import InvestorPortal from '../../pages/InvestorPortal';
+import InvestorPortal from '../../pages/investor/InvestorPortal';
 import StudentPortal from '../../pages/student/StudentPortal';
 import ProfessionalPage from '../../pages/professional/ProfessionalPortal';
 import AccessDenied from '../../pages/accessDenied';

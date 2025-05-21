@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import RegisterPage from '../pages/RegisterPage';
 import HomePage from '../pages/Home';
@@ -11,6 +11,8 @@ const ProfessionalPortal = React.lazy(() => import('../pages/professional/Profes
 const StudentPortal = React.lazy(() => import('../pages/student/StudentPortal'));
 const MessagingPortal = React.lazy(() => import('../pages/messaging/MessagingPortal'));
 import NotFoundPage from '../components/shared/NotFoundPage';
+import ConversationView from '../components/messaging/ConversationView';
+import ThankYou from '../pages/ThankYou';
 import ServicesPage from '../pages/services/ServiceCatalog';
 import VideoLibrary from '../pages/videos/VideoLibrary';
 // If the actual filename is different, update the import path accordingly.
@@ -20,11 +22,14 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import VideoDetail from '../pages/videos/VideoDetail';
 import LoginPage from '../pages/LoginPage';
-import Guest from '../pages/guest';
-import Dashboard from '../pages/Dashboard';
+import Guest from '../pages/Guest/guest';
+import Dashboard, { AdminDashboard, ProfessionalDashboard, StudentDashboard, ClientDashboard } from '../pages/Dashboard';
+import { InvestorDashboard } from '../components/investor/InvestorDashboard';
 
 export default function AppRoutes() {
-  console.log("✅ AppRoutes rendering");
+  useEffect(() => {
+    console.log("✅ AppRoutes component is rendering");
+  }, []);
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>
@@ -39,9 +44,16 @@ export default function AppRoutes() {
         <Route path="/courses" element={<VideoLibrary />} />
         <Route path="/tax-calculator" element={<TaxCalculator />} />
         <Route path="/tax-forms" element={<TaxFormsPage />} />
+        <Route path="/thank-you" element={<ThankYou />} />
+        {/* Move /messaging/:senderId inside the /messaging/* protected route group below for consistent protection and layout */}
         <Route path="/admin/*" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminPortal />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboard />
           </ProtectedRoute>
         } />
         <Route path="/superadmin/*" element={
@@ -54,9 +66,19 @@ export default function AppRoutes() {
             <ClientPortal />
           </ProtectedRoute>
         } />
+        <Route path="/client/dashboard" element={
+          <ProtectedRoute allowedRoles={['client']}>
+            <ClientDashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/investor/*" element={
           <ProtectedRoute allowedRoles={['investor']}>
             <InvestorPortal />
+          </ProtectedRoute>
+        } />
+        <Route path="/investor/dashboard" element={
+          <ProtectedRoute allowedRoles={['investor']}>
+            <InvestorDashboard />
           </ProtectedRoute>
         } />
         {/* <Route path="/videos" element={<VideoLibrary />} /> */}
@@ -66,14 +88,29 @@ export default function AppRoutes() {
             <MessagingPortal />
           </ProtectedRoute>
         } />
+        <Route path="/messaging/:senderId" element={
+          <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+            <ConversationView />
+          </ProtectedRoute>
+        } />
         <Route path="/professional/*" element={
           <ProtectedRoute allowedRoles={['professional']}>
             <ProfessionalPortal />
           </ProtectedRoute>
         } />
+        <Route path="/professional/dashboard" element={
+          <ProtectedRoute allowedRoles={['professional']}>
+            <ProfessionalDashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/student/*" element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentPortal />
+          </ProtectedRoute>
+        } />
+        <Route path="/student/dashboard" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentDashboard />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFoundPage />} />

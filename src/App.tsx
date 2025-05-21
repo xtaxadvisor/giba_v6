@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Providers } from './Providers'; // Ensure the file exists and matches this path
 import AppRoutes from './routes/AppRoutes';
 
 const App = () => {
+  useEffect(() => {
+    console.log("✅ App component is rendering");
+  }, []);
+
   return (
-    <>
-      {console.log("✅ App component is rendering")}
-      <Providers>
-        <AppRoutes />
-      </Providers>
-    </>
+    <Providers>
+      <AppRoutes />
+    </Providers>
   );
 };
 
-export default App;
+export default App;Providers

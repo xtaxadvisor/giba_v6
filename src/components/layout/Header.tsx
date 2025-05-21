@@ -50,8 +50,8 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-1 flex justify-center items-center cursor-pointer" onClick={() => navigate('/')}>
-            <span className={`text-4xl sm:text-5xl font-extrabold tracking-tight leading-snug transition-all duration-500 ${
-              isScrolled ? 'scale-95 text-gray-800' : 'scale-100'
+            <span className={`brand-logo text-4xl sm:text-5xl font-extrabold tracking-tight leading-snug transition-all duration-700 ease-out ${
+              isScrolled ? 'scale-95 text-gray-800' : 'scale-100 opacity-100'
             }`}>
               <span className="text-blue-600">PRo</span>
               <span className={isScrolled ? 'text-gray-900' : 'text-gray-800'}>Ta</span>

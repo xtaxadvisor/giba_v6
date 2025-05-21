@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../../components/admin/layout/AdminLayout';
 import { AdminDashboard } from '../../components/admin/dashboard/AdminDashboard';
 import { TeamManagement } from '../../components/admin/team/TeamManagement';
@@ -7,11 +7,29 @@ import { AdminSettings } from '../../components/admin/settings/AdminSettings';
 import { NotFoundPage } from '../../components/shared/NotFoundPage';
 import { AdminProtectedRoute } from '../../components/admin/auth/AdminProtectedRoute';
 import MessagingInbox from '../messaging/MessagingInbox';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react';
 
 export default function AdminPortal() {
+  const location = useLocation();
+  const pathParts = location.pathname.split('/').filter(Boolean);
+
   return (
     <AdminProtectedRoute>
       <AdminLayout>
+        <Breadcrumb fontWeight="medium" fontSize="sm" mb={4}>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
+          </BreadcrumbItem>
+          {pathParts.map((part, idx) => {
+            const path = '/' + pathParts.slice(0, idx + 1).join('/');
+            const isLast = idx === pathParts.length - 1;
+            return (
+              <BreadcrumbItem key={path} isCurrentPage={isLast}>
+                <BreadcrumbLink href={path}>{part}</BreadcrumbLink>
+              </BreadcrumbItem>
+            );
+          })}
+        </Breadcrumb>
         <Routes>
           <Route index element={<AdminDashboard />} />
           <Route path="team" element={<TeamManagement />} />

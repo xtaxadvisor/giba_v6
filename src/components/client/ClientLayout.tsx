@@ -63,6 +63,8 @@ const ClientLayout = ({ children, title, description }: ClientLayoutProps) => {
     await logout();
   };
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   if (!formCompleted) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -178,46 +180,57 @@ const ClientLayout = ({ children, title, description }: ClientLayoutProps) => {
               >
                 <Bell className="h-6 w-6" />
               </button>
-              <div className="relative group">
+              <div className="relative">
                 <button 
                   className="flex items-center space-x-3"
                   aria-label="User menu"
                   aria-haspopup="true"
-                  aria-expanded="false"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  type="button"
                 >
                   <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
                     <User className="h-5 w-5 text-white" />
                   </div>
                   <span className="text-gray-700">{user?.name}</span>
                 </button>
-                <div 
-                  className="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300"
-                  role="menu"
-                  aria-orientation="vertical"
-                >
-                  <Link 
-                    to="/client/profile" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    role="menuitem"
+                {menuOpen && (
+                  <div 
+                    className="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl"
+                    role="menu"
+                    aria-orientation="vertical"
+                    onMouseLeave={() => setMenuOpen(false)}
                   >
-                    Profile
-                  </Link>
-                  <Link 
-                    to="/client/settings" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    role="menuitem"
-                  >
-                    Settings
-                  </Link>
-                  <hr className="my-2" />
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    role="menuitem"
-                  >
-                    Sign Out
-                  </button>
-                </div>
+                    <Link 
+                      to="/client/profile" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link 
+                      to="/client/settings" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                    <hr className="my-2" />
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      role="menuitem"
+                      type="button"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -249,7 +262,7 @@ const ClientLayout = ({ children, title, description }: ClientLayoutProps) => {
         </aside>
 
         <main className="flex-1 ml-64 p-8" role="main">
-          <header className="ml-64 px-8 pt-4">
+          <header className="px-8 pt-4">
             {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
             {description && <p className="text-sm text-gray-500">{description}</p>}
           </header>

@@ -1,4 +1,5 @@
 export const handler = async (event) => {
+  console.log("📨 Email request received");
   const { to, subject, html } = JSON.parse(event.body || '{}');
 
   if (!to || !subject || !html) {

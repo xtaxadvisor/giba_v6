@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -14,6 +15,7 @@ interface Message {
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleMarkAsRead = async (id: string) => {
     await supabase.from('messages').update({ is_read: true }).eq('id', id);
@@ -35,7 +37,7 @@ export default function MessagesPage() {
       if (error) {
         console.error('Error fetching messages:', error.message);
       } else {
-        setMessages(data || []);
+        setMessages((data || []).filter((m) => !m.archived));
       }
       setLoading(false);
     };
@@ -45,7 +47,9 @@ export default function MessagesPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Inbox</h1>
+      <header className="mb-6 border-b pb-4">
+        <h1 className="text-3xl font-bold">Inbox</h1>
+      </header>
       {loading ? (
         <p>Loading messages...</p>
       ) : messages.length === 0 ? (
@@ -61,7 +65,9 @@ export default function MessagesPage() {
                     Mark as Read
                   </button>
                 )}
-                <button className="text-sm text-indigo-600 underline">Reply</button>
+                <button onClick={() => navigate(`/messaging/${msg.sender_id}`)} className="text-sm text-indigo-600 underline">
+                  Reply
+                </button>
                 <button onClick={() => handleArchive(msg.id)} className="text-sm text-red-500 underline">
                   Archive
                 </button>

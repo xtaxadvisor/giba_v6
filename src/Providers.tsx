@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { supabase } from '@/lib/supabase/client';
@@ -12,6 +12,10 @@ import { SupabaseProvider } from '@/contexts/SupabaseContext';
 const queryClient = new QueryClient();
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    console.log("✅ Providers component is mounting");
+  }, []);
+
   return (
     <HelmetProvider>
       <ChakraProvider theme={chakraTheme}>

@@ -80,11 +80,19 @@ useEffect(() => {
         }
 
         if (session?.user?.id) {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('role, full_name, location, phone')
-            .eq('id', session.user.id)
-            .maybeSingle();
+          let profileData = null;
+          let profileError = null;
+          try {
+            const response = await supabase
+              .from('profiles')
+              .select('role, full_name, location, phone')
+              .eq('id', session.user.id)
+              .maybeSingle();
+            profileData = response.data;
+            profileError = response.error;
+          } catch (fetchError) {
+            console.error('❌ Exception while fetching profile data:', fetchError);
+          }
 
           if (profileError) {
             console.error('❌ Failed to fetch profile:', profileError.message);
@@ -128,11 +136,19 @@ useEffect(() => {
       }
 
       if (event === 'SIGNED_IN' && session?.user?.id) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('role, full_name, location, phone')
-          .eq('id', session.user.id)
-          .maybeSingle();
+        let profileData = null;
+        let profileError = null;
+        try {
+          const response = await supabase
+            .from('profiles')
+            .select('role, full_name, location, phone')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          profileData = response.data;
+          profileError = response.error;
+        } catch (fetchError) {
+          console.error('❌ Exception while fetching profile data:', fetchError);
+        }
 
         if (profileError) {
           console.error('❌ Profile fetch error after login:', profileError.message);

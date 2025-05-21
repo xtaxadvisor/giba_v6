@@ -3,6 +3,7 @@ interface SupabaseMessage {
   content: string;
   created_at: string;
   read: boolean;
+  assigned_to?: string;
   profiles?: { full_name: string }[];
 }
 import React, { useEffect, useState } from 'react';
@@ -15,14 +16,18 @@ interface ThreadPreview {
   last_message: string;
   last_sent_at: string;
   unread_count: number;
+  assigned_to?: string;
 }
 
 export default function MessagingInbox() {
   const [threads, setThreads] = useState<ThreadPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [assignedToMeOnly, setAssignedToMeOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  const currentUserEmail = 'admin@protaxadvisors.tax'; // Replace with actual auth context later
 
   const navigate = useNavigate();
   const handleViewConversation = (senderId: string) => {
@@ -37,7 +42,7 @@ export default function MessagingInbox() {
 
       const { data, error, count } = await supabase
         .from('messages')
-        .select('sender_id, content, created_at, read, profiles(full_name)', { count: 'exact' });
+        .select('sender_id, content, created_at, read, assigned_to, profiles(full_name)', { count: 'exact' });
 
       const typedData = data as SupabaseMessage[];
 
@@ -69,7 +74,8 @@ export default function MessagingInbox() {
             sender_name: senderName,
             last_message: msg.content,
             last_sent_at: msg.created_at,
-            unread_count: unreadMessages
+            unread_count: unreadMessages,
+            assigned_to: msg.assigned_to,
           });
         }
       });
@@ -82,10 +88,12 @@ export default function MessagingInbox() {
     fetchThreads();
   }, [page]);
 
-  // Filtering logic for unread/all toggle
-  const visibleThreads = showUnreadOnly
-    ? threads.filter((t) => t.unread_count > 0)
-    : threads;
+  // Filtering logic for unread/all toggle and assigned to me toggle
+  const visibleThreads = threads.filter((t) => {
+    if (showUnreadOnly && t.unread_count === 0) return false;
+    if (assignedToMeOnly && t.assigned_to !== currentUserEmail) return false;
+    return true;
+  });
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -96,6 +104,12 @@ export default function MessagingInbox() {
           className="text-sm text-blue-600 hover:underline"
         >
           {showUnreadOnly ? 'Show All Messages' : 'Show Unread Only'}
+        </button>
+        <button
+          onClick={() => setAssignedToMeOnly(!assignedToMeOnly)}
+          className="ml-4 text-sm text-blue-600 hover:underline"
+        >
+          {assignedToMeOnly ? 'Show All' : 'Only My Messages'}
         </button>
       </div>
       {loading ? (
@@ -117,6 +131,29 @@ export default function MessagingInbox() {
               <p className="text-xs text-gray-400 mt-1">
                 Sent at: {new Date(thread.last_sent_at).toLocaleString()}
               </p>
+              <p className="text-xs text-gray-500">Assigned to: {thread.assigned_to || 'Unassigned'}</p>
+              <select
+                onChange={async (e) => {
+                  const newAssignee = e.target.value;
+                  await supabase
+                    .from('messages')
+                    .update({ assigned_to: newAssignee })
+                    .eq('sender_id', thread.sender_id);
+                  setThreads((prev) =>
+                    prev.map((t) =>
+                      t.sender_id === thread.sender_id
+                        ? { ...t, assigned_to: newAssignee }
+                        : t
+                    )
+                  );
+                }}
+                defaultValue={thread.assigned_to || ''}
+                className="mt-1 text-xs text-gray-700 border rounded px-2 py-1"
+              >
+                <option value="">Unassigned</option>
+                <option value="admin@protaxadvisors.tax">Admin</option>
+                <option value="staff@protaxadvisors.tax">Staff</option>
+              </select>
               <button
                 onClick={() => handleViewConversation(thread.sender_id)}
                 className="mt-2 text-blue-600 hover:underline text-sm"
