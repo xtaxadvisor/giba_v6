@@ -8,49 +8,55 @@ export default function ContactForm() {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
+  try {
     const success = await submitContactForm({ name, email, message });
-    if (success) {
-      const response = await fetch('/.netlify/functions/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: email,
-          cc: ['admin@protaxadvisors.tax'],
-          subject: 'We received your message!',
-          html: `<p>Hi ${name},</p><p>Thanks for reaching out to ProTaxAdvisors. One of our experts will follow up with you soon.</p>`,
-        }),
-      });
+    if (!success) throw new Error("Form submission failed");
 
-      const logStatus = response.ok ? 'sent' : 'error';
-
-      await supabase.from('email_logs').insert({
-        recipient: email,
-        cc: 'admin@protaxadvisors.tax',
+    const response = await fetch("https://asdthnxphqjpxzyhpylr.functions.supabase.co/send-email", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: email,
+        cc: ['admin@protaxadvisors.tax'],
         subject: 'We received your message!',
-        sent_at: new Date().toISOString(),
-        context: 'contact_form',
-        status: logStatus,
-        ip_address: window?.location?.hostname || 'unknown'
-      });
-      await supabase.from('messages').insert({
-        name,
-        email,
-        message,
-        status: 'new',
-        assigned_to: 'admin@protaxadvisors.tax',
-        received_at: new Date().toISOString(),
-        context: 'contact_form'
-      });
+        html: `<p>Hi ${name},</p><p>Thanks for reaching out to ProTaxAdvisors. One of our experts will follow up with you soon.</p>`,
+      }),
+    });
 
-      alert("Thank you! We received your message.");
-      setName('');
-      setEmail('');
-      setMessage('');
-    }
-  };
+    const logStatus = response.ok ? 'sent' : 'error';
+
+    await supabase.from('email_logs').insert({
+      recipient: email,
+      cc: 'admin@protaxadvisors.tax',
+      subject: 'We received your message!',
+      sent_at: new Date().toISOString(),
+      context: 'contact_form',
+      status: logStatus,
+      ip_address: window?.location?.hostname || 'unknown'
+    });
+
+    await supabase.from('messages').insert({
+      name,
+      email,
+      message,
+      status: 'new',
+      assigned_to: 'admin@protaxadvisors.tax',
+      received_at: new Date().toISOString(),
+      context: 'contact_form'
+    });
+
+    alert("Thank you! We received your message.");
+    setName('');
+    setEmail('');
+    setMessage('');
+  } catch (err) {
+    console.error("❌ Contact form error:", err);
+    alert("Something went wrong. Please try again later.");
+  }
+};
 
   return (
     <form onSubmit={handleSubmit}>

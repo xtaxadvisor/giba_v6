@@ -1,4 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  Deno.env.get("PUBLIC_SUPABASE_URL")!,
+  Deno.env.get("SERVICE_ROLE_KEY")!
+);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -16,7 +22,7 @@ Deno.serve(async (req) => {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${Deno.env.get("re_atdwuf2p_7cjERHb3gi52ckGktyzt2U2V")}`,
+      "Authorization": `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -34,6 +40,19 @@ Deno.serve(async (req) => {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  // ✅ Log email to Supabase
+  const { error: logError } = await supabaseAdmin.from('email_log').insert([
+    {
+      to_email: to,
+      subject,
+      body
+    }
+  ]);
+
+  if (logError) {
+    console.error("❌ Failed to log email to email_log:", logError);
   }
 
   return new Response(
