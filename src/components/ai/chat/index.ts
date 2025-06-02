@@ -1,4 +1,4 @@
-export { AIChat } from './AIChat';
+export { AIChat } from './LegacyAIChat';
 export { AIMessage } from './AIMessage';
 export { AIMessageList } from './AIMessageList';
 export { AIMessageInput } from './AIMessageInput';

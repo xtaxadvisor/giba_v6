@@ -1,48 +1,29 @@
-import { Handler } from '@netlify/functions';
-import axios from 'axios';
+// netlify/functions/start-jennifer.ts
+import type { Handler } from '@netlify/functions';
 
-const handler: Handler = async (event, context) => {
+const handler: Handler = async () => {
   try {
-    const config = {
-      model: 'gpt-4o-realtime-preview',
-      modalities: ['audio', 'text'],
-      voice: 'coral',
-      instructions: `You are Jennifer, the official assistant of ProTaxAdvisors. Your role is to support clients and team members by:
-      - Explaining tax and accounting tasks in simple terms
-      - Helping clients understand what documents they need to upload
-      - Responding warmly and professionally to inquiries about services, pricing, scheduling, and deadlines
-      - Managing booking flow
-      - Following up on missing documents or forms
-      - Helping organize tasks or communications for Giba
-      - Speaking clearly and kindly, but never overstepping legal or financial boundaries`,
-      temperature: 0.8,
-      input_audio_format: 'pcm16',
-      output_audio_format: 'pcm16',
-      turn_detection: { type: 'semantic' }
-    };
-
-    const response = await axios.post(
-      'https://api.openai.com/v1/realtime/sessions',
-      config,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    // 🔐 In the future, you might call OpenAI or another voice provider here
+    const mockClientSecret = 'mock_client_secret_here';
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        session: response.data.id,
-        client_secret: response.data.client_secret.value
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*', // ✅ CORS support
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+      body: JSON.stringify({ client_secret: mockClientSecret }),
     };
   } catch (err) {
+    console.error('❌ Error generating client secret:', err);
+
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: err.message })
+      body: JSON.stringify({
+        error: 'Internal Server Error',
+        message: 'Could not generate client secret for Jennifer.',
+      }),
     };
   }
 };

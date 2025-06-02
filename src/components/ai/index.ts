@@ -1,7 +1,7 @@
 // src/components/ai/index.ts (Enhanced for Jennifer Assistant)
 
 // Rebranded AI Assistant: Jennifer
-export { JenniferWidget as AIAssistant } from './JenniferWidget';
+export { default as Jennifer } from './JenniferWidget';
 
 // Welcome & UI Components
 export { default as AIWelcomeMessage } from './AIWelcomeMessage';

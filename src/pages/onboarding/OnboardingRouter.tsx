@@ -1,16 +1,19 @@
-// src/pages/onboarding/OnboardingRouter.tsx (Enhanced with welcome UI, onboarding steps, first-time guard)
+// src/pages/onboarding/OnboardingRouter.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Box, Heading, Spinner, Text, VStack, Checkbox, Button } from '@chakra-ui/react';
+import { Box, Heading, Spinner, Text, VStack, Checkbox, Button, useToast } from '@chakra-ui/react';
+import { supabase } from '@/lib/supabase/client';
 
 export default function OnboardingRouter() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { role } = useParams();
+  const toast = useToast();
+
   const [stepIndex, setStepIndex] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [firstTime, setFirstTime] = useState(true); // TODO: replace with real logic from Supabase profiles
+  const [firstTime, setFirstTime] = useState(true);
 
   const steps = [
     'Welcome to ProTaxAdvisors!',
@@ -25,33 +28,80 @@ export default function OnboardingRouter() {
       return;
     }
 
-    // Simulate profile fetch / first-time check
-    setTimeout(() => {
-      setLoading(false);
-    }, 800);
+    const checkOnboardingStatus = async () => {
+      try {
+        if (!user) return;
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('onboarding_complete')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error checking onboarding status:', error);
+        }
+
+        if (data?.onboarding_complete) {
+          setFirstTime(false);
+        }
+      } catch (err) {
+        console.error('Error during onboarding status check:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkOnboardingStatus();
   }, [user, navigate]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (stepIndex < steps.length - 1) {
       setStepIndex(stepIndex + 1);
     } else {
-      // Final redirect based on role
-      switch (role) {
-        case 'client':
-          navigate('/client');
-          break;
-        case 'professional':
-          navigate('/professional');
-          break;
-        case 'student':
-          navigate('/student');
-          break;
-        case 'admin':
-          navigate('/admin');
-          break;
-        default:
-          navigate('/unauthorized');
-          break;
+      try {
+        if (!user) {
+          throw new Error('User is not authenticated');
+        }
+        const { error } = await supabase
+          .from('profiles')
+          .update({ onboarding_complete: true })
+          .eq('id', user.id);
+
+        if (error) throw error;
+
+        toast({
+          title: 'Welcome aboard!',
+          description: 'Onboarding complete. Redirecting you now...',
+          status: 'success',
+          duration: 3000,
+          isClosable: true
+        });
+
+        switch (role) {
+          case 'client':
+            navigate('/client');
+            break;
+          case 'professional':
+            navigate('/professional');
+            break;
+          case 'student':
+            navigate('/student');
+            break;
+          case 'admin':
+            navigate('/admin');
+            break;
+          default:
+            navigate('/unauthorized');
+        }
+      } catch (err: any) {
+        console.error('Failed to complete onboarding:', err);
+        toast({
+          title: 'Error',
+          description: 'Could not finish onboarding. Please try again.',
+          status: 'error',
+          duration: 4000,
+          isClosable: true
+        });
       }
     }
   };
@@ -66,7 +116,6 @@ export default function OnboardingRouter() {
   }
 
   if (!firstTime) {
-    // If already onboarded, skip
     navigate(`/${role}`);
     return null;
   }
@@ -77,18 +126,11 @@ export default function OnboardingRouter() {
       <Text fontSize="lg" color="gray.600" mb={6}>Let’s complete your {role} onboarding in a few quick steps.</Text>
 
       <VStack spacing={4} align="stretch">
-        <Checkbox isChecked={stepIndex >= 1} isReadOnly>
-          {steps[0]}
-        </Checkbox>
-        <Checkbox isChecked={stepIndex >= 2} isReadOnly>
-          {steps[1]}
-        </Checkbox>
-        <Checkbox isChecked={stepIndex >= 3} isReadOnly>
-          {steps[2]}
-        </Checkbox>
-        <Checkbox isChecked={stepIndex >= 4} isReadOnly>
-          {steps[3]}
-        </Checkbox>
+        {steps.map((label, index) => (
+          <Checkbox key={index} isChecked={stepIndex >= index + 1} isReadOnly>
+            {label}
+          </Checkbox>
+        ))}
       </VStack>
 
       <Button mt={8} colorScheme="blue" onClick={handleNext}>

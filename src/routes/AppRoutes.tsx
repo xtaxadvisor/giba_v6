@@ -1,3 +1,4 @@
+// src/routes/AppRoutes.tsx
 import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import RegisterPage from '../pages/RegisterPage';
@@ -24,9 +25,12 @@ import LoginPage from '../pages/LoginPage';
 import Guest from '../pages/Guest/guest';
 import Dashboard, { AdminDashboard, ProfessionalDashboard, StudentDashboard, ClientDashboard } from '../pages/Dashboard';
 import { InvestorDashboard } from '../components/investor/InvestorDashboard';
-import { JenniferWidget } from '@/components/ai/JenniferWidget';
+import JenniferWidget from '@/components/ai/JenniferWidget';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AppRoutes() {
+  const { hydrated } = useAuth();
+
   useEffect(() => {
     console.log("✅ AppRoutes component is rendering");
   }, []);
@@ -64,9 +68,9 @@ export default function AppRoutes() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
-        {/* ✅ Globally available Jennifer assistant */}
-        <JenniferWidget />
+        {/* ✅ Only render Jennifer when auth is hydrated */}
+        {hydrated && <JenniferWidget />}
       </>
     </Suspense>
   );
-}
+}  

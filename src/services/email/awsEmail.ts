@@ -36,17 +36,11 @@ export class AWSEmailService {
   } = {}) {
     try {
       const destination: any = { ToAddresses: [to] };
-      if (options.cc && options.cc.length > 0) {
-        destination.CcAddresses = options.cc;
-      }
-      if (options.bcc && options.bcc.length > 0) {
-        destination.BccAddresses = options.bcc;
-      }
+      if (options.cc && options.cc.length > 0) destination.CcAddresses = options.cc;
+      if (options.bcc && options.bcc.length > 0) destination.BccAddresses = options.bcc;
 
       const messageBody: any = { Text: { Data: body || ' ' } };
-      if (options.html) {
-        messageBody.Html = { Data: options.html };
-      }
+      if (options.html) messageBody.Html = { Data: options.html };
 
       const command = new SendEmailCommand({
         Source: this.defaultSender,
@@ -60,8 +54,6 @@ export class AWSEmailService {
 
       await this.sesClient.send(command);
       console.log('Email sent to:', to, 'Subject:', subject);
-      // Optionally log this in Supabase:
-      // await supabase.from('email_logs').insert([{ to, subject, timestamp: new Date().toISOString() }]);
       return true;
     } catch (error) {
       console.error('Email sending error:', error);

@@ -12,7 +12,7 @@ import {
   useToast,
   Divider
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 
@@ -40,15 +40,18 @@ export function LoginForm() {
 
     try {
       setLoading(true);
-      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-      if (authError) {
+      if (error) {
         toast({
           title: 'Login failed',
-          description: authError.message,
+          description: error.message,
           status: 'error',
           duration: 4000,
-          isClosable: true
+          isClosable: true,
         });
         return;
       }
@@ -57,16 +60,26 @@ export function LoginForm() {
         title: 'Login successful',
         status: 'success',
         duration: 2000,
-        isClosable: true
+        isClosable: true,
       });
 
-      navigate(redirectTo);
+      // 🔐 Extend with role or onboarding redirect (optional):
+      const user = (await supabase.auth.getUser()).data.user;
+      const role = user?.user_metadata?.primary_role;
+
+      if (role) {
+        navigate(`/onboarding/${role}`);
+      } else {
+        navigate(redirectTo);
+      }
     } catch (err) {
+      console.error('Unexpected login error:', err);
       toast({
         title: 'Unexpected error',
-        description: 'Something went wrong.',
+        description: 'Something went wrong. Please try again.',
         status: 'error',
-        duration: 4000
+        duration: 4000,
+        isClosable: true,
       });
     } finally {
       setLoading(false);
@@ -75,35 +88,48 @@ export function LoginForm() {
 
   return (
     <Box maxW="md" mx="auto" mt={10} p={6} borderWidth={1} rounded="md" shadow="md">
-      <Heading mb={4} textAlign="center">Login</Heading>
+      <Heading mb={4} textAlign="center">
+        Login
+      </Heading>
+
       <Stack spacing={4}>
-        <FormControl>
+        <FormControl isRequired>
           <FormLabel>Email</FormLabel>
-          <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            placeholder="you@example.com"
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
         </FormControl>
 
-        <FormControl>
+        <FormControl isRequired>
           <FormLabel>Password</FormLabel>
           <InputGroup>
             <Input
+              id="password"
               type={showPassword ? 'text' : 'password'}
               value={password}
+              placeholder="Enter your password"
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
             />
             <InputRightElement width="4.5rem">
-              <Button size="sm" onClick={() => setShowPassword(!showPassword)}>
+              <Button h="1.75rem" size="sm" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? 'Hide' : 'Show'}
               </Button>
             </InputRightElement>
           </InputGroup>
         </FormControl>
 
-        <Button colorScheme="blue" isLoading={loading} onClick={handleLogin}>
+        <Button colorScheme="blue" onClick={handleLogin} isLoading={loading}>
           Login
         </Button>
 
-        <Text textAlign="right">
-          <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+        <Text textAlign="right" fontSize="sm">
+          <a href="/forgot-password" className="text-blue-600 hover:underline">
             Forgot your password?
           </a>
         </Text>
@@ -114,18 +140,19 @@ export function LoginForm() {
           onClick={() =>
             supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: window.location.origin + redirectTo }
+              options: { redirectTo: window.location.origin + redirectTo },
             })
           }
           colorScheme="red"
         >
           Continue with Google
         </Button>
+
         <Button
           onClick={() =>
             supabase.auth.signInWithOAuth({
               provider: 'github',
-              options: { redirectTo: window.location.origin + redirectTo }
+              options: { redirectTo: window.location.origin + redirectTo },
             })
           }
           bg="gray.800"
@@ -134,11 +161,12 @@ export function LoginForm() {
         >
           Continue with GitHub
         </Button>
+
         <Button
           onClick={() =>
             supabase.auth.signInWithOAuth({
               provider: 'apple',
-              options: { redirectTo: window.location.origin + redirectTo }
+              options: { redirectTo: window.location.origin + redirectTo },
             })
           }
           bg="black"
@@ -148,8 +176,8 @@ export function LoginForm() {
           Continue with Apple
         </Button>
 
-        <Text textAlign="center">
-          Don't have an account?{' '}
+        <Text textAlign="center" fontSize="sm">
+          Don’t have an account?{' '}
           <a href="/register" className="text-blue-600 hover:underline">
             Sign up here
           </a>

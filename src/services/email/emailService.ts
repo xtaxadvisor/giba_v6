@@ -1,3 +1,4 @@
+// src/services/email/client.ts
 import nodemailer from 'nodemailer';
 import { useNotificationStore } from '../../lib/store';
 
@@ -10,13 +11,13 @@ class EmailService {
       console.warn('SMTP credentials are not set in environment variables.');
     }
     this.transporter = nodemailer.createTransport({
-      host: "email-smtp.us-east-1.amazonaws.com",
+      host: 'email-smtp.us-east-1.amazonaws.com',
       port: 465,
       secure: true,
       auth: {
         user: process.env.VITE_AWS_SMTP_USERNAME!,
-        pass: process.env.VITE_AWS_SMTP_PASSWORD!
-      }
+        pass: process.env.VITE_AWS_SMTP_PASSWORD!,
+      },
     });
   }
 
@@ -27,11 +28,16 @@ class EmailService {
     return EmailService.instance;
   }
 
-  async sendEmail(to: string, subject: string, body: string, options: {
-    html?: string;
-    replyTo?: string;
-    attachments?: Array<{ filename: string; content: Buffer }>;
-  } = {}) {
+  async sendEmail(
+    to: string,
+    subject: string,
+    body: string,
+    options: {
+      html?: string;
+      replyTo?: string;
+      attachments?: Array<{ filename: string; content: Buffer }>;
+    } = {}
+  ) {
     try {
       const info = await this.transporter.sendMail({
         from: process.env.VITE_AWS_SMTP_FROM || 'info@protaxadvisors.tax',
@@ -40,13 +46,13 @@ class EmailService {
         text: body,
         html: options.html,
         replyTo: options.replyTo,
-        attachments: options.attachments
+        attachments: options.attachments,
       });
 
-      console.log('Email sent:', info.messageId);
+      console.log('✅ Email sent:', info.messageId);
       return true;
     } catch (error) {
-      console.error('Email sending error:', error);
+      console.error('❌ Email sending error:', error);
       useNotificationStore.getState().addNotification(
         'Failed to send email. Please try again later.',
         'error'
@@ -61,7 +67,7 @@ class EmailService {
       'SMTP Test',
       'If you received this email, SMTP is working!',
       {
-        html: '<h1>SMTP Test</h1><p>If you received this email, SMTP is working!</p>'
+        html: '<h1>SMTP Test</h1><p>If you received this email, SMTP is working!</p>',
       }
     );
   }
@@ -81,6 +87,36 @@ class EmailService {
       email,
       'Your Consultation is Confirmed',
       `Your ${details.consultationType} consultation is confirmed for ${details.date}.`,
+      { html }
+    );
+  }
+
+  async sendFeedbackEmail(fromEmail: string, message: string) {
+    const html = `
+      <h2>New Feedback Received</h2>
+      <p><strong>From:</strong> ${fromEmail}</p>
+      <p><strong>Message:</strong></p>
+      <p>${message}</p>
+    `;
+    return this.sendEmail(
+      'support@protaxadvisors.tax',
+      'Client Feedback',
+      message,
+      { html, replyTo: fromEmail }
+    );
+  }
+
+  async sendPasswordReset(email: string, resetLink: string) {
+    const html = `
+      <h2>Password Reset</h2>
+      <p>To reset your password, click the link below:</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>If you did not request this, please ignore this email.</p>
+    `;
+    return this.sendEmail(
+      email,
+      'Reset Your Password',
+      `Reset your password using this link: ${resetLink}`,
       { html }
     );
   }
