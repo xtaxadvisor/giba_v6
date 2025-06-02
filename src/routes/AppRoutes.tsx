@@ -15,7 +15,6 @@ import ConversationView from '../components/messaging/ConversationView';
 import ThankYou from '../pages/ThankYou';
 import ServicesPage from '../pages/services/ServiceCatalog';
 import VideoLibrary from '../pages/videos/VideoLibrary';
-// If the actual filename is different, update the import path accordingly.
 import { TaxCalculator } from '../components/calculator/TaxCalculator';
 import TaxFormsPage from '../pages/forms/TaxForms';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -25,96 +24,49 @@ import LoginPage from '../pages/LoginPage';
 import Guest from '../pages/Guest/guest';
 import Dashboard, { AdminDashboard, ProfessionalDashboard, StudentDashboard, ClientDashboard } from '../pages/Dashboard';
 import { InvestorDashboard } from '../components/investor/InvestorDashboard';
+import { JenniferWidget } from '@/components/ai/JenniferWidget';
 
 export default function AppRoutes() {
   useEffect(() => {
     console.log("✅ AppRoutes component is rendering");
   }, []);
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        
-        <Route path="/guest" element={<Guest />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/same-day-services" element={<SameDayServicesPage />} />
-        <Route path="/services" element={<ServicesPage />} />
-        <Route path="/courses" element={<VideoLibrary />} />
-        <Route path="/tax-calculator" element={<TaxCalculator />} />
-        <Route path="/tax-forms" element={<TaxFormsPage />} />
-        <Route path="/thank-you" element={<ThankYou />} />
-        {/* Move /messaging/:senderId inside the /messaging/* protected route group below for consistent protection and layout */}
-        <Route path="/admin/*" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/dashboard" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/superadmin/*" element={
-          <ProtectedRoute allowedRoles={['superadmin']}>
-            <SuperAdminPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/client/*" element={
-          <ProtectedRoute allowedRoles={['client']}>
-            <ClientPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/client/dashboard" element={
-          <ProtectedRoute allowedRoles={['client']}>
-            <ClientDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/investor/*" element={
-          <ProtectedRoute allowedRoles={['investor']}>
-            <InvestorPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/investor/dashboard" element={
-          <ProtectedRoute allowedRoles={['investor']}>
-            <InvestorDashboard />
-          </ProtectedRoute>
-        } />
-        {/* <Route path="/videos" element={<VideoLibrary />} /> */}
-        <Route path="/videos/:videoId" element={<VideoDetail />} />
-        <Route path="/messaging/*" element={
-          <ProtectedRoute allowedRoles={['admin', 'superadmin', 'client', 'investor', 'professional', 'student']}>
-            <MessagingPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/messaging/:senderId" element={
-          <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
-            <ConversationView />
-          </ProtectedRoute>
-        } />
-        <Route path="/professional/*" element={
-          <ProtectedRoute allowedRoles={['professional']}>
-            <ProfessionalPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/professional/dashboard" element={
-          <ProtectedRoute allowedRoles={['professional']}>
-            <ProfessionalDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/student/*" element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <StudentPortal />
-          </ProtectedRoute>
-        } />
-        <Route path="/student/dashboard" element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <StudentDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/guest" element={<Guest />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/same-day-services" element={<SameDayServicesPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/courses" element={<VideoLibrary />} />
+          <Route path="/tax-calculator" element={<TaxCalculator />} />
+          <Route path="/tax-forms" element={<TaxFormsPage />} />
+          <Route path="/thank-you" element={<ThankYou />} />
+
+          <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']}><AdminPortal /></ProtectedRoute>} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/superadmin/*" element={<ProtectedRoute allowedRoles={['superadmin']}><SuperAdminPortal /></ProtectedRoute>} />
+          <Route path="/client/*" element={<ProtectedRoute allowedRoles={['client']}><ClientPortal /></ProtectedRoute>} />
+          <Route path="/client/dashboard" element={<ProtectedRoute allowedRoles={['client']}><ClientDashboard /></ProtectedRoute>} />
+          <Route path="/investor/*" element={<ProtectedRoute allowedRoles={['investor']}><InvestorPortal /></ProtectedRoute>} />
+          <Route path="/investor/dashboard" element={<ProtectedRoute allowedRoles={['investor']}><InvestorDashboard /></ProtectedRoute>} />
+          <Route path="/videos/:videoId" element={<VideoDetail />} />
+          <Route path="/messaging/*" element={<ProtectedRoute allowedRoles={['admin', 'superadmin', 'client', 'investor', 'professional', 'student']}><MessagingPortal /></ProtectedRoute>} />
+          <Route path="/messaging/:senderId" element={<ProtectedRoute allowedRoles={['admin', 'superadmin']}><ConversationView /></ProtectedRoute>} />
+          <Route path="/professional/*" element={<ProtectedRoute allowedRoles={['professional']}><ProfessionalPortal /></ProtectedRoute>} />
+          <Route path="/professional/dashboard" element={<ProtectedRoute allowedRoles={['professional']}><ProfessionalDashboard /></ProtectedRoute>} />
+          <Route path="/student/*" element={<ProtectedRoute allowedRoles={['student']}><StudentPortal /></ProtectedRoute>} />
+          <Route path="/student/dashboard" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+
+        {/* ✅ Globally available Jennifer assistant */}
+        <JenniferWidget />
+      </>
     </Suspense>
   );
 }

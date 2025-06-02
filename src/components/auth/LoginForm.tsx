@@ -13,7 +13,7 @@ import {
   Divider
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 
 export function LoginForm() {
@@ -23,6 +23,8 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = new URLSearchParams(location.search).get('redirect') || '/';
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -41,27 +43,31 @@ export function LoginForm() {
       const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
       if (authError) {
-        toast({ title: 'Login failed', description: authError.message, status: 'error', duration: 4000, isClosable: true });
+        toast({
+          title: 'Login failed',
+          description: authError.message,
+          status: 'error',
+          duration: 4000,
+          isClosable: true
+        });
         return;
       }
 
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
+      toast({
+        title: 'Login successful',
+        status: 'success',
+        duration: 2000,
+        isClosable: true
+      });
 
-      if (profileError || !profileData) {
-        toast({ title: 'Login error', description: 'Failed to fetch user role.', status: 'error', duration: 4000, isClosable: true });
-        return;
-      }
-
-      toast({ title: 'Login successful', status: 'success', duration: 2000, isClosable: true });
-
-      const role = profileData.role;
-      navigate(`/${role}`);
+      navigate(redirectTo);
     } catch (err) {
-      toast({ title: 'Unexpected error', description: 'Something went wrong.', status: 'error', duration: 4000 });
+      toast({
+        title: 'Unexpected error',
+        description: 'Something went wrong.',
+        status: 'error',
+        duration: 4000
+      });
     } finally {
       setLoading(false);
     }
@@ -92,7 +98,9 @@ export function LoginForm() {
           </InputGroup>
         </FormControl>
 
-        <Button colorScheme="blue" isLoading={loading} onClick={handleLogin}>Login</Button>
+        <Button colorScheme="blue" isLoading={loading} onClick={handleLogin}>
+          Login
+        </Button>
 
         <Text textAlign="right">
           <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
@@ -106,7 +114,7 @@ export function LoginForm() {
           onClick={() =>
             supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: window.location.origin + '/dashboard' }
+              options: { redirectTo: window.location.origin + redirectTo }
             })
           }
           colorScheme="red"
@@ -117,7 +125,7 @@ export function LoginForm() {
           onClick={() =>
             supabase.auth.signInWithOAuth({
               provider: 'github',
-              options: { redirectTo: window.location.origin + '/dashboard' }
+              options: { redirectTo: window.location.origin + redirectTo }
             })
           }
           bg="gray.800"
@@ -130,7 +138,7 @@ export function LoginForm() {
           onClick={() =>
             supabase.auth.signInWithOAuth({
               provider: 'apple',
-              options: { redirectTo: window.location.origin + '/dashboard' }
+              options: { redirectTo: window.location.origin + redirectTo }
             })
           }
           bg="black"

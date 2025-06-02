@@ -13,7 +13,7 @@ export const handler: Handler = async (event) => {
     // Validate request method
     if (event.httpMethod !== 'POST') {
       return {
-        ...createErrorResponse(405, 'Method not allowed'),
+        ...createErrorResponse('Method not allowed', 405),
         headers: corsHeaders
       };
     }
@@ -24,7 +24,7 @@ export const handler: Handler = async (event) => {
     // Validate login ID
     if (paymentData.loginId !== '5S35UDg3cec8') {
       return {
-        ...createErrorResponse(401, 'Invalid credentials'),
+        ...createErrorResponse('Invalid credentials', 401),
         headers: corsHeaders
       };
     }
@@ -45,9 +45,8 @@ export const handler: Handler = async (event) => {
     console.error('Payment processing error:', error);
     return {
       ...createErrorResponse(
-        500,
         'Payment processing failed',
-        process.env.NODE_ENV === 'development' ? error : undefined
+        500
       ),
       headers: getCorsHeaders(event)
     };

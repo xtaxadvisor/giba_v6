@@ -13,7 +13,7 @@ export const handler: Handler = async (event) => {
     // Validate request method
     if (event.httpMethod !== 'POST') {
       return {
-        ...createErrorResponse(405, 'Method not allowed'),
+        ...createErrorResponse('Method not allowed', 405),
         headers: corsHeaders
       };
     }
@@ -33,9 +33,10 @@ export const handler: Handler = async (event) => {
     console.error('Audit log error:', error);
     return {
       ...createErrorResponse(
-        500,
-        'Failed to store audit log',
-        process.env.NODE_ENV === 'development' ? error : undefined
+        process.env.NODE_ENV === 'development' && error instanceof Error
+          ? error.message
+          : 'Failed to store audit log',
+        500
       ),
       headers: getCorsHeaders(event)
     };

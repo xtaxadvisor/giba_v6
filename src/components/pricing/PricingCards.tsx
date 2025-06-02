@@ -1,5 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ServiceCard } from '../booking/ServiceCard';
+import { supabase } from '@/lib/supabase/client';
 
 const services = [
   {
@@ -33,6 +35,19 @@ const services = [
 ];
 
 const PricingCards: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleBook = async (serviceTitle: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const encodedType = encodeURIComponent(serviceTitle);
+
+    if (user) {
+      navigate(`/consultation/book?type=${encodedType}`);
+    } else {
+      navigate(`/login?redirect=/consultation/book&type=${encodedType}`);
+    }
+  };
+
   return (
     <section className="py-10 bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,7 +63,7 @@ const PricingCards: React.FC = () => {
               hourlyRate={service.hourlyRate}
               minimumHours={service.minimumHours}
               features={service.features}
-              onBook={() => console.log(`Book ${service.title}`)}
+              onBook={() => handleBook(service.title)}
               description={`Professional ${service.title} service`}
               price={service.basePrice.toString()}
               duration={service.minimumHours.toString()}

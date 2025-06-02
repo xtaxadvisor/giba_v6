@@ -1,57 +1,88 @@
-import { Bot, Shield, Clock, MessageSquare, Sparkles } from 'lucide-react';
+// JenniferVoiceAssistant.tsx
+import React, { useEffect, useRef, useState } from 'react';
 
-export function AIWelcomeMessage() {
+export default function JenniferVoiceAssistant() {
+  const [isListening, setIsListening] = useState(false);
+  const [status, setStatus] = useState("Idle");
+  const wsRef = useRef<WebSocket | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const startJenniferSession = async () => {
+    setStatus("Connecting to Jennifer...");
+
+    const res = await fetch("/.netlify/functions/start-jennifer", {
+      method: "POST"
+    });
+    const { client_secret } = await res.json();
+
+    const ws = new WebSocket(`wss://api.openai.com/v1/realtime/sessions/${client_secret}`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      setStatus("Jennifer is listening 🎤");
+      setIsListening(true);
+      startMicrophoneStream(ws);
+    };
+
+    ws.onmessage = (event) => {
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+      const audioBlob = new Blob([event.data], { type: 'audio/pcm' });
+      const reader = new FileReader();
+      reader.onload = () => {
+        audioCtxRef.current?.decodeAudioData(reader.result as ArrayBuffer, (buffer) => {
+          const source = audioCtxRef.current!.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioCtxRef.current!.destination);
+          source.start();
+        });
+      };
+      reader.readAsArrayBuffer(audioBlob);
+    };
+
+    ws.onerror = () => {
+      setStatus("Error connecting to Jennifer");
+    };
+
+    ws.onclose = () => {
+      setStatus("Jennifer session ended");
+      setIsListening(false);
+    };
+  };
+
+  const startMicrophoneStream = async (ws: WebSocket) => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = async (e) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64AudioMessage = btoa(reader.result as string);
+          ws.send(
+            JSON.stringify({
+              type: "input_audio_buffer.append",
+              audio: base64AudioMessage
+            })
+          );
+        };
+        reader.readAsBinaryString(e.data);
+      }
+    };
+
+    mediaRecorder.start(1000);
+  };
+
   return (
-    <div className="p-6 space-y-6">
-      <div className="text-center">
-        <div className="inline-flex p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl">
-          <Bot className="h-8 w-8 text-white" />
-        </div>
-        <h3 className="mt-4 text-xl font-semibold text-gray-900">
-          Welcome to GRAKON AI
-        </h3>
-        <p className="mt-2 text-gray-600">
-          I'm here to provide expert assistance with your tax and financial questions.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        {[
-          {
-            icon: Shield,
-            title: 'Expert Knowledge',
-            description: 'Access to professional tax & financial expertise'
-          },
-          {
-            icon: Clock,
-            title: '24/7 Available',
-            description: 'Get answers anytime, anywhere'
-          },
-          {
-            icon: MessageSquare,
-            title: 'Easy Communication',
-            description: 'Simple, clear explanations'
-          },
-          {
-            icon: Sparkles,
-            title: 'Smart Assistance',
-            description: 'Personalized help & recommendations'
-          }
-        ].map((feature, index) => (
-          <div
-            key={index}
-            className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <feature.icon className="h-6 w-6 text-blue-600 mb-2" />
-            <h4 className="text-sm font-medium text-gray-900">{feature.title}</h4>
-            <p className="text-xs text-gray-600 mt-1">{feature.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="text-center text-sm text-gray-600">
-        Start by asking a question or choose from the suggestions below
-      </div>
+    <div className="p-6 bg-white rounded shadow-md text-center">
+      <h2 className="text-xl font-semibold">🎙️ Talk to Jennifer</h2>
+      <p className="text-gray-600">{status}</p>
+      <button
+        className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        onClick={startJenniferSession}
+        disabled={isListening}
+      >
+        Start Talking
+      </button>
     </div>
   );
 }

@@ -1,106 +1,4 @@
-// components/forms/RegisterForm.tsx
-import { Mail, Lock, User, Building } from 'lucide-react';
-import { Input } from '../components/ui/Input';
-// import { Button } from '../components/ui/Button';
-import { Select } from '../components/ui/Select';
-
-interface RegisterFormProps {
-  formData: {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    role: string;
-    date: string;
-    phone: string;
-  };
-  setFormData: React.Dispatch<React.SetStateAction<{
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    role: string;
-    date: string;
-    phone: string;
-  }>>;
-  loading: boolean;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-}
-
-const RegisterForm = ({ formData, setFormData, loading, handleSubmit }: RegisterFormProps) => {
-  return (
-    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-      <div className="rounded-md shadow-sm -space-y-px">
-        <Input
-          id="name"
-          type="text"
-          label="Full Name"
-          icon={User}
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-          placeholder="John Doe"
-        />
-        <Input
-          id="email"
-          type="email"
-          label="Email address"
-          icon={Mail}
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-          placeholder="you@example.com"
-        />
-        <Input
-          id="password"
-          type="password"
-          label="Password"
-          icon={Lock}
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          required
-          placeholder="Password"
-        />
-        <Input
-          id="confirmPassword"
-          type="password"
-          label="Confirm Password"
-          icon={Lock}
-          value={formData.confirmPassword}
-          onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-          required
-          placeholder="Confirm Password"
-        />
-        <Select
-          label="Account Type"
-          options={[
-            { value: 'client', label: 'Client' },
-            { value: 'professional', label: 'Professional' },
-            { value: 'investor', label: 'Investor' }
-          ]}
-          value={formData.role}
-          onChange={(value) => setFormData({ ...formData, role: value })}
-          required
-        />
-      </div>
-
-      <Button
-        type="submit"
-        variant="primary"
-        className="w-full"
-        icon={Building}
-        disabled={loading}
-      >
-        {loading ? 'Creating Account...' : 'Create Account'}
-      </Button>
-    </form>
-  );
-};
-
-export { RegisterForm };
-
-
-// src/pages/RegisterPage.tsx
+// src/pages/RegisterPage.tsx (Enhanced: role-based redirect, secure metadata)
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, Link } from 'react-router-dom';
@@ -110,11 +8,8 @@ import { useNotificationStore } from '../lib/store';
 import { supabase } from '../lib/supabase/client';
 import RegisterFormComponent from '../components/forms/RegisterForm';
 
-// Removed duplicate RegisterPage function
-
-
-function RegisterPage() { // eslint-disable-line no-unused-vars 
-  const navigate = useNavigate(); // Ensure navigate is defined
+function RegisterPage() {
+  const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
   const supabaseContext = supabase;
   if (!supabaseContext || !supabaseContext.auth || !supabaseContext.auth.signUp) {
@@ -150,17 +45,16 @@ function RegisterPage() { // eslint-disable-line no-unused-vars
 
     setLoading(true);
     try {
-      const {
-        data,
-        error
-      } = await signUp({
+      const { data, error } = await signUp({
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
         options: {
           data: {
             full_name: formData.name,
-            role: formData.role
-          }
+            roles: [formData.role], // multi-role support
+            primary_role: formData.role // optional: for clarity
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
 
@@ -181,11 +75,14 @@ function RegisterPage() { // eslint-disable-line no-unused-vars
     }
   };
 
-  return ( 
+  return (
     <>
       <Helmet>
         <title>Register | ProTaxAdvisors</title>
-        <meta name="description" content="Create your ProTaxAdvisors account and access tailored tax and financial services." />
+        <meta
+          name="description"
+          content="Create your ProTaxAdvisors account and access tailored tax and financial services."
+        />
       </Helmet>
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
@@ -222,4 +119,4 @@ function RegisterPage() { // eslint-disable-line no-unused-vars
   );
 }
 
-  export default RegisterPage;
+export default RegisterPage;

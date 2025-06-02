@@ -6,7 +6,7 @@ interface AIHeaderProps {
   title?: string;
 }
 
-export function AIHeader({ onClose, title = 'GRAKON AI' }: AIHeaderProps) {
+export function AIHeader({ onClose, title = 'Jennifer' }: AIHeaderProps) {
   return (
     <div className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center space-x-2">
@@ -15,7 +15,7 @@ export function AIHeader({ onClose, title = 'GRAKON AI' }: AIHeaderProps) {
         </div>
         <div>
           <h3 className="font-medium text-gray-900">{title}</h3>
-          <p className="text-xs text-gray-500">Tax & Financial Expert</p>
+          <p className="text-xs text-gray-500">Your ProTaxAdvisors Assistant</p>
         </div>
       </div>
       <Button
