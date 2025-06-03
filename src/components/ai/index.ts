@@ -1,12 +1,10 @@
-// src/components/ai/index.ts (Enhanced for Jennifer Assistant)
+// src/components/ai/index.ts (Safeguarded export file)
 
-// Rebranded AI Assistant: Jennifer
-export { default as Jennifer } from './JenniferWidget';
+// Remove this risky line:
+// export { default as Jennifer } from './JenniferWidget';
 
-// Welcome & UI Components
-export { default as AIWelcomeMessage } from './AIWelcomeMessage';
+// Only export explicitly when needed
+export { default as AIWelcomeMessage } from './JenniferVoicePanel';
 export { AISuggestions } from './AISuggestions';
 export { AITypingIndicator } from './AITypingIndicator';
-
-// Full Chat UI & Voice Support
 export * from './chat';

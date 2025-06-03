@@ -19,12 +19,19 @@ export default function LoginPage() {
   const { user, hydrated } = useAuth();
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(() => {
+    return localStorage.getItem('lastRole') || null;
+  });
 
   useEffect(() => {
     if (!hydrated || !user) return;
 
-    const roles: string[] = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
+    const roles: string[] = Array.isArray(user.roles)
+      ? user.roles
+      : user.role
+      ? [user.role]
+      : [];
+
     const hasCompleted = (user as any)?.onboarding_complete;
 
     if (!roles.length) {
@@ -35,16 +42,14 @@ export default function LoginPage() {
 
     if (roles.length === 1) {
       const role = roles[0];
+      localStorage.setItem('lastRole', role);
       const path = hasCompleted ? `/${role}` : `/onboarding/${role}`;
       navigate(path, { replace: true });
-    }
-
-    if (roles.length > 1 && !selectedRole) {
-      // Wait for user to pick role via dropdown
       return;
     }
 
-    if (selectedRole) {
+    if (selectedRole && roles.includes(selectedRole)) {
+      localStorage.setItem('lastRole', selectedRole);
       const path = hasCompleted ? `/${selectedRole}` : `/onboarding/${selectedRole}`;
       navigate(path, { replace: true });
     }
@@ -59,13 +64,16 @@ export default function LoginPage() {
     );
   }
 
-  // If user is already authenticated but needs to pick a role
+  // Show role selector if user has multiple roles
   if (user && Array.isArray(user.roles) && user.roles.length > 1 && !selectedRole) {
     return (
       <Box maxW="md" mx="auto" mt={10}>
         <VStack spacing={6} align="stretch">
           <Heading size="md">Select a role to continue</Heading>
-          <Select placeholder="Choose your portal" onChange={(e) => setSelectedRole(e.target.value)}>
+          <Select
+            placeholder="Choose your portal"
+            onChange={(e) => setSelectedRole(e.target.value)}
+          >
             {user.roles.map((role: string) => (
               <option key={role} value={role}>
                 {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -76,7 +84,7 @@ export default function LoginPage() {
             colorScheme="indigo"
             onClick={() => {
               if (!selectedRole) {
-                addNotification('Please select a role.', 'warning');
+                addNotification('Please select a role.', 'info');
               }
             }}
           >

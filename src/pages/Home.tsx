@@ -10,7 +10,7 @@ import { Contact } from '../components/home/Contact';
 import { Header } from '../components/layout/Header';
 import BookingModal from '../components/booking/BookingModal';
 import PricingCards from '../components/pricing/PricingCards';
-import JenniferWidget from '@/components/ai/JenniferWidget'; // ✅ No curly braces
+
 
 
 export default function Home() {
@@ -40,7 +40,7 @@ export default function Home() {
         <Testimonials />
         <AboutUs />
         <Contact />
-         <JenniferWidget />
+         
       </main>
       <BookingModal
         isOpen={bookingModalOpen}

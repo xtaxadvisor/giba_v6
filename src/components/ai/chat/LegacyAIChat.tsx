@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { AIMessageList } from './AIMessageList';
 import { AIMessageInput } from './AIMessageInput';
-import AIWelcomeMessage from '../AIWelcomeMessage';
+import AIWelcomeMessage from '../JenniferVoicePanel';
 import { AISuggestions } from '../AISuggestions';
 import { AIHeader } from './AIHeader';
 import type { AIMessage } from '../../../types/ai';

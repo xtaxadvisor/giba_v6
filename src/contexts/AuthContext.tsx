@@ -20,6 +20,7 @@ export interface User {
   createdAt?: string;
   location?: string;
   role?: string;
+  roles?: string[]; // ✅ ADD THIS
   phone?: string;
   avatarUrl?: string;
   userType?: string;
@@ -85,7 +86,7 @@ useEffect(() => {
           try {
             const response = await supabase
               .from('profiles')
-              .select('role, full_name, location, phone')
+              .select('role, roles, full_name, location, phone')
               .eq('id', session.user.id)
               .maybeSingle();
             profileData = response.data;
@@ -100,14 +101,15 @@ useEffect(() => {
 
           if (profileData) {
             const restoredUser: User = {
-              id: session.user.id,
-              email: session.user.email ?? '',
-              fullName: profileData.full_name ?? '',
-              createdAt: session.user.created_at,
-              location: profileData.location ?? '',
-              role: profileData.role ?? '',
-              phone: profileData.phone ?? '',
-            };
+            id: session.user.id,
+            email: session.user.email ?? '',
+            fullName: profileData.full_name ?? '',
+            createdAt: session.user.created_at,
+            location: profileData.location ?? '',
+            role: profileData.role ?? '',
+            roles: profileData.roles ?? [profileData.role], // fallback if roles missing
+            phone: profileData.phone ?? '',
+};
 
             setUser(restoredUser);
             setProfile({ role: profileData.role });
