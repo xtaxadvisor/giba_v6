@@ -1,12 +1,19 @@
 // netlify/functions/send-email.ts
 import type { Handler } from '@netlify/functions';
+import { createClient } from '@supabase/supabase-js';
+
+// ✅ Secure Supabase admin client for logging or role-based logic
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Never expose this key on the client!
+);
 
 export const handler: Handler = async (event) => {
   console.log('📨 Email request received');
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { to, subject, html, replyTo } = body;
+    const { to, subject, html, replyTo, sentBy, purpose } = body;
 
     if (!to || !subject || !html) {
       return {
@@ -55,6 +62,21 @@ export const handler: Handler = async (event) => {
 
     const result = await response.json();
     console.log('✅ Email sent:', result);
+
+    // ✅ Optional: Log the email event to Supabase audit_logs table
+    if (sentBy || purpose) {
+      const { error: logError } = await supabaseAdmin.from('audit_logs').insert({
+        event: 'email_sent',
+        metadata: {
+          to,
+          subject,
+          replyTo,
+          sentBy: sentBy || 'anonymous',
+          purpose: purpose || 'unspecified'
+        }
+      });
+      if (logError) console.warn('⚠️ Failed to log email audit:', logError);
+    }
 
     return {
       statusCode: 200,

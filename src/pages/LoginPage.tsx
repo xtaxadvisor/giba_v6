@@ -1,33 +1,91 @@
-// src/pages/LoginPage.tsx
-import { Helmet } from 'react-helmet-async';
-import { useAuth } from '@/contexts/AuthContext';
-import { Box, Text } from '@chakra-ui/react';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import {
+  Box,
+  Text,
+  Select,
+  Spinner,
+  VStack,
+  Heading,
+  Button
+} from '@chakra-ui/react';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { LoginForm } from '@/components/auth/LoginForm';
+import { useNotificationStore } from '@/lib/store';
 
 export default function LoginPage() {
-  const { hydrated, user } = useAuth();
+  const { user, hydrated } = useAuth();
   const navigate = useNavigate();
+  const { addNotification } = useNotificationStore();
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (!hydrated || !user) return;
 
-    // Replace 'onboarding_complete' with the correct property name, e.g., 'onboardingComplete'
-    const hasCompletedOnboarding = (user as any).onboarding_complete;
+    const roles: string[] = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
+    const hasCompleted = (user as any)?.onboarding_complete;
 
-    const basePath = hasCompletedOnboarding
-      ? `/${user.role}`
-      : `/onboarding/${user.role}`;
-
-    if (user.role && ['client', 'professional', 'student', 'admin', 'investor'].includes(user.role)) {
-      console.log(`🔐 Authenticated as ${user.role} → redirecting to ${basePath}`);
-      navigate(basePath);
-    } else {
-      console.warn('🚫 Unknown or unauthorized role:', user.role);
+    if (!roles.length) {
+      addNotification('No role assigned. Contact support.', 'error');
       navigate('/unauthorized');
+      return;
     }
-  }, [hydrated, user, navigate]);
+
+    if (roles.length === 1) {
+      const role = roles[0];
+      const path = hasCompleted ? `/${role}` : `/onboarding/${role}`;
+      navigate(path, { replace: true });
+    }
+
+    if (roles.length > 1 && !selectedRole) {
+      // Wait for user to pick role via dropdown
+      return;
+    }
+
+    if (selectedRole) {
+      const path = hasCompleted ? `/${selectedRole}` : `/onboarding/${selectedRole}`;
+      navigate(path, { replace: true });
+    }
+  }, [hydrated, user, selectedRole, navigate, addNotification]);
+
+  if (!hydrated) {
+    return (
+      <Box textAlign="center" mt={20}>
+        <Spinner />
+        <Text mt={2}>Initializing session... Please wait.</Text>
+      </Box>
+    );
+  }
+
+  // If user is already authenticated but needs to pick a role
+  if (user && Array.isArray(user.roles) && user.roles.length > 1 && !selectedRole) {
+    return (
+      <Box maxW="md" mx="auto" mt={10}>
+        <VStack spacing={6} align="stretch">
+          <Heading size="md">Select a role to continue</Heading>
+          <Select placeholder="Choose your portal" onChange={(e) => setSelectedRole(e.target.value)}>
+            {user.roles.map((role: string) => (
+              <option key={role} value={role}>
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </option>
+            ))}
+          </Select>
+          <Button
+            colorScheme="indigo"
+            onClick={() => {
+              if (!selectedRole) {
+                addNotification('Please select a role.', 'warning');
+              }
+            }}
+          >
+            Continue
+          </Button>
+        </VStack>
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -35,13 +93,7 @@ export default function LoginPage() {
         <title>Login | ProTaxAdvisors</title>
       </Helmet>
 
-      {!hydrated ? (
-        <Box textAlign="center" mt={20}>
-          <Text>Initializing session... Please wait.</Text>
-        </Box>
-      ) : (
-        <LoginForm />
-      )}
+      <LoginForm />
     </>
   );
 }

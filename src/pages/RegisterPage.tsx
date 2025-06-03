@@ -1,73 +1,39 @@
-// src/pages/RegisterPage.tsx (Enhanced: role-based redirect, secure metadata)
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { useNotificationStore } from '../lib/store';
-import { supabase } from '../lib/supabase/client';
-import RegisterFormComponent from '../components/forms/RegisterForm';
+// src/pages/RegisterPage.tsx
+import { useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
+import { useNotificationStore } from '@/lib/store';
 
-function RegisterPage() {
-  const navigate = useNavigate();
-  const { addNotification } = useNotificationStore();
-  const supabaseContext = supabase;
-  if (!supabaseContext || !supabaseContext.auth || !supabaseContext.auth.signUp) {
-    throw new Error('Supabase context is not properly initialized.');
-  }
-  const { signUp } = supabaseContext.auth;
+export function RegisterPage() {
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('client');
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'client',
-    date: '',
-    phone: ''
-  });
+  const { addNotification } = useNotificationStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      addNotification('Passwords do not match', 'error');
-      return;
-    }
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
-    if (!passwordRegex.test(formData.password)) {
-      addNotification(
-        'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character.',
-        'error'
-      );
-      return;
-    }
-
     setLoading(true);
+
     try {
-      const { data, error } = await signUp({
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
         options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/auth/callback`, // ✅ use callback route
           data: {
-            full_name: formData.name,
-            roles: [formData.role], // multi-role support
-            primary_role: formData.role // optional: for clarity
-          },
-          emailRedirectTo: `${window.location.origin}/login`
+            full_name: fullName,
+            role
+          }
         }
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      addNotification('Registration successful! Please check your email to verify your account.', 'success');
-      navigate('/login');
-    } catch (error) {
-      console.error('Signup error:', error);
+      addNotification('📩 Magic link sent! Check your inbox.', 'success');
+    } catch (err) {
+      console.error('Signup error:', err);
       addNotification(
-        error instanceof Error ? error.message : 'Registration failed. Please try again.',
+        err instanceof Error ? err.message : 'Signup failed. Try again later.',
         'error'
       );
     } finally {
@@ -76,47 +42,43 @@ function RegisterPage() {
   };
 
   return (
-    <>
-      <Helmet>
-        <title>Register | ProTaxAdvisors</title>
-        <meta
-          name="description"
-          content="Create your ProTaxAdvisors account and access tailored tax and financial services."
-        />
-      </Helmet>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <Button
-              variant="ghost"
-              className="mb-4"
-              onClick={() => navigate('/')}
-              icon={ArrowLeft}
-            >
-              Back to Home
-            </Button>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Create your account
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{' '}
-              <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                sign in to your existing account
-              </Link>
-            </p>
-          </div>
-          {formData && (
-            <RegisterFormComponent
-              formData={formData}
-              setFormData={setFormData}
-              loading={loading}
-              handleSubmit={handleSubmit}
-            />
-          )}
-        </div>
-      </div>
-    </>
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto mt-10">
+      <h2 className="text-lg font-semibold">Sign up with Magic Link</h2>
+
+      <input
+        type="text"
+        placeholder="Full Name (optional)"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        className="w-full px-4 py-2 border rounded"
+      />
+
+      <input
+        type="email"
+        placeholder="you@example.com"
+        value={email}
+        required
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full px-4 py-2 border rounded"
+      />
+
+      <select
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+        className="w-full px-4 py-2 border rounded"
+      >
+        <option value="client">Client</option>
+        <option value="professional">Professional</option>
+        <option value="admin">Admin</option>
+      </select>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-indigo-600 text-white px-4 py-2 rounded disabled:opacity-50"
+      >
+        {loading ? 'Sending...' : 'Send Magic Link'}
+      </button>
+    </form>
   );
 }
-
-export default RegisterPage;

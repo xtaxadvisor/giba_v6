@@ -139,3 +139,4 @@ export function RoleManagement() {
     </div>
   );
 }
+export default RoleManagement;
