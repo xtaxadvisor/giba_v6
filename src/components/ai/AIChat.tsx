@@ -1,4 +1,4 @@
-// src/components/ai/AIChat.tsx (Full Production with Voice Upload, Whisper, LLM Summary, Auto-Logging)
+// ✅ src/components/ai/AIChat.tsx (Production-Ready w/ Voice Upload, Whisper, LLM Summary Logging)
 
 import { useEffect, useState, useRef } from 'react';
 import { AIMessageList } from './chat/AIMessageList';
@@ -8,7 +8,7 @@ import { AIHeader } from './AIHeader';
 import type { AIMessage } from '@/types/ai';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import JenniferVoicePanel from './JenniferVoicePanel'; // ✅ import default
+import JenniferVoicePanel from './JenniferVoicePanel';
 
 export interface AIChatProps {
   messages: AIMessage[];

@@ -1,4 +1,3 @@
-// src/pages/RegisterPage.tsx
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/lib/store';
@@ -6,12 +5,18 @@ import { useNotificationStore } from '@/lib/store';
 export function RegisterPage() {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('client');
+  const [role, setRole] = useState('');
   const [loading, setLoading] = useState(false);
   const { addNotification } = useNotificationStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!role) {
+      addNotification('Please select a role to continue.', 'error');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -19,10 +24,10 @@ export function RegisterPage() {
         email,
         options: {
           shouldCreateUser: true,
-          emailRedirectTo: `${window.location.origin}/auth/callback`, // ✅ use callback route
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: fullName,
-            role
+            roles: [role], // ✅ assuming Supabase `profiles.roles` is a text[]
           }
         }
       });
@@ -66,7 +71,9 @@ export function RegisterPage() {
         value={role}
         onChange={(e) => setRole(e.target.value)}
         className="w-full px-4 py-2 border rounded"
+        required
       >
+        <option value="">Select Role</option>
         <option value="client">Client</option>
         <option value="professional">Professional</option>
         <option value="admin">Admin</option>
