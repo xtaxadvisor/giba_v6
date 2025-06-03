@@ -35,7 +35,7 @@ export default function AuthCallback() {
         return;
       }
 
-      const role = profile.role;
+      const role = profile.role as 'admin' | 'client' | 'professional' | 'investor' | 'student';
       const redirectPath = {
         admin: '/admin/dashboard',
         client: '/client/dashboard',
