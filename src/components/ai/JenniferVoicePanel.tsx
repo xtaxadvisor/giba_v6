@@ -1,88 +1,84 @@
-// JenniferVoiceAssistant.tsx
+// ✅ src/components/ai/JenniferVoicePanel.tsx (Production-Ready)
 import React, { useEffect, useRef, useState } from 'react';
 
-export default function JenniferVoiceAssistant() {
+
+
+export interface JenniferVoicePanelProps {
+  onTranscript: ((transcript: string) => void | Promise<void>) | ((transcript: string, audioBlob: Blob) => void | Promise<void>);
+}
+
+const JenniferVoicePanel: React.FC<JenniferVoicePanelProps> = ({ onTranscript }) => {
   const [isListening, setIsListening] = useState(false);
-  const [status, setStatus] = useState("Idle");
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
+  const [status, setStatus] = useState('Idle');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
-  const startJenniferSession = async () => {
-    setStatus("Connecting to Jennifer...");
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
 
-    const res = await fetch("/.netlify/functions/start-jennifer", {
-      method: "POST"
-    });
-    const { client_secret } = await res.json();
-
-    const ws = new WebSocket(`wss://api.openai.com/v1/realtime/sessions/${client_secret}`);
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      setStatus("Jennifer is listening 🎤");
-      setIsListening(true);
-      startMicrophoneStream(ws);
-    };
-
-    ws.onmessage = (event) => {
-      if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
-      const audioBlob = new Blob([event.data], { type: 'audio/pcm' });
-      const reader = new FileReader();
-      reader.onload = () => {
-        audioCtxRef.current?.decodeAudioData(reader.result as ArrayBuffer, (buffer) => {
-          const source = audioCtxRef.current!.createBufferSource();
-          source.buffer = buffer;
-          source.connect(audioCtxRef.current!.destination);
-          source.start();
-        });
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunksRef.current.push(event.data);
       };
-      reader.readAsArrayBuffer(audioBlob);
-    };
 
-    ws.onerror = () => {
-      setStatus("Error connecting to Jennifer");
-    };
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob);
 
-    ws.onclose = () => {
-      setStatus("Jennifer session ended");
-      setIsListening(false);
-    };
-  };
+        setStatus('⏳ Transcribing...');
+        try {
+          const res = await fetch('/.netlify/functions/transcribe-and-log', {
+            method: 'POST',
+            body: formData
+          });
 
-  const startMicrophoneStream = async (ws: WebSocket) => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
+          const result = await res.json();
 
-    mediaRecorder.ondataavailable = async (e) => {
-      if (ws.readyState === WebSocket.OPEN) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64AudioMessage = btoa(reader.result as string);
-          ws.send(
-            JSON.stringify({
-              type: "input_audio_buffer.append",
-              audio: base64AudioMessage
-            })
-          );
-        };
-        reader.readAsBinaryString(e.data);
-      }
-    };
+          if (res.ok && result.transcript) {
+            await onTranscript(result.transcript, audioBlob);
+            setStatus('✅ Transcription complete.');
+          } else {
+            console.error('Transcription failed:', result.error);
+            setStatus('⚠️ Transcription failed.');
+          }
+        } catch (err) {
+          console.error('Error sending audio:', err);
+          setStatus('⚠️ Upload error.');
+        } finally {
+          setIsListening(false);
+        }
+      };
 
-    mediaRecorder.start(1000);
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsListening(true);
+      setStatus('🎤 Recording...');
+
+      setTimeout(() => {
+        mediaRecorder.stop();
+        setStatus('🔄 Processing...');
+      }, 5000); // Record for 5 seconds
+    } catch (err) {
+      console.error('Microphone error:', err);
+      setStatus('❌ Microphone access denied.');
+    }
   };
 
   return (
-    <div className="p-6 bg-white rounded shadow-md text-center">
-      <h2 className="text-xl font-semibold">🎙️ Talk to Jennifer</h2>
-      <p className="text-gray-600">{status}</p>
+    <div className="mt-2 text-center">
       <button
-        className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-        onClick={startJenniferSession}
+        onClick={startRecording}
         disabled={isListening}
+        className="px-4 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
       >
-        Start Talking
+        {isListening ? 'Listening...' : '🎤 Start Voice Recording'}
       </button>
+      <p className="text-xs text-gray-500 mt-1">{status}</p>
     </div>
   );
-}
+};
+
+export default JenniferVoicePanel;

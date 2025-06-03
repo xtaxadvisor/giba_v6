@@ -1,4 +1,5 @@
-// ✅ Enhanced AIChat.tsx with JenniferVoicePanel integration, audio transcription logging, and summarization
+// src/components/ai/AIChat.tsx (Full Production with Voice Upload, Whisper, LLM Summary, Auto-Logging)
+
 import { useEffect, useState, useRef } from 'react';
 import { AIMessageList } from './chat/AIMessageList';
 import { AIMessageInput } from './chat/AIMessageInput';
@@ -7,41 +8,8 @@ import { AIHeader } from './AIHeader';
 import type { AIMessage } from '@/types/ai';
 import { supabase } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import React from 'react';
+import JenniferVoicePanel from './JenniferVoicePanel'; // ✅ import default
 
-export interface JenniferVoicePanelProps {
-  onTranscript: (transcript: string) => void | Promise<void>;
-}
-
-const JenniferVoicePanel: React.FC<JenniferVoicePanelProps> = ({ onTranscript }) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
-
-  // Placeholder UI for JenniferVoicePanel
-  return (
-    <div>
-      <button
-        onClick={() => {
-          setIsRecording((prev) => !prev);
-          // Simulate a transcript for demonstration
-          if (!isRecording) {
-            const fakeTranscript = "This is a sample transcript.";
-            setTranscript(fakeTranscript);
-            onTranscript(fakeTranscript);
-          }
-        }}
-      >
-        {isRecording ? 'Stop Recording' : 'Start Recording'}
-      </button>
-      <div>
-        <strong>Transcript:</strong> {transcript}
-      </div>
-    </div>
-  );
-};
-// ... rest of the code remains the same
-
-export default JenniferVoicePanel;
 export interface AIChatProps {
   messages: AIMessage[];
   onSendMessage: (message: string) => void;
@@ -50,7 +18,13 @@ export interface AIChatProps {
   onClose?: () => void;
 }
 
-export function AIChat({ messages: initialMessages, onSendMessage, isLoading, error, onClose }: AIChatProps) {
+export function AIChat({
+  messages: initialMessages,
+  onSendMessage,
+  isLoading,
+  error,
+  onClose
+}: AIChatProps) {
   const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
   const chatRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -62,7 +36,7 @@ export function AIChat({ messages: initialMessages, onSendMessage, isLoading, er
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) setMessages(parsed);
       } catch {
-        console.warn('💾 Failed to parse chat history.');
+        console.warn('💾 Could not restore chat history');
       }
     }
   }, []);
@@ -71,32 +45,46 @@ export function AIChat({ messages: initialMessages, onSendMessage, isLoading, er
     localStorage.setItem('jennifer.chat.history', JSON.stringify(messages));
   }, [messages]);
 
-  const handleVoiceTranscript = async (transcript: string) => {
-    if (!transcript) return;
+  const handleVoiceTranscript = async (transcript: string, audioBlob: Blob) => {
+    if (!transcript || !audioBlob) return;
 
     const userMsg: AIMessage = { role: 'user', content: transcript };
     setMessages((prev) => [...prev, userMsg]);
     onSendMessage(transcript);
 
     try {
-      // Log transcription to audit_logs
-      await supabase.from('audit_logs').insert({
-        user_id: user?.id ?? null,
-        event: 'jennifer_voice_transcript',
-        metadata: { transcript, timestamp: new Date().toISOString() }
-      });
+      const filename = `voice_${Date.now()}.webm`;
+      const { data, error: uploadError } = await supabase.storage
+        .from('voice-recordings')
+        .upload(filename, audioBlob, {
+          contentType: 'audio/webm',
+          upsert: false
+        });
 
-      // Send to summarizer (optional)
-      const res = await fetch('/.netlify/functions/summarize-transcript', {
+      if (uploadError) throw uploadError;
+
+      const { publicUrl } = supabase.storage.from('voice-recordings').getPublicUrl(filename).data;
+      if (!publicUrl) throw new Error('Failed to retrieve public audio URL');
+
+      const res = await fetch('/.netlify/functions/transcribe-and-log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript })
+        body: JSON.stringify({
+          audio_url: publicUrl,
+          user_id: user?.id ?? null,
+          source: 'voice'
+        })
       });
 
-      const { summary } = await res.json();
-      setMessages((prev) => [...prev, { role: 'assistant', content: `📄 Summary: ${summary}` }]);
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Unknown transcription error');
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `📄 Summary: ${result.summary}` }
+      ]);
     } catch (err) {
-      console.error('🔴 Transcript processing failed:', err);
+      console.error('🎤 Whisper/GPT logging failed:', err);
     }
   };
 
@@ -106,13 +94,10 @@ export function AIChat({ messages: initialMessages, onSendMessage, isLoading, er
 
       <div className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <>
-           
-            <AISuggestions
-              suggestions={['How can you help?', 'Schedule a consultation', 'Upload a document']}
-              onSelect={onSendMessage}
-            />
-          </>
+          <AISuggestions
+            suggestions={['How can you help?', 'Schedule a consultation', 'Upload a document']}
+            onSelect={onSendMessage}
+          />
         ) : (
           <AIMessageList messages={messages} isTyping={isLoading} />
         )}
@@ -138,3 +123,5 @@ export function AIChat({ messages: initialMessages, onSendMessage, isLoading, er
     </div>
   );
 }
+
+export default AIChat;
