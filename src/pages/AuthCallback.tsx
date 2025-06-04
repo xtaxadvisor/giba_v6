@@ -1,12 +1,13 @@
-// src/pages/AuthCallback.tsx
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/lib/store';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
+  const { setUser } = useAuth();
 
   useEffect(() => {
     const processLogin = async () => {
@@ -22,34 +23,45 @@ export default function AuthCallback() {
       const user = session.user;
       console.log('🔐 Supabase session found:', user.email);
 
-      // Fetch the profile to get role
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role')
+        .select('full_name, role, roles')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profileError || !profile?.role) {
-        console.warn('⚠️ No profile role found, redirecting to default dashboard');
-        navigate('/dashboard');
-        return;
+      if (profileError) {
+        console.warn('⚠️ No profile found:', profileError.message);
       }
 
-      const role = profile.role as 'admin' | 'client' | 'professional' | 'investor' | 'student';
+      const hydratedUser = {
+        id: user.id,
+        email: user.email,
+        fullName: profile?.full_name ?? '',
+        role: profile?.role ?? '',
+        roles: profile?.roles ?? [],
+        createdAt: user.created_at
+      };
+
+      setUser(hydratedUser);
+      localStorage.setItem('currentUser', JSON.stringify(hydratedUser));
+
+      type Role = 'admin' | 'client' | 'professional' | 'investor' | 'student';
+      const primaryRole: Role = (profile?.role as Role) || 'client';
+
       const redirectPath = {
         admin: '/admin/dashboard',
         client: '/client/dashboard',
         professional: '/professional/dashboard',
         investor: '/investor/dashboard',
         student: '/student/dashboard'
-      }[role] || '/dashboard';
+      }[primaryRole] || '/dashboard';
 
-      addNotification(`✅ Welcome back, ${role}`, 'success');
+      addNotification(`✅ Welcome back, ${primaryRole}`, 'success');
       navigate(redirectPath);
     };
 
     processLogin();
-  }, [navigate, addNotification]);
+  }, [navigate, addNotification, setUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center text-gray-600">

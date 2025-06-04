@@ -58,7 +58,10 @@ export function useJenniferChat() {
       const userMessage: AIMessage = { role: 'user', content: clean };
       setMessages(prev => [...prev, userMessage]);
 
-      const response = await jenniferAI.getResponse(clean);
+      let response = '';
+      await jenniferAI.streamResponse(clean, (chunk: string) => {
+        response += chunk;
+      });
 
       const assistantMessage: AIMessage = { role: 'assistant', content: response };
       setMessages(prev => [...prev, assistantMessage]);

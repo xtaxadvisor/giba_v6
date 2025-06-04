@@ -1,99 +1,74 @@
+// ✅ src/services/ai/JenniferClient.ts (Enhanced with logging, streaming, and signed upload support)
+
 import { supabase } from '@/lib/supabase/client';
 
-const API_ENDPOINT = '/.netlify/functions/ask-jennifer'; // ✅ Netlify function endpoint
+const API_ENDPOINT = '/.netlify/functions/ask-jennifer';
 
 export const jenniferAI = {
-  // 🔹 Get chat response from Jennifer AI
-  async getResponse(prompt: string): Promise<string> {
-    try {
-      const res = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      });
+  // ✅ 1. Stream OpenAI chat response token-by-token (experimental, use with SSE-capable endpoint)
+  async streamResponse(prompt: string, onChunk: (chunk: string) => void): Promise<void> {
+    const res = await fetch(`${API_ENDPOINT}/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Jennifer failed to respond: ${errText}`);
-      }
+    if (!res.body) throw new Error('Streaming failed. No response body.');
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let done = false;
 
-      const json = await res.json();
-      return json?.reply || '⚠️ Jennifer was unable to generate a response.';
-    } catch (err) {
-      console.error('🛑 JenniferAI.getResponse error:', err);
-      throw err;
+    while (!done) {
+      const { value, done: streamDone } = await reader.read();
+      done = streamDone;
+      const chunk = decoder.decode(value);
+      onChunk(chunk);
     }
   },
 
-  // 🔹 Upload file to Supabase Storage and return public URL
-  async uploadFileToStorage(file: File, userId: string): Promise<string> {
-    const path = `${userId}/${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('documents')
-      .upload(path, file, { upsert: true });
+  // ✅ 2. Upload file with signed URL support (for private buckets)
+  async uploadPrivateFile(file: File, userId: string): Promise<string> {
+    const path = `${userId}/${Date.now()}_${file.name}`;
 
-    if (uploadError) {
-      console.error('🛑 Supabase upload error:', uploadError.message);
-      throw new Error('Upload to storage failed');
+    const { data: signedURLData, error: signedError } = await supabase.storage
+      .from('documents')
+      .createSignedUploadUrl(path);
+
+    if (signedError || !signedURLData?.signedUrl) {
+      console.error('🛑 Signed upload URL error:', signedError);
+      throw new Error('Could not create signed upload URL');
+    }
+
+    const uploadRes = await fetch(signedURLData.signedUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file,
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error('Failed to upload to signed URL');
     }
 
     const { data } = supabase.storage.from('documents').getPublicUrl(path);
-
-    if (!data?.publicUrl) {
-      throw new Error('Failed to generate public URL for uploaded file.');
-    }
-
+    if (!data?.publicUrl) throw new Error('No public URL returned');
     return data.publicUrl;
   },
 
-  // 🔹 Summarize document using OpenAI based on public URL
-  async summarizeDocument(publicUrl: string): Promise<string> {
-    try {
-      const res = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `📄 Please summarize the document at this link and highlight any incomplete or missing sections:\n\n${publicUrl}`
-        })
-      });
+  // ✅ 3. Log user and assistant messages into ai_messages table
+  async logMessage(params: {
+    userId: string;
+    role: 'user' | 'assistant';
+    content: string;
+    source?: string;
+  }): Promise<void> {
+    const { userId, role, content, source = 'chat' } = params;
+    const { error } = await supabase.from('ai_messages').insert({
+      user_id: userId,
+      role,
+      message: content,
+      source,
+    });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Summarization failed: ${errText}`);
-      }
-
-      const json = await res.json();
-      return json?.reply || '⚠️ No summary could be generated.';
-    } catch (err) {
-      console.error('🛑 summarizeDocument error:', err);
-      throw err;
-    }
+    if (error) console.error('🛑 Logging failed:', error.message);
   },
-
-  // 🔹 Remind user about missing documents from Supabase
-  async remindMissingDocuments(userId: string): Promise<string> {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('missing_documents')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('🛑 Missing documents fetch error:', error.message);
-        return '⚠️ Could not retrieve your missing documents.';
-      }
-
-      const docs: string[] = data?.missing_documents || [];
-
-      if (docs.length === 0) {
-        return '✅ All required documents are submitted.';
-      }
-
-      return `📬 You’re missing the following documents:\n- ${docs.join('\n- ')}\nPlease upload them to complete your file.`;
-    } catch (err) {
-      console.error('🛑 remindMissingDocuments error:', err);
-      return '⚠️ Document check failed.';
-    }
-  }
 };

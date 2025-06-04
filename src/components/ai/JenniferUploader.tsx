@@ -26,7 +26,18 @@ export function JenniferUploader({ onAnalysis }: { onAnalysis?: (summary: string
       addNotification('📂 File uploaded successfully', 'success');
 
       const { data: download } = supabase.storage.from('jennifer-docs').getPublicUrl(filePath);
-      const summary = await jenniferAI.summarizeDocument(download.publicUrl);
+      // Replace with the correct method from jenniferAI, for example:
+      // const summary = await jenniferAI.streamResponse(download.publicUrl, ...);
+      // Or implement summarizeDocument in jenniferAI if needed.
+
+      // Example using streamResponse and collecting the summary:
+      let summary = '';
+      await jenniferAI.streamResponse(
+        download.publicUrl,
+        (chunk: string) => {
+          summary += chunk;
+        }
+      );
 
       if (onAnalysis) onAnalysis(summary);
     } catch (err: any) {

@@ -1,4 +1,3 @@
-// ✅ src/pages/RegisterPage.tsx (Multi-Role, Auto-Profile, CAPTCHA-ready)
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/lib/store';
@@ -10,15 +9,12 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const { addNotification } = useNotificationStore();
 
-  const allowedDomains = ['protaxadvisors.tax'];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const domain = email.split('@')[1];
-    if (!allowedDomains.includes(domain)) {
-      addNotification('Unauthorized email domain.', 'error');
+    if (!roles.length) {
+      addNotification('⚠️ Please select at least one role.', 'error');
       setLoading(false);
       return;
     }
@@ -57,8 +53,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto mt-10">
-      <h2 className="text-lg font-semibold text-center">Register with Magic Link</h2>
+    <form onSubmit={handleSubmit} className="space-y-5 max-w-md mx-auto mt-10 p-6 border rounded shadow">
+      <h2 className="text-xl font-semibold text-center text-gray-800">Register with Magic Link</h2>
 
       <input
         type="text"
@@ -71,7 +67,7 @@ export default function RegisterPage() {
 
       <input
         type="email"
-        placeholder="you@protaxadvisors.tax"
+        placeholder="you@example.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         className="w-full px-4 py-2 border rounded shadow-sm"
@@ -79,19 +75,18 @@ export default function RegisterPage() {
       />
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium">Choose your roles:</legend>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" onChange={() => toggleRole('client')} /> Client
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" onChange={() => toggleRole('professional')} /> Professional
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" onChange={() => toggleRole('investor')} /> Investor
-        </label>
+        <legend className="text-sm font-medium text-gray-700 mb-1">Choose your roles:</legend>
+        {['client', 'professional', 'investor'].map((role) => (
+          <label key={role} className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              onChange={() => toggleRole(role)}
+              checked={roles.includes(role)}
+            />
+            <span className="capitalize">{role}</span>
+          </label>
+        ))}
       </fieldset>
-
-      {/* You can wire in hCaptcha or Google reCAPTCHA here */}
 
       <button
         type="submit"
