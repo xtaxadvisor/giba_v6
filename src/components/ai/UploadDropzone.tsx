@@ -20,7 +20,7 @@ export function UploadDropzone({ onUploadComplete }: UploadDropzoneProps) {
     try {
       // Replace 'user-id-here' with the actual user ID from your auth context/store
       const userId = 'user-id-here';
-      const publicUrl = await jenniferAI.uploadFileToStorage(file, userId);
+      const publicUrl = await jenniferAI.uploadPrivateFile(file, userId);
       addNotification(`📂 ${file.name} uploaded`, 'success');
 
       const summary = await jenniferAI.summarizeDocument(publicUrl);

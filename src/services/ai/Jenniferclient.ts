@@ -3,8 +3,28 @@
 import { supabase } from '@/lib/supabase/client';
 
 const API_ENDPOINT = '/.netlify/functions/ask-jennifer';
+interface LogMessageParams {
+  userId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  source?: string;
+}
 
-export const jenniferAI = {
+interface JenniferAI {
+  uploadFileToStorage: (file: File, userId: string) => Promise<any>;
+  summarizeDocument: (url: string) => Promise<any>;
+  getResponse: (prompt: string) => Promise<any>;
+  streamResponse: (prompt: string, onChunk: (chunk: string) => void) => Promise<void>;
+  uploadPrivateFile: (file: File, userId: string) => Promise<string>;
+  logMessage: (params: LogMessageParams) => Promise<void>;
+}
+
+export const jenniferAI: JenniferAI = {
+  uploadFileToStorage: async (file: File, userId: string): Promise<any> => { /* ... */ },
+  summarizeDocument: async (url: string): Promise<any> => { /* ... */ },
+  getResponse: async (prompt: string): Promise<any> => { /* ... */ },
+  // others...
+
   // ✅ 1. Stream OpenAI chat response token-by-token (experimental, use with SSE-capable endpoint)
   async streamResponse(prompt: string, onChunk: (chunk: string) => void): Promise<void> {
     const res = await fetch(`${API_ENDPOINT}/stream`, {
@@ -55,12 +75,7 @@ export const jenniferAI = {
   },
 
   // ✅ 3. Log user and assistant messages into ai_messages table
-  async logMessage(params: {
-    userId: string;
-    role: 'user' | 'assistant';
-    content: string;
-    source?: string;
-  }): Promise<void> {
+  async logMessage(params: LogMessageParams): Promise<void> {
     const { userId, role, content, source = 'chat' } = params;
     const { error } = await supabase.from('ai_messages').insert({
       user_id: userId,
