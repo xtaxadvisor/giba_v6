@@ -1,95 +1,99 @@
 import { supabase } from '@/lib/supabase/client';
 
-const API_ENDPOINT = '/api/ask-jennifer'; // ✅ Make sure this exists as a Netlify function
+const API_ENDPOINT = '/.netlify/functions/ask-jennifer'; // ✅ Netlify function endpoint
 
 export const jenniferAI = {
-  // ✅ Core AI response
+  // 🔹 Get chat response from Jennifer AI
   async getResponse(prompt: string): Promise<string> {
     try {
-      const response = await fetch(API_ENDPOINT, {
+      const res = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt })
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
+      if (!res.ok) {
+        const errText = await res.text();
         throw new Error(`Jennifer failed to respond: ${errText}`);
       }
 
-      const json = await response.json();
-      return json?.reply || 'Sorry, I wasn\'t able to help with that.';
+      const json = await res.json();
+      return json?.reply || '⚠️ Jennifer was unable to generate a response.';
     } catch (err) {
-      console.error('JenniferAI.getResponse error:', err);
+      console.error('🛑 JenniferAI.getResponse error:', err);
       throw err;
     }
   },
 
-  // ✅ Upload file to Supabase Storage
+  // 🔹 Upload file to Supabase Storage and return public URL
   async uploadFileToStorage(file: File, userId: string): Promise<string> {
     const path = `${userId}/${file.name}`;
-    const { error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('documents')
       .upload(path, file, { upsert: true });
 
-    if (error) {
-      console.error('Upload error:', error.message);
-      throw new Error('Failed to upload file');
+    if (uploadError) {
+      console.error('🛑 Supabase upload error:', uploadError.message);
+      throw new Error('Upload to storage failed');
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from('documents')
-      .getPublicUrl(path);
+    const { data } = supabase.storage.from('documents').getPublicUrl(path);
 
-    if (!publicUrlData?.publicUrl) {
-      throw new Error('Could not generate public URL');
+    if (!data?.publicUrl) {
+      throw new Error('Failed to generate public URL for uploaded file.');
     }
 
-    return publicUrlData.publicUrl;
+    return data.publicUrl;
   },
 
-  // ✅ Summarize a document after upload
+  // 🔹 Summarize document using OpenAI based on public URL
   async summarizeDocument(publicUrl: string): Promise<string> {
     try {
-      const response = await fetch(API_ENDPOINT, {
+      const res = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `Summarize the following document and highlight any missing or incomplete sections:\n${publicUrl}`
+          prompt: `📄 Please summarize the document at this link and highlight any incomplete or missing sections:\n\n${publicUrl}`
         })
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Failed to summarize document: ${errText}`);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Summarization failed: ${errText}`);
       }
 
-      const json = await response.json();
-      return json?.reply || 'No summary was returned.';
-    } catch (error) {
-      console.error('summarizeDocument error:', error);
-      throw error;
+      const json = await res.json();
+      return json?.reply || '⚠️ No summary could be generated.';
+    } catch (err) {
+      console.error('🛑 summarizeDocument error:', err);
+      throw err;
     }
   },
 
-  // ✅ Check user’s missing docs
+  // 🔹 Remind user about missing documents from Supabase
   async remindMissingDocuments(userId: string): Promise<string> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('missing_documents')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('missing_documents')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Missing docs fetch error:', error.message);
-      return '⚠️ Unable to check for missing documents at this time.';
+      if (error) {
+        console.error('🛑 Missing documents fetch error:', error.message);
+        return '⚠️ Could not retrieve your missing documents.';
+      }
+
+      const docs: string[] = data?.missing_documents || [];
+
+      if (docs.length === 0) {
+        return '✅ All required documents are submitted.';
+      }
+
+      return `📬 You’re missing the following documents:\n- ${docs.join('\n- ')}\nPlease upload them to complete your file.`;
+    } catch (err) {
+      console.error('🛑 remindMissingDocuments error:', err);
+      return '⚠️ Document check failed.';
     }
-
-    const docs = data?.missing_documents || [];
-    if (docs.length === 0) {
-      return '✅ All your required documents are submitted.';
-    }
-
-    return `📬 You’re still missing the following documents:\n- ${docs.join('\n- ')}\nPlease upload them to proceed.`;
   }
 };

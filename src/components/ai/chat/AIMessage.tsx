@@ -1,6 +1,6 @@
 import { Bot, User } from 'lucide-react';
 import { AIResponseActions } from './AIResponseActions';
-import type { AIMessage as AIMessageType } from '../../../types/ai';
+import type { AIMessage as AIMessageType } from '@/types/ai';
 
 interface AIMessageProps {
   message: AIMessageType;
@@ -15,7 +15,8 @@ export function AIMessage({ message, isLast }: AIMessageProps) {
   };
 
   const handleFeedback = (isPositive: boolean) => {
-    console.log('Feedback:', isPositive);
+    // In production: send this to a feedback table or analytics service
+    console.log('✅ Feedback for response:', isPositive);
   };
 
   return (
@@ -27,23 +28,19 @@ export function AIMessage({ message, isLast }: AIMessageProps) {
           </div>
         </div>
       )}
-      
+
       <div className={`flex flex-col max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
         <div
-          className={`rounded-lg px-4 py-2 ${
-            isUser 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-100 text-gray-900'
+          className={`rounded-lg px-4 py-2 text-sm whitespace-pre-wrap ${
+            isUser ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'
           }`}
         >
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          {message.content}
         </div>
 
+        {/* Show copy/feedback only for assistant and only for the latest message */}
         {!isUser && isLast && (
-          <AIResponseActions
-            onCopy={handleCopy}
-            onFeedback={handleFeedback}
-          />
+          <AIResponseActions onCopy={handleCopy} onFeedback={handleFeedback} />
         )}
       </div>
 

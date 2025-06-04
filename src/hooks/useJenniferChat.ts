@@ -1,13 +1,10 @@
-// src/hooks/useJenniferChat.ts
+// ✅ src/hooks/useJenniferChat.ts (Production Ready)
 import { useEffect, useRef, useState } from 'react';
 import type { AIMessage } from '@/types/ai';
 import { useNotificationStore } from '@/lib/store';
 import { jenniferAI } from '@/services/ai/Jenniferclient';
 import { supabase } from '@/lib/supabase/client';
 
-/**
- * Hook to manage Jennifer AI chat, real-time syncing, and message sending.
- */
 export function useJenniferChat() {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +15,6 @@ export function useJenniferChat() {
   useEffect(() => {
     isMounted.current = true;
 
-    // ✅ Dynamically create a fresh channel instance (prevents double subscribe)
     const channel = supabase.channel('jennifer-chat', {
       config: {
         broadcast: { self: true },
@@ -33,7 +29,7 @@ export function useJenniferChat() {
           setMessages(prev => [...prev, { role: 'assistant', content: response }]);
         }
       })
-      .subscribe((status) => {
+      .subscribe(status => {
         if (status === 'SUBSCRIBED') {
           console.log('✅ Jennifer chat channel subscribed');
           channel.track({ jennifer_active: true });
@@ -67,7 +63,6 @@ export function useJenniferChat() {
       const assistantMessage: AIMessage = { role: 'assistant', content: response };
       setMessages(prev => [...prev, assistantMessage]);
 
-      // ✅ Safely send broadcast via dynamic channel
       await channelRef.current?.send({
         type: 'broadcast',
         event: 'jennifer-response',

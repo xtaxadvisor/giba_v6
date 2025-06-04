@@ -1,7 +1,7 @@
 // src/routes/AppRoutes.tsx
 import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { RegisterPage } from '@/pages/RegisterPage';
+import RegisterPage from '@/pages/RegisterPage';
 import HomePage from '../pages/Home';
 import SameDayServicesPage from '../pages/services/SameDayServices';
 import NotFoundPage from '../components/shared/NotFoundPage';

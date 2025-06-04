@@ -1,6 +1,10 @@
+// Core AI Orchestration Layer
 export * from './AIManager';
-// Ensure the file exists or update the path if necessary
-// export * from './client/OpenAIClient'; // Commented out due to missing module
+
+// Optional clients: Add only if you have actual implementation
+// export * from './client/OpenAIClient'; // ✅ Uncomment when client exists
+
+// Modular services
 export * from './core/AICore';
 export * from './metrics/AIMetricsManager';
 export * from './history/AIHistoryManager';
