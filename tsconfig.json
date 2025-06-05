@@ -1,5 +1,7 @@
 {
-  "compilerOptions": {
+  // ...existing code...
+    "$schema": "https://json.schemastore.org/tsconfig.v1.json", 
+    "compilerOptions": {
     "target": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
@@ -17,8 +19,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["node"]
   },
   "include": ["src", "vite.config.ts", "vite.config.js"],
   "exclude": ["node_modules", "dist"]
 }
+

@@ -4,6 +4,11 @@ import { useNotificationStore } from '@/lib/store';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+console.log('🧪 Loaded RECAPTCHA_SITE_KEY:', RECAPTCHA_SITE_KEY);
+
+if (!RECAPTCHA_SITE_KEY) {
+  console.warn('⚠️ Environment variable missing: NEXT_PUBLIC_RECAPTCHA_SITE_KEY');
+}
 
 
 const roleDescriptions: Record<string, string> = {
@@ -159,10 +164,16 @@ export default function RegisterPage() {
       </label>
 
       <div className="mt-3">
-        <ReCAPTCHA
-          sitekey={RECAPTCHA_SITE_KEY}
-          onChange={token => setRecaptchaToken(token)}
-        />
+        {RECAPTCHA_SITE_KEY ? (
+          <ReCAPTCHA
+            sitekey={RECAPTCHA_SITE_KEY}
+            onChange={token => setRecaptchaToken(token)}
+          />
+        ) : (
+          <p className="text-red-500 text-sm">
+            ⚠️ reCAPTCHA site key missing. Please check your environment variables.
+          </p>
+        )}
       </div>
 
       <button

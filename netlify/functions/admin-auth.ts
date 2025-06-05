@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Handler } from '@netlify/functions';
 import { handleCors, getCorsHeaders } from './utils/cors';
 import { validateCredentials, generateToken, createAdminUser } from './utils/auth';
