@@ -1,12 +1,13 @@
-// src/main.tsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { BrowserTracing, reactRouterV6Instrumentation } from '@sentry/react';
 import {
   matchRoutes, createRoutesFromChildren,
   useLocation, useNavigationType
 } from 'react-router-dom';
+
 import { addInstrumentationHandler } from '@sentry/utils';
 import { instrumentFetchRequest } from './utils/instrumentFetch';
 import type { Span, HandlerDataFetch } from '@sentry/types';
@@ -17,12 +18,12 @@ import './index.css';
 import { Providers } from './Providers';
 import AppRoutes from './routes/AppRoutes';
 import { JenniferChatProvider } from '@/contexts/JenniferChatContext';
-import ErrorBoundary from '@/components/ui/ErrorBoundary'; // ✅ Add this
+import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
 const rootContainer = document.getElementById('root')!;
 const appRoot = createRoot(rootContainer);
 
-// Sentry setup (same as you already had)
+// Sentry setup
 const sentryInstrumentation = reactRouterV6Instrumentation(
   React.useEffect, useLocation, useNavigationType,
   createRoutesFromChildren, matchRoutes
@@ -39,19 +40,39 @@ addInstrumentationHandler('fetch', (handlerData: HandlerDataFetch) => {
 });
 
 console.log('✅ React App is rendering...');
+
 appRoot.render(
-<React.StrictMode>
-  <ErrorBoundary>
-    <Providers>
-      <AppRoutes />
-    </Providers>
-  </ErrorBoundary>
-</React.StrictMode>
+  <React.StrictMode>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <JenniferChatProvider>
+          <Providers>
+            <AppRoutes />
+          </Providers>
+        </JenniferChatProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  </React.StrictMode>
 );
 
+// Hot reload
 if (import.meta.hot) {
   import.meta.hot.accept();
   import.meta.hot.dispose(() => {
     appRoot.unmount();
+  });
+}
+
+// ✅ Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (registration) => {
+        console.log('✅ SW registered: ', registration);
+      },
+      (err) => {
+        console.log('❌ SW registration failed: ', err);
+      }
+    );
   });
 }
