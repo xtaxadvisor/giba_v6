@@ -1,7 +1,7 @@
 // netlify/functions/ask-jennifer.ts
 import { Handler } from '@netlify/functions';
 import { OpenAI } from 'openai';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -70,3 +70,6 @@ export const handler: Handler = async (event) => {
     };
   }
 };
+function createClient(url: string, serviceRoleKey: string): SupabaseClient {
+  return createSupabaseClient(url, serviceRoleKey);
+}

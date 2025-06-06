@@ -1,6 +1,6 @@
 // netlify/functions/send-email.ts
 import type { Handler } from '@netlify/functions';
-import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
 
 // ✅ Secure Supabase admin client for logging or role-based logic
 const supabaseAdmin = createClient(
@@ -93,3 +93,6 @@ export const handler: Handler = async (event) => {
     };
   }
 };
+function createClient(url: string, serviceRoleKey: string): SupabaseClient {
+  return createSupabaseClient(url, serviceRoleKey);
+}

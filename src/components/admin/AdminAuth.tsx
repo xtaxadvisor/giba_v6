@@ -9,7 +9,7 @@ export function AdminAuth({ children }: { children: React.ReactNode }) {
   try {
     const auth = useAuth();
     user = auth.user;
-    loading = auth.loading; // Ensure loading is defined in AuthContextType
+    loading = auth.isLoading; // Corrected to match AuthContextType
   } catch (err) {
     console.error('AdminAuth must be used within an AuthProvider.', err);
     return (

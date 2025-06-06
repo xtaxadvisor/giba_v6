@@ -6,9 +6,10 @@ import type { UserRole } from '@/lib/auth/types';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: UserRole[];
+  fallback?: React.ReactNode;
 }
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, allowedRoles = [], fallback }: ProtectedRouteProps) {
   const { user, isAuthenticated, hydrated } = useAuth();
   const [delayPassed, setDelayPassed] = useState(false);
 
@@ -27,7 +28,15 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (!hydrated || !delayPassed) {
-    return <div className="text-center text-gray-500 p-6">🔄 Checking access...</div>;
+    return (
+      <>
+        {fallback ?? (
+          <div role="status" className="text-center text-gray-500 p-6">
+            🔄 Checking access...
+          </div>
+        )}
+      </>
+    );
   }
 
   if (!user || !user.role) {
@@ -38,7 +47,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   const normalizedUserRole = user.role.toLowerCase();
-  const normalizedAllowedRoles = allowedRoles?.map(r => r.toLowerCase()) || [];
+  const normalizedAllowedRoles = allowedRoles.map(r => r.toLowerCase());
 
   const hasAccess =
     normalizedAllowedRoles.length === 0 ||

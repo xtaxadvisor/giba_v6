@@ -17,7 +17,7 @@ const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 console.log('🧪 Loaded RECAPTCHA_SITE_KEY:', RECAPTCHA_SITE_KEY);
 
 if (!RECAPTCHA_SITE_KEY) {
-  console.warn('⚠️ Environment variable missing: NEXT_PUBLIC_RECAPTCHA_SITE_KEY');
+  console.warn('⚠️ Environment variable missing: VITE_RECAPTCHA_SITE_KEY');
 }
 
 
@@ -128,20 +128,8 @@ export default function RegisterPage() {
 
       addNotification('📩 Magic link sent! Check your inbox.', 'success');
 
-      const destination = roles.includes('admin')
-        ? '/superadmin/dashboard'
-        : roles.includes('client')
-        ? '/client/dashboard'
-        : roles.includes('professional')
-        ? '/professional/dashboard'
-        : roles.includes('investor')
-        ? '/investor/dashboard'
-        : roles.includes('student')
-        ? '/student/dashboard'
-        : '/';
-
       setTimeout(() => {
-        window.location.href = destination;
+        window.location.href = '/check-email';
       }, 500);
 
       // Reset form and recaptcha token on success
@@ -228,7 +216,7 @@ export default function RegisterPage() {
           <>
             {console.warn('⚠️ reCAPTCHA site key is undefined or invalid')}
             <p className="text-red-500 text-sm">
-              ⚠️ reCAPTCHA site key missing or invalid. Please fix .env.local and restart the server.
+              ⚠️ reCAPTCHA site key missing or invalid. Please fix your environment variables.
             </p>
           </>
         )}

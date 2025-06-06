@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bot } from 'lucide-react';
+import { Bot, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useJenniferChat } from '@/hooks/useJenniferChat';
 import { AIChat } from './AIChat';
@@ -25,7 +25,7 @@ const JenniferWidget = () => {
           <Button
             onClick={() => setIsOpen(true)}
             aria-label="Open Jennifer Assistant"
-            title="Talk to Jennifer"
+            title="Talk to Jennifer AI"
             className="p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
           >
             <Bot className="h-6 w-6" aria-hidden="true" />
@@ -33,20 +33,29 @@ const JenniferWidget = () => {
         </div>
       )}
 
-      {/* Chat Modal */}
+      {/* Chat Modal with Transition and Scrollable Container */}
       {isOpen && (
         <div
           id="jennifer-widget-modal"
-          className="fixed bottom-20 right-4 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50"
+          className="fixed bottom-20 right-4 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-300 ease-out animate-fade-in-up"
           role="dialog"
           aria-label="Jennifer AI Assistant"
         >
-          <AIChat
-            messages={messages}
-            onSendMessage={sendMessage}
-            isLoading={isLoading}
-            onClose={() => setIsOpen(false)} // ⬅️ This properly unmounts the modal
-          />
+          <div className="relative max-h-[70vh] overflow-y-auto p-4">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              aria-label="Close Jennifer Assistant"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <AIChat
+              messages={messages}
+              onSendMessage={sendMessage}
+              isLoading={isLoading}
+              onClose={() => setIsOpen(false)}
+            />
+          </div>
         </div>
       )}
     </>

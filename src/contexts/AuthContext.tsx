@@ -11,9 +11,11 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   hydrated: boolean;
+  resolvedRole: string | null;
 }
 
 export interface User {
+  onboardingcomplete: boolean;
   id: string;
   email?: string;
   fullName?: string;
@@ -34,6 +36,7 @@ export const AuthContext = React.createContext<AuthContextType | undefined>({
   isAuthenticated: false,
   isLoading: false,
   hydrated: true,
+  resolvedRole: null,
 });
 
 export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
@@ -42,6 +45,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
   const [profile, setProfile] = useState<{ role: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [hydrated, setHydrated] = useState<boolean>(true);
+  const [resolvedRole, setResolvedRole] = useState<string | null>(null);
 
 useEffect(() => {
   const storedUser = localStorage.getItem('currentUser');
@@ -101,23 +105,30 @@ useEffect(() => {
 
           if (profileData) {
             const restoredUser: User = {
-            id: session.user.id,
-            email: session.user.email ?? '',
-            fullName: profileData.full_name ?? '',
-            createdAt: session.user.created_at,
-            location: profileData.location ?? '',
-            role: profileData.role ?? '',
-            roles: profileData.roles ?? [profileData.role], // fallback if roles missing
-            phone: profileData.phone ?? '',
-};
+              id: session.user.id,
+              email: session.user.email ?? '',
+              fullName: profileData.full_name ?? '',
+              createdAt: session.user.created_at,
+              location: profileData.location ?? '',
+              role: profileData.role ?? '',
+              roles: profileData.roles ?? [profileData.role], // fallback if roles missing
+              phone: profileData.phone ?? '',
+              onboardingcomplete: false
+            };
 
             setUser(restoredUser);
+            setResolvedRole(restoredUser.roles?.[0] || restoredUser.role || null);
             setProfile({ role: profileData.role });
             localStorage.setItem('currentUser', JSON.stringify(restoredUser));
+          } else {
+            setResolvedRole(null);
           }
+        } else {
+          setResolvedRole(null);
         }
       } catch (err) {
         console.error('❌ Error during session hydration:', err);
+        setResolvedRole(null);
       } finally {
         setLoading(false);
         setHydrated(true);
@@ -133,6 +144,7 @@ useEffect(() => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setProfile(null);
+        setResolvedRole(null);
         localStorage.removeItem('currentUser');
         window.location.href = '/login';
       }
@@ -166,15 +178,20 @@ useEffect(() => {
             role: profileData.role ?? '',
             roles: profileData.roles ?? [profileData.role], // Ensure roles array is used
             phone: profileData.phone ?? '',
+            onboardingcomplete: false
           };
 
           setUser(restoredUser);
+          setResolvedRole(restoredUser.roles?.[0] || restoredUser.role || null);
           setProfile({ role: profileData.role });
           localStorage.setItem('currentUser', JSON.stringify(restoredUser));
+        } else {
+          setResolvedRole(null);
         }
         setHydrated(true);
       } else {
         // Always ensure hydration completes even if no session
+        setResolvedRole(null);
         setHydrated(true);
       }
     });
@@ -216,6 +233,7 @@ useEffect(() => {
     supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    setResolvedRole(null);
     localStorage.removeItem('currentUser');
     localStorage.removeItem('accessToken');
     window.location.href = '/login';
@@ -233,6 +251,7 @@ useEffect(() => {
         hydrated,
         isAuthenticated,
         isLoading: loading,
+        resolvedRole,
       }}
     >
       {children}

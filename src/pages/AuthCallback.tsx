@@ -23,7 +23,7 @@ export default function AuthCallback() {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('full_name, role, roles')
+        .select('full_name, role, roles, onboardingcomplete')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -38,6 +38,7 @@ export default function AuthCallback() {
         role: profile?.role ?? '',
         roles: profile?.roles ?? [],
         createdAt: user.created_at,
+        onboardingcomplete: profile?.onboardingcomplete ?? false,
       };
 
       setUser(hydratedUser);

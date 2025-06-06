@@ -4,7 +4,7 @@ import { OpenAI } from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
-export const handler: Handler = async (event, context) => {
+const handler: Handler = async (event, context) => {
   try {
     const { prompt } = JSON.parse(event.body || '{}');
     if (!prompt) {
@@ -39,3 +39,5 @@ export const handler: Handler = async (event, context) => {
     };
   }
 };
+
+export default handler;

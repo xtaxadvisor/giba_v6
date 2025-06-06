@@ -21,8 +21,15 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
   const [selectedRole, setSelectedRole] = useState<string | null>(() => {
-    return localStorage.getItem('lastRole') || null;
+    const stored = localStorage.getItem('lastRole');
+    return stored && stored !== 'null' ? stored : null;
   });
+
+  const redirectToRolePath = (role: string, hasCompleted: boolean) => {
+    localStorage.setItem('lastRole', role);
+    const path = hasCompleted ? `/${role}` : `/onboarding/${role}`;
+    navigate(path, { replace: true });
+  };
 
   useEffect(() => {
     if (!hydrated || !user) return;
@@ -33,7 +40,7 @@ export default function LoginPage() {
       ? [user.role]
       : [];
 
-    const hasCompleted = (user as any)?.onboarding_complete;
+    const hasCompleted = user?.onboardingcomplete ?? false;
 
     if (!roles.length) {
       addNotification('No role assigned. Contact support.', 'error');
@@ -42,17 +49,12 @@ export default function LoginPage() {
     }
 
     if (roles.length === 1) {
-      const role = roles[0];
-      localStorage.setItem('lastRole', role);
-      const path = hasCompleted ? `/${role}` : `/onboarding/${role}`;
-      navigate(path, { replace: true });
+      redirectToRolePath(roles[0], hasCompleted);
       return;
     }
 
     if (selectedRole && roles.includes(selectedRole)) {
-      localStorage.setItem('lastRole', selectedRole);
-      const path = hasCompleted ? `/${selectedRole}` : `/onboarding/${selectedRole}`;
-      navigate(path, { replace: true });
+      redirectToRolePath(selectedRole, hasCompleted);
     }
   }, [hydrated, user, selectedRole, navigate, addNotification]);
 
@@ -63,6 +65,7 @@ export default function LoginPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
         >
           <Box textAlign="center" mt={20}>
             <Spinner />
@@ -87,6 +90,7 @@ export default function LoginPage() {
             <VStack spacing={6} align="stretch">
               <Heading size="md">Select a role to continue</Heading>
               <Select
+                aria-label="Select role"
                 placeholder="Choose your portal"
                 onChange={(e) => setSelectedRole(e.target.value)}
               >
@@ -97,20 +101,19 @@ export default function LoginPage() {
                 ))}
               </Select>
               <Button
-                colorScheme="indigo"
+                colorScheme="blue"
+                isDisabled={!selectedRole}
                 onClick={() => {
                   if (!selectedRole) {
                     addNotification('Please select a role.', 'info');
                     return;
                   }
 
-                  localStorage.setItem('lastRole', selectedRole);
-                  const hasCompleted = (user as any)?.onboarding_complete;
+                  const hasCompleted = user?.onboardingcomplete ?? false;
 
                   addNotification('🎯 Redirecting to your dashboard...', 'info');
                   setTimeout(() => {
-                    const path = hasCompleted ? `/${selectedRole}` : `/onboarding/${selectedRole}`;
-                    navigate(path, { replace: true });
+                    redirectToRolePath(selectedRole, hasCompleted);
                   }, 800);
                 }}
               >
@@ -127,6 +130,7 @@ export default function LoginPage() {
     <>
       <Helmet>
         <title>Login | ProTaxAdvisors</title>
+        <meta name="description" content="Login to ProTaxAdvisors to manage your taxes, roles, and financial tools." />
       </Helmet>
 
       <LoginForm />

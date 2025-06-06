@@ -17,7 +17,7 @@ export function UserManagement() {
   try {
     const auth = useAuth();
     user = auth.user;
-    loading = auth.loading;
+    loading = auth.isLoading;
   } catch (err) {
     console.error('ProfessionalAuth must be used within an AuthProvider.', err);
     return (
