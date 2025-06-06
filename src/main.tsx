@@ -20,7 +20,10 @@ import AppRoutes from './routes/AppRoutes';
 import { JenniferChatProvider } from '@/contexts/JenniferChatContext';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
 
-const rootContainer = document.getElementById('root')!;
+const rootContainer = document.getElementById('root');
+if (!rootContainer) {
+  throw new Error('❌ Root container not found. Did you forget <div id="root"></div> in index.html?');
+}
 const appRoot = createRoot(rootContainer);
 
 // Sentry setup
@@ -29,17 +32,22 @@ const sentryInstrumentation = reactRouterV6Instrumentation(
   createRoutesFromChildren, matchRoutes
 );
 const spans: Record<string, Span> = {};
-Sentry.init({
-  dsn: 'https://80cda50e3cf066a524158b31ca370667@o4508848989929472.ingest.us.sentry.io/4508848996155392',
-  integrations: [new BrowserTracing({ routingInstrumentation: sentryInstrumentation })],
-  tracesSampleRate: 1.0,
-  environment: import.meta.env.MODE,
-});
-addInstrumentationHandler('fetch', (handlerData: HandlerDataFetch) => {
-  instrumentFetchRequest(handlerData, () => true, () => true, spans, 'auto.http.browser');
-});
+if (import.meta.env.PROD) {
+  Sentry.init({
+    dsn: 'https://80cda50e3cf066a524158b31ca370667@o4508848989929472.ingest.us.sentry.io/4508848996155392',
+    integrations: [new BrowserTracing({ routingInstrumentation: sentryInstrumentation })],
+    tracesSampleRate: 1.0,
+    environment: import.meta.env.MODE,
+  });
 
-console.log('✅ React App is rendering...');
+  addInstrumentationHandler('fetch', (handlerData: HandlerDataFetch) => {
+    instrumentFetchRequest(handlerData, () => true, () => true, spans, 'auto.http.browser');
+  });
+}
+
+if (import.meta.env.DEV) {
+  console.log('✅ React App is rendering...');
+}
 
 appRoot.render(
   <React.StrictMode>

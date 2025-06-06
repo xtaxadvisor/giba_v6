@@ -3,7 +3,17 @@ import { supabase } from '@/lib/supabase/client';
 import { useNotificationStore } from '@/lib/store';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-const RECAPTCHA_SITE_KEY = import.meta.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+// Extend the Window interface to include grecaptcha
+declare global {
+  interface Window {
+    grecaptcha?: {
+      reset: () => void;
+      [key: string]: any;
+    };
+  }
+}
+
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 console.log('🧪 Loaded RECAPTCHA_SITE_KEY:', RECAPTCHA_SITE_KEY);
 
 if (!RECAPTCHA_SITE_KEY) {
@@ -72,13 +82,24 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
 
+    console.log('Submitting registration with:', { email, fullName, roles, rememberMe, recaptchaToken });
+
+    if (!email) {
+      console.warn('Email is missing');
+      addNotification('⚠️ Please enter your email address.', 'error');
+      setLoading(false);
+      return;
+    }
+
     if (!roles.length) {
+      console.warn('No roles selected');
       addNotification('⚠️ Please select at least one role.', 'error');
       setLoading(false);
       return;
     }
 
     if (!recaptchaToken) {
+      console.warn('reCAPTCHA token missing');
       addNotification('⚠️ Please verify you are not a robot.', 'error');
       setLoading(false);
       return;
@@ -98,13 +119,44 @@ export default function RegisterPage() {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Signup error:', error);
+        addNotification(error.message || 'Signup failed. Try again later.', 'error');
+        setLoading(false);
+        return;
+      }
 
       addNotification('📩 Magic link sent! Check your inbox.', 'success');
+
+      const destination = roles.includes('admin')
+        ? '/superadmin-dashboard'
+        : roles.includes('client')
+        ? '/client-dashboard'
+        : roles.includes('professional')
+        ? '/professional-dashboard'
+        : roles.includes('investor')
+        ? '/investor'
+        : roles.includes('student')
+        ? '/student-dashboard'
+        : '/dashboard';
+
+      setTimeout(() => {
+        window.location.href = destination;
+      }, 500);
+
+      // Reset form and recaptcha token on success
+      setEmail('');
+      setFullName('');
+      setRoles([]);
+      setRememberMe(false);
+      setRecaptchaToken(null);
+      if (typeof window !== 'undefined' && window.grecaptcha && RECAPTCHA_SITE_KEY) {
+        window.grecaptcha.reset();
+      }
     } catch (err) {
-      console.error('Signup error:', err);
+      console.error('Unexpected signup error:', err);
       addNotification(
-        err instanceof Error ? err.message : 'Signup failed. Try again later.',
+        err instanceof Error ? err.message : 'Unexpected error occurred. Please try again later.',
         'error'
       );
     } finally {
@@ -164,15 +216,21 @@ export default function RegisterPage() {
       </label>
 
       <div className="mt-3">
-        {RECAPTCHA_SITE_KEY ? (
+        {RECAPTCHA_SITE_KEY && typeof RECAPTCHA_SITE_KEY === 'string' ? (
           <ReCAPTCHA
             sitekey={RECAPTCHA_SITE_KEY}
-            onChange={token => setRecaptchaToken(token)}
+            onChange={(token) => {
+              console.log('✅ CAPTCHA resolved:', token);
+              setRecaptchaToken(token);
+            }}
           />
         ) : (
-          <p className="text-red-500 text-sm">
-            ⚠️ reCAPTCHA site key missing. Please check your environment variables.
-          </p>
+          <>
+            {console.warn('⚠️ reCAPTCHA site key is undefined or invalid')}
+            <p className="text-red-500 text-sm">
+              ⚠️ reCAPTCHA site key missing or invalid. Please fix .env.local and restart the server.
+            </p>
+          </>
         )}
       </div>
 

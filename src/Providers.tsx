@@ -15,23 +15,20 @@ const queryClient = new QueryClient();
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-   <HelmetProvider>
-  <ChakraProvider theme={chakraTheme}>
-    <QueryClientProvider client={queryClient}>
-      <SessionContextProvider supabaseClient={supabase}>
-        <SupabaseProvider>
-          <AuthProvider>
-            <BrowserRouter>
-              <JenniferChatProvider> {/* ✅ Must be inside the router */}
-                {children}
-              </JenniferChatProvider>
-            </BrowserRouter>
-          </AuthProvider>
-        </SupabaseProvider>
-      </SessionContextProvider>
-    </QueryClientProvider>
-  </ChakraProvider>
-</HelmetProvider>
+    <HelmetProvider>
+      <ChakraProvider theme={chakraTheme}>
+        <QueryClientProvider client={queryClient}>
+          <SessionContextProvider supabaseClient={supabase}>
+            <SupabaseProvider>
+              <AuthProvider>
+                <JenniferChatProvider>
+                  {children}
+                </JenniferChatProvider>
+              </AuthProvider>
+            </SupabaseProvider>
+          </SessionContextProvider>
+        </QueryClientProvider>
+      </ChakraProvider>
+    </HelmetProvider>
   );
 };
-

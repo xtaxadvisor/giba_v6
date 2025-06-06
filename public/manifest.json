@@ -2,9 +2,12 @@
   "name": "ProTaXAdvisors",
   "short_name": "ProTaX",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "description": "Smart tax help for real people. ProTaXAdvisors is a modern tax and financial advisory platform.",
   "icons": [
     {
       "src": "/icons/icon-192.png",

@@ -1,17 +1,12 @@
-import React, { useEffect } from 'react';
-import { Providers } from './Providers'; // Ensure the file exists and matches this path
-import AppRoutes from './routes/AppRoutes';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 
-const App = () => {
-  useEffect(() => {
-    console.log("✅ App component is rendering");
-  }, []);
-
+const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Providers>
-      <AppRoutes />
-    </Providers>
+    <>
+      {children}
+    </>
   );
 };
 
-export default App;Providers
+export { Providers };
