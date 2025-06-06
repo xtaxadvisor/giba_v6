@@ -96,7 +96,7 @@ export function LoginForm() {
         <FormControl isRequired>
           <FormLabel>Email</FormLabel>
           <Input
-            id="email"
+            name="email"
             type="email"
             value={email}
             placeholder="you@example.com"
@@ -109,7 +109,7 @@ export function LoginForm() {
           <FormLabel>Password</FormLabel>
           <InputGroup>
             <Input
-              id="password"
+              name="password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               placeholder="Enter your password"

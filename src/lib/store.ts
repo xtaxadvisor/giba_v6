@@ -82,8 +82,16 @@ export const useNotificationStore = create<NotificationState>((set) => ({
       ],
     }));
   },
-  removeNotification: (id) =>
-    set((state) => ({
+removeNotification: (id) => {
+  set((state) => {
+    const exists = state.notifications.some((n) => n.id === id);
+    if (!exists) {
+      console.warn(`⚠️ Tried to remove notification with id "${id}", but it doesn't exist.`);
+      return state;
+    }
+    return {
       notifications: state.notifications.filter((n) => n.id !== id),
-    })),
+    };
+  });
+},
 }));

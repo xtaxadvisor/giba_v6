@@ -5,50 +5,49 @@ import type { UserRole } from '@/lib/auth/types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: UserRole[];
+  allowedRoles?: UserRole[];
 }
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  allowedRoles: string[];
-}
-export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, isAuthenticated } = useAuth();
 
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+  const { user, isAuthenticated, hydrated } = useAuth();
   const [delayPassed, setDelayPassed] = useState(false);
+
   useEffect(() => {
-    const timeout = setTimeout(() => setDelayPassed(true), 500);
+    const timeout = setTimeout(() => setDelayPassed(true), 300);
     return () => clearTimeout(timeout);
   }, []);
-
-  if (!user) {
-    console.warn('[ProtectedRoute] No user context found.');
-  }
-  
-  const normalizedUserRole = user?.role?.toLowerCase();
-  const hasRoleAccess = isAuthenticated && (
-    // If no specific roles required, allow any authenticated user
-    !requiredRole?.length ||
-    // Otherwise, check if user's role matches one of the required roles (or is superadmin)
-    requiredRole.map(role => role.toLowerCase()).includes(normalizedUserRole ?? '') ||
-    normalizedUserRole === 'superadmin'
-  );
 
   if (import.meta.env.DEV) {
     console.log('[ProtectedRoute Debug]', {
       isAuthenticated,
-      normalizedUserRole,
-      requiredRole,
-      hasRoleAccess,
+      hydrated,
+      user,
+      allowedRoles,
     });
   }
 
-  if (!delayPassed) {
-    return <div className="text-center text-gray-500 p-6">Loading authentication...</div>;
+  if (!hydrated || !delayPassed) {
+    return <div className="text-center text-gray-500 p-6">🔄 Checking access...</div>;
   }
 
-  if (!hasRoleAccess) {
+  if (!user || !user.role) {
     if (import.meta.env.DEV) {
-      console.warn('[ProtectedRoute] Access denied for role:', user?.role);
+      console.warn('[ProtectedRoute] No user or user role found.');
+    }
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  const normalizedUserRole = user.role.toLowerCase();
+  const normalizedAllowedRoles = allowedRoles?.map(r => r.toLowerCase()) || [];
+
+  const hasAccess =
+    normalizedAllowedRoles.length === 0 ||
+    normalizedAllowedRoles.includes(normalizedUserRole) ||
+    normalizedUserRole === 'superadmin';
+
+  if (!hasAccess) {
+    if (import.meta.env.DEV) {
+      console.warn('[ProtectedRoute] Access denied for role:', user.role);
     }
     return <Navigate to="/unauthorized" replace />;
   }

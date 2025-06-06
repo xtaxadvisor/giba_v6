@@ -6,7 +6,7 @@ import { useNotificationStore } from '../../lib/store';
 
 export function ConnectionStatus() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { addNotification } = useNotificationStore();
 
   const checkConnection = async () => {

@@ -15,13 +15,13 @@ interface Insight {
 export default function InvestorInsights() {
   const { investorId } = useParams<{ investorId: string }>();
   const [insights, setInsights] = useState<Insight[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!investorId) {
       setError('No investor ID provided.');
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
 
@@ -33,14 +33,14 @@ export default function InvestorInsights() {
         console.error(err);
         setError('Failed to load insights.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchInsights();
   }, [investorId]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <LoadingSpinner />

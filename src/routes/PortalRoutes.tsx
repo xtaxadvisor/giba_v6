@@ -61,7 +61,10 @@ export function PortalRoutes() {
           <React.Suspense fallback={<LoadingSpinner />}>
             <section className="p-6 text-center">
               <h2 className="text-lg font-bold text-gray-700">Loading Admin Portal...</h2>
-              <AdminPortal />
+              <Routes>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="*" element={<AdminPortal />} />
+              </Routes>
             </section>
           </React.Suspense>
         }
@@ -107,7 +110,10 @@ export function PortalRoutes() {
           <React.Suspense fallback={<LoadingSpinner />}>
             <section className="p-6 text-center">
               <h2 className="text-lg font-bold text-gray-700">Loading Student Portal...</h2>
-              <StudentPortal />
+              <Routes>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="*" element={<StudentPortal />} />
+              </Routes>
             </section>
           </React.Suspense>
         }
@@ -119,7 +125,10 @@ export function PortalRoutes() {
           <React.Suspense fallback={<LoadingSpinner />}>
             <section className="p-6 text-center">
               <h2 className="text-lg font-bold text-gray-700">Loading Professional Portal...</h2>
-              <ProfessionalPortal />
+              <Routes>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="*" element={<ProfessionalPortal />} />
+              </Routes>
             </section>
           </React.Suspense>
         }
@@ -130,7 +139,10 @@ export function PortalRoutes() {
           <React.Suspense fallback={<LoadingSpinner />}>
             <section className="p-6 text-center">
               <h2 className="text-lg font-bold text-gray-700">Loading Client Portal...</h2>
-              <ClientPortal />
+              <Routes>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="*" element={<ClientPortal />} />
+              </Routes>
             </section>
           </React.Suspense>
         }

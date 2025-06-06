@@ -6,7 +6,7 @@ import { ClientDashboard } from '@/components/client/Dashboard/ClientDashboard';
 import ProfessionalDashboard from '@/components/professional/ProfessionalDashboard';
 import { InvestorDashboard } from '@/components/investor/InvestorDashboard';
 import { MessagingCenter } from '@/components/messaging/MessagingCenter';
-import { AdminDashboard } from '@/components/admin/dashboard/AdminDashboard';
+import { AdminDashboard } from '@/components/admin/dashboard/superadmin/dashboard';
 import RoleManagement from '@/components/admin/roles/RoleManagement';
 
 const SuperAdminDashboard = () => <div><h1>SuperAdmin Dashboard</h1></div>;

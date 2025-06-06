@@ -11,17 +11,15 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const processLogin = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
 
-      if (error || !session) {
-        console.error('🔴 Auth session missing or failed:', error);
-        addNotification('Login failed. Please try again.', 'error');
+      if (error || !data?.session) {
+        addNotification('Login failed. Try again.', 'error');
         navigate('/login');
         return;
       }
 
-      const user = session.user;
-      console.log('🔐 Supabase session found:', user.email);
+      const user = data.session.user;
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -30,7 +28,7 @@ export default function AuthCallback() {
         .maybeSingle();
 
       if (profileError) {
-        console.warn('⚠️ No profile found:', profileError.message);
+        console.warn('⚠️ Could not fetch user profile:', profileError.message);
       }
 
       const hydratedUser = {
@@ -39,25 +37,27 @@ export default function AuthCallback() {
         fullName: profile?.full_name ?? '',
         role: profile?.role ?? '',
         roles: profile?.roles ?? [],
-        createdAt: user.created_at
+        createdAt: user.created_at,
       };
 
       setUser(hydratedUser);
       localStorage.setItem('currentUser', JSON.stringify(hydratedUser));
 
-      type Role = 'admin' | 'client' | 'professional' | 'investor' | 'student';
-      const primaryRole: Role = (profile?.role as Role) || 'client';
-
-      const redirectPath = {
+      const roleToPathMap = {
         admin: '/admin/dashboard',
+        superadmin: '/superadmin/dashboard',
         client: '/client/dashboard',
         professional: '/professional/dashboard',
         investor: '/investor/dashboard',
-        student: '/student/dashboard'
-      }[primaryRole] || '/dashboard';
+        student: '/student/dashboard',
+      } as const;
+
+      const primaryRole = (profile?.role || 'client') as keyof typeof roleToPathMap;
+
+      const redirectPath = roleToPathMap[primaryRole] || '/portal-access';
 
       addNotification(`✅ Welcome back, ${primaryRole}`, 'success');
-      navigate(redirectPath);
+      setTimeout(() => navigate(redirectPath), 100);
     };
 
     processLogin();

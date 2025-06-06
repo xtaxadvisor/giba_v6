@@ -9,7 +9,7 @@ export interface AuthContextType {
   setUser: (user: User | null) => void;
   profile: { role: string } | null;
   isAuthenticated: boolean;
-  loading: boolean;
+  isLoading: boolean;
   hydrated: boolean;
 }
 
@@ -32,7 +32,7 @@ export const AuthContext = React.createContext<AuthContextType | undefined>({
   setUser: () => {},
   profile: null,
   isAuthenticated: false,
-  loading: false,
+  isLoading: false,
   hydrated: true,
 });
 
@@ -143,7 +143,7 @@ useEffect(() => {
         try {
           const response = await supabase
             .from('profiles')
-            .select('role, full_name, location, phone')
+            .select('role, roles, full_name, location, phone')
             .eq('id', session.user.id)
             .maybeSingle();
           profileData = response.data;
@@ -164,6 +164,7 @@ useEffect(() => {
             createdAt: session.user.created_at,
             location: profileData.location ?? '',
             role: profileData.role ?? '',
+            roles: profileData.roles ?? [profileData.role], // Ensure roles array is used
             phone: profileData.phone ?? '',
           };
 
@@ -171,7 +172,6 @@ useEffect(() => {
           setProfile({ role: profileData.role });
           localStorage.setItem('currentUser', JSON.stringify(restoredUser));
         }
-
         setHydrated(true);
       } else {
         // Always ensure hydration completes even if no session
@@ -232,13 +232,13 @@ useEffect(() => {
         profile,
         hydrated,
         isAuthenticated,
-        loading,
+        isLoading: loading,
       }}
-        >
-          {children}
-        </AuthContext.Provider>
-      );
-    };
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);

@@ -1,5 +1,6 @@
 // src/pages/onboarding/OnboardingRouter.tsx
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Box, Heading, Spinner, Text, VStack, Checkbox, Button, useToast } from '@chakra-ui/react';
@@ -121,21 +122,31 @@ export default function OnboardingRouter() {
   }
 
   return (
-    <Box maxW="xl" mx="auto" mt={10} p={6} borderWidth={1} rounded="md" shadow="md" textAlign="center">
-      <Heading mb={4}>Welcome, {user?.email || 'New User'}!</Heading>
-      <Text fontSize="lg" color="gray.600" mb={6}>Let’s complete your {role} onboarding in a few quick steps.</Text>
+    <AnimatePresence>
+      <motion.div
+        key={stepIndex}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -30 }}
+        transition={{ duration: 0.4 }}
+      >
+        <Box maxW="xl" mx="auto" mt={10} p={6} borderWidth={1} rounded="md" shadow="md" textAlign="center">
+          <Heading mb={4}>Welcome, {user?.email || 'New User'}!</Heading>
+          <Text fontSize="lg" color="gray.600" mb={6}>Let’s complete your {role} onboarding in a few quick steps.</Text>
 
-      <VStack spacing={4} align="stretch">
-        {steps.map((label, index) => (
-          <Checkbox key={index} isChecked={stepIndex >= index + 1} isReadOnly>
-            {label}
-          </Checkbox>
-        ))}
-      </VStack>
+          <VStack spacing={4} align="stretch">
+            {steps.map((label, index) => (
+              <Checkbox key={index} isChecked={stepIndex >= index + 1} isReadOnly>
+                {label}
+              </Checkbox>
+            ))}
+          </VStack>
 
-      <Button mt={8} colorScheme="blue" onClick={handleNext}>
-        {stepIndex < steps.length - 1 ? 'Next' : 'Finish and Enter Dashboard'}
-      </Button>
-    </Box>
+          <Button mt={8} colorScheme="blue" onClick={handleNext}>
+            {stepIndex < steps.length - 1 ? 'Next' : 'Finish and Enter Dashboard'}
+          </Button>
+        </Box>
+      </motion.div>
+    </AnimatePresence>
   );
 }

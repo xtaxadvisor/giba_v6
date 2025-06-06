@@ -1,3 +1,6 @@
+// Production-ready ResetPasswordForm component
+// Author: ProTaXAdvisors Team
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client';
@@ -5,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Lock, ArrowLeft } from 'lucide-react';
 import { useNotificationStore } from '@/lib/store';
+import { motion } from 'framer-motion';
 
 export function ResetPasswordForm() {
   const [password, setPassword] = useState('');
@@ -15,42 +19,58 @@ export function ResetPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!password || !confirmPassword) {
-      addNotification('Both fields are required.', 'info');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      addNotification('Passwords do not match.', 'error');
-      return;
-    }
-
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).+$/;
-    if (!passwordRegex.test(password)) {
-      addNotification(
-        'Password must include uppercase, lowercase, number, and special character.',
-        'error'
-      );
-      return;
-    }
-
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({ password });
+    const trimmedPassword = password.trim();
+    const trimmedConfirm = confirmPassword.trim();
 
-    if (error) {
-      addNotification(error.message, 'error');
-    } else {
-      addNotification('Password reset successful!', 'success');
-      navigate('/login');
+    if (!trimmedPassword || !trimmedConfirm) {
+      addNotification('Both fields are required.', 'info');
+      setLoading(false);
+      return;
+    }
+
+    if (trimmedPassword !== trimmedConfirm) {
+      addNotification('Passwords do not match.', 'error');
+      setLoading(false);
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!passwordRegex.test(trimmedPassword)) {
+      addNotification(
+        'Password must include uppercase, lowercase, number, special character, and be at least 8 characters long.',
+        'error'
+      );
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password: trimmedPassword });
+
+      if (error) {
+        addNotification(error.message, 'error');
+      } else {
+        addNotification('🎉 Your password has been reset. Redirecting to login...', 'success');
+        setTimeout(() => navigate('/login'), 1500);
+      }
+    } catch (err) {
+      addNotification('Unexpected error. Try again.', 'error');
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6 py-12">
+    <motion.div
+      className="min-h-screen flex items-center justify-center bg-gray-50 px-6 py-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      aria-live="polite"
+    >
       <div className="max-w-md w-full space-y-6">
         <Button
           variant="ghost"
@@ -74,6 +94,8 @@ export function ResetPasswordForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="new-password"
+            autoFocus
           />
 
           <Input
@@ -96,6 +118,8 @@ export function ResetPasswordForm() {
           </Button>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 }
+
+export default ResetPasswordForm;

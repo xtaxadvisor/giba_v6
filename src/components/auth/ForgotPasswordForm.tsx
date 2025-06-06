@@ -5,10 +5,12 @@ import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase/client';
 import { useNotificationStore } from '../../lib/store';
+import { motion } from 'framer-motion';
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
 
@@ -27,11 +29,14 @@ export function ForgotPasswordForm() {
         'Password reset instructions have been sent to your email',
         'success'
       );
-      navigate('/login');
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (error) {
       console.error('Password reset error:', error);
       addNotification(
-        'Failed to send reset instructions. Please try again.',
+        error instanceof Error ? error.message : 'Could not send instructions. Try again later.',
         'error'
       );
     } finally {
@@ -41,16 +46,23 @@ export function ForgotPasswordForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-md w-full space-y-8"
+      >
         <div>
-          <Button
-            variant="ghost"
-            className="mb-4"
-            onClick={() => navigate('/login')}
-            icon={ArrowLeft}
-          >
-            Back to Login
-          </Button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+            <Button
+              variant="ghost"
+              className="mb-4"
+              onClick={() => navigate('/login')}
+              icon={ArrowLeft}
+            >
+              Back to Login
+            </Button>
+          </motion.div>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             Reset Your Password
           </h2>
@@ -83,6 +95,17 @@ export function ForgotPasswordForm() {
             {loading ? 'Sending Instructions...' : 'Send Reset Instructions'}
           </Button>
 
+          {success && (
+            <motion.p
+              className="text-green-600 text-sm text-center mt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              ✅ Instructions sent! Redirecting to login...
+            </motion.p>
+          )}
+
           <div className="text-center">
             <Link
               to="/login"
@@ -92,7 +115,7 @@ export function ForgotPasswordForm() {
             </Link>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
