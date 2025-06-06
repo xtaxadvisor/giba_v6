@@ -1,35 +1,41 @@
-// netlify/functions/ask-jennifer/stream.ts
+/// <reference types="node" />
 import { Handler } from '@netlify/functions';
 import { OpenAI } from 'openai';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
-export const handler: Handler = async (event) => {
-  const { prompt } = JSON.parse(event.body || '{}');
-  if (!prompt) return { statusCode: 400, body: 'Missing prompt' };
-
-  const stream = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    stream: true,
-    messages: [{ role: 'user', content: prompt }]
-  });
-
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        const token = chunk.choices[0]?.delta?.content || '';
-        controller.enqueue(encoder.encode(token));
-      }
-      controller.close();
+export const handler: Handler = async (event, context) => {
+  try {
+    const { prompt } = JSON.parse(event.body || '{}');
+    if (!prompt) {
+      return { statusCode: 400, body: 'Missing prompt' };
     }
-  });
 
-  return new Response(readable, {
-    headers: {
-      'Content-Type': 'text/plain',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
+    const stream = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      stream: true,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    let body = '';
+    for await (const chunk of stream) {
+      const token = chunk.choices[0]?.delta?.content || '';
+      body += token;
     }
-  }) as any;
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'text/plain',
+        'Cache-Control': 'no-cache',
+      },
+      body,
+    };
+  } catch (error: any) {
+    console.error('Function error:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message || 'Internal Server Error' }),
+    };
+  }
 };

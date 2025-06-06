@@ -129,16 +129,16 @@ export default function RegisterPage() {
       addNotification('📩 Magic link sent! Check your inbox.', 'success');
 
       const destination = roles.includes('admin')
-        ? '/superadmin-dashboard'
+        ? '/superadmin/dashboard'
         : roles.includes('client')
-        ? '/client-dashboard'
+        ? '/client/dashboard'
         : roles.includes('professional')
-        ? '/professional-dashboard'
+        ? '/professional/dashboard'
         : roles.includes('investor')
-        ? '/investor'
+        ? '/investor/dashboard'
         : roles.includes('student')
-        ? '/student-dashboard'
-        : '/dashboard';
+        ? '/student/dashboard'
+        : '/';
 
       setTimeout(() => {
         window.location.href = destination;

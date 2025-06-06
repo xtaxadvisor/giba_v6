@@ -53,6 +53,7 @@ export default function AppRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/success" element={<Navigate to="/client/dashboard" replace />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/guest" element={<Guest />} />
           <Route path="/dashboard" element={<Dashboard />} />
