@@ -4,11 +4,19 @@ import { OpenAI } from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 
+interface RequestBody {
+  prompt?: string;
+}
+
 const handler: Handler = async (event, context) => {
   try {
-    const { prompt } = JSON.parse(event.body || '{}');
-    if (!prompt) {
-      return { statusCode: 400, body: 'Missing prompt' };
+    const { prompt }: RequestBody = JSON.parse(event.body || '{}');
+
+    if (!prompt || typeof prompt !== 'string') {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Missing or invalid prompt' }),
+      };
     }
 
     const stream = await openai.chat.completions.create({
@@ -19,8 +27,12 @@ const handler: Handler = async (event, context) => {
 
     let body = '';
     for await (const chunk of stream) {
-      const token = chunk.choices[0]?.delta?.content || '';
+      const token = chunk.choices?.[0]?.delta?.content || '';
       body += token;
+    }
+
+    if (!body) {
+      body = '⚠️ No response generated.';
     }
 
     return {
@@ -28,6 +40,7 @@ const handler: Handler = async (event, context) => {
       headers: {
         'Content-Type': 'text/plain',
         'Cache-Control': 'no-cache',
+        'Access-Control-Allow-Origin': '*',
       },
       body,
     };

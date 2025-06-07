@@ -10,6 +10,9 @@ export default defineConfig({
   publicDir: 'public',
   build: {
     outDir: 'dist/protax',
+    emptyOutDir: true,
+    sourcemap: false,
+    minify: 'esbuild',
   },
   plugins: [
     react(),
@@ -24,5 +27,9 @@ export default defineConfig({
     hmr: {
       overlay: false
     }
+  },
+  define: {
+    'process.env.NODE_ENV': '"production"',
+    'console.log': '()=>{}'
   }
 });

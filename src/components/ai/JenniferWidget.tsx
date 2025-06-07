@@ -37,11 +37,11 @@ const JenniferWidget = () => {
       {isOpen && (
         <div
           id="jennifer-widget-modal"
-          className="fixed bottom-20 right-4 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 transition-all duration-300 ease-out animate-fade-in-up"
+          className="fixed bottom-20 right-4 w-[400px] backdrop-blur-md bg-white/90 rounded-lg shadow-2xl border border-gray-200 z-50 transition-all duration-300 ease-out animate-fade-in-up"
           role="dialog"
           aria-label="Jennifer AI Assistant"
         >
-          <div className="relative max-h-[70vh] overflow-y-auto p-4">
+          <div className="relative h-[70vh] flex flex-col bg-white rounded-lg p-4 overflow-hidden shadow-2xl border border-gray-300">
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 focus:outline-none"
@@ -49,12 +49,16 @@ const JenniferWidget = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <AIChat
-              messages={messages}
-              onSendMessage={sendMessage}
-              isLoading={isLoading}
-              onClose={() => setIsOpen(false)}
-            />
+            <div className="flex-1 overflow-y-auto pr-2 scroll-smooth" id="jennifer-chat-scroll-container">
+              <div className="animate-fade-in transition-all duration-300">
+                <AIChat
+                  messages={messages}
+                  onSendMessage={sendMessage}
+                  isLoading={isLoading}
+                  onClose={() => setIsOpen(false)}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}

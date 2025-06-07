@@ -5,8 +5,8 @@
 
 [build.environment]
   VITE_SUPABASE_URL = "https://asdthnxphqjpxzyhpylr.supabase.co"
-  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZHRobnhwaHFqcHh6eWhweWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNDg4MDMsImV4cCI6MjA1NDYyNDgwM30.AGjxQM7QkIUA6d0jgJa4uaXQlJX8r9Bya9zC7B7F9qc"
-  NEXT_PUBLIC_RECAPTCHA_SITE_KEY = "6Leg81YrAAAAACCRNS83hgyWXRKteCFiR6rwo4sL"
+  VITE_SUPABASE_ANON_KEY = "${VITE_SUPABASE_ANON_KEY}"
+ 
 
 [[redirects]]
   from = "/login-share.html"
@@ -19,7 +19,7 @@
   status = 200
 
 [[redirects]]
-  from = "/.netlify/functions/*"
+  from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
@@ -39,8 +39,8 @@
 
 [dev.environment]
   VITE_SUPABASE_URL = "https://asdthnxphqjpxzyhpylr.supabase.co"
-  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzZHRobnhwaHFqcHh6eWhweWxyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkwNDg4MDMsImV4cCI6MjA1NDYyNDgwM30.AGjxQM7QkIUA6d0jgJa4uaXQlJX8r9Bya9zC7B7F9qc"
-  NEXT_PUBLIC_RECAPTCHA_SITE_KEY = "6Leg81YrAAAAACCRNS83hgyWXRKteCFiR6rwo4sL"
+  VITE_SUPABASE_ANON_KEY = "${VITE_SUPABASE_ANON_KEY}"
+  
 
 [functions]
   node_bundler = "esbuild"
