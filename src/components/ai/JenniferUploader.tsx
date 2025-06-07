@@ -12,6 +12,22 @@ export function JenniferUploader({ onAnalysis }: { onAnalysis?: (summary: string
 
   const handleUpload = async () => {
     if (!file) return;
+
+    // ✅ Validate file type and size before upload
+    const validTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    if (!validTypes.includes(file.type)) {
+      addNotification('⚠️ Unsupported file type.', 'error');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      addNotification('⚠️ File is too large. Max 10MB allowed.', 'error');
+      return;
+    }
+
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
@@ -19,26 +35,25 @@ export function JenniferUploader({ onAnalysis }: { onAnalysis?: (summary: string
 
       const { error: uploadError } = await supabase.storage
         .from('jennifer-docs')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          contentType: file.type || 'application/octet-stream',
+        });
 
       if (uploadError) throw uploadError;
 
       addNotification('📂 File uploaded successfully', 'success');
 
       const { data: download } = supabase.storage.from('jennifer-docs').getPublicUrl(filePath);
-      // Replace with the correct method from jenniferAI, for example:
-      // const summary = await jenniferAI.streamResponse(download.publicUrl, ...);
-      // Or implement summarizeDocument in jenniferAI if needed.
+      if (!download?.publicUrl) throw new Error('Missing public URL for uploaded file.');
 
-      // Example using streamResponse and collecting the summary:
       let summary = '';
-      await jenniferAI.streamResponse(
-        download.publicUrl,
-        (chunk: string) => {
-          summary += chunk;
-        }
-      );
+      addNotification('💡 Jennifer is analyzing your document...', 'info');
 
+      await jenniferAI.streamResponse(download.publicUrl, (chunk: string) => {
+        summary += chunk;
+      });
+
+      addNotification('✅ Analysis complete!', 'success');
       if (onAnalysis) onAnalysis(summary);
     } catch (err: any) {
       console.error('File upload failed:', err.message);
@@ -51,9 +66,13 @@ export function JenniferUploader({ onAnalysis }: { onAnalysis?: (summary: string
 
   return (
     <div className="mt-4 space-y-2">
+      <label htmlFor="jennifer-upload" className="block text-sm font-medium text-gray-700">
+        Upload a file to analyze
+      </label>
       <input
+        id="jennifer-upload"
         type="file"
-        accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        accept=".pdf,.doc,.docx"
         onChange={(e) => setFile(e.target.files?.[0] || null)}
       />
       <Button
@@ -61,7 +80,7 @@ export function JenniferUploader({ onAnalysis }: { onAnalysis?: (summary: string
         disabled={!file || uploading}
         className="w-full"
       >
-        {uploading ? 'Uploading...' : 'Upload & Let Jennifer Analyze'}
+        {uploading ? 'Uploading & Analyzing...' : 'Upload & Let Jennifer Analyze'}
       </Button>
     </div>
   );

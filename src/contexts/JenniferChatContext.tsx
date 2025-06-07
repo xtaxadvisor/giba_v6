@@ -19,22 +19,28 @@ interface JenniferContextType {
 
 // ✅ Context initialization
 const JenniferChatContext = createContext<JenniferContextType | undefined>(undefined);
+JenniferChatContext.displayName = 'JenniferChatContext';
 
 // ✅ Provider component
 export const JenniferChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const initialContextId = getContextFromPath(location.pathname);
-  const [contextId, setContextId] = useState<string>(initialContextId);
+  const [contextId, setContextId] = useState<keyof typeof AI_CONTEXTS>(initialContextId);
 
   // 🧠 Update context on path change
   useEffect(() => {
     const newContextId = getContextFromPath(location.pathname);
     setContextId(newContextId);
+    if (import.meta.env.DEV) console.debug('[JenniferChatContext] Context ID updated to:', newContextId);
   }, [location.pathname]);
 
   const value = useMemo(() => {
+    const resolvedContext = AI_CONTEXTS[contextId] || AI_CONTEXTS.general;
+    if (!AI_CONTEXTS[contextId] && import.meta.env.DEV) {
+      console.warn('[JenniferChatContext] Fallback to general context for unknown ID:', contextId);
+    }
     return {
-      context: AI_CONTEXTS[contextId] || AI_CONTEXTS.general,
+      context: resolvedContext,
       setContextId
     };
   }, [contextId]);

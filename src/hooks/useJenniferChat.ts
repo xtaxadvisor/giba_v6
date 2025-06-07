@@ -5,8 +5,13 @@ import { useNotificationStore } from '@/lib/store';
 import { jenniferAI } from '@/services/ai/Jenniferclient';
 import { supabase } from '@/lib/supabase/client';
 
+interface ExtendedAIMessage extends AIMessage {
+  timestamp: number;
+  sender: 'user' | 'assistant';
+}
+
 export function useJenniferChat() {
-  const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [messages, setMessages] = useState<ExtendedAIMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { addNotification } = useNotificationStore();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -24,9 +29,14 @@ export function useJenniferChat() {
 
     channel
       .on('broadcast', { event: 'jennifer-response' }, ({ payload }) => {
-        const response = payload?.message;
+        const response = payload?.content;
+        const timestamp = payload?.timestamp;
+        const sender = payload?.sender;
         if (response && isMounted.current) {
-          setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+          setMessages(prev => [
+            ...prev,
+            { role: 'assistant', content: response, timestamp: timestamp ?? Date.now(), sender: sender ?? 'assistant' }
+          ]);
         }
       })
       .subscribe(status => {
@@ -55,7 +65,12 @@ export function useJenniferChat() {
     try {
       setIsLoading(true);
 
-      const userMessage: AIMessage = { role: 'user', content: clean };
+      const userMessage: ExtendedAIMessage = {
+        role: 'user',
+        content: clean,
+        timestamp: Date.now(),
+        sender: 'user'
+      };
       setMessages(prev => [...prev, userMessage]);
 
       let response = '';
@@ -63,13 +78,18 @@ export function useJenniferChat() {
         response += chunk;
       });
 
-      const assistantMessage: AIMessage = { role: 'assistant', content: response };
+      const assistantMessage: ExtendedAIMessage = {
+        role: 'assistant',
+        content: response,
+        timestamp: Date.now(),
+        sender: 'assistant'
+      };
       setMessages(prev => [...prev, assistantMessage]);
 
       await channelRef.current?.send({
         type: 'broadcast',
         event: 'jennifer-response',
-        payload: { message: response }
+        payload: assistantMessage
       });
 
       return response;

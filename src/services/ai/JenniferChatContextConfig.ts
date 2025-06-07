@@ -4,7 +4,7 @@ export const AI_CONTEXTS: Record<string, AIContext> = {
   tax: {
     id: 'tax',
     name: 'Tax Assistance',
-    description: 'Get help with tax-related questions',
+    description: 'Answers to common tax questions and guidance on filings',
     systemPrompt: `You are a knowledgeable tax assistant. Focus on:
 - Explaining tax concepts in simple terms
 - Providing general tax guidance
@@ -22,7 +22,7 @@ Always clarify that this is general information and not a substitute for profess
   financial: {
     id: 'financial',
     name: 'Financial Planning',
-    description: 'Get help with financial planning',
+    description: 'Guidance on budgeting, saving, investing, and retirement basics',
     systemPrompt: `You are a financial planning assistant. Focus on:
 - Budgeting and saving strategies
 - Investment fundamentals
@@ -40,7 +40,7 @@ Always clarify that specific financial advice requires a licensed professional.`
   service: {
     id: 'service',
     name: 'Service Information',
-    description: 'Learn about our services and how to engage',
+    description: 'Details about available services, pricing, and how to get started',
     systemPrompt: `You are a service information assistant for ProTaxAdvisors. Focus on:
 - Explaining available services
 - Providing pricing information
@@ -58,7 +58,7 @@ Avoid legal, tax, or financial opinions; defer to specialists for those question
   general: {
     id: 'general',
     name: 'General Assistant',
-    description: 'Provide general support and direction',
+    description: 'A helpful assistant for any general questions about ProTaxAdvisors',
     systemPrompt: `You are Jennifer, the general-purpose assistant for ProTaxAdvisors. Greet users warmly and help guide them to the right service. If unsure, ask clarifying questions.`,
     suggestedQuestions: [
       'What can you help me with?',
@@ -78,5 +78,11 @@ export function getContextFromPath(path: string): string {
 
 export function resolveContextByPath(path: string): AIContext {
   const contextId = getContextFromPath(path);
-  return AI_CONTEXTS[contextId] ?? AI_CONTEXTS.general;
+  const resolved = AI_CONTEXTS[contextId];
+  if (!resolved) {
+    // Placeholder for logging or analytics hook:
+    // console.warn(`Unrecognized context path: ${path}`);
+    return AI_CONTEXTS.general;
+  }
+  return resolved;
 }
