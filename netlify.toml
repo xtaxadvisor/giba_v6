@@ -6,6 +6,8 @@
 [build.environment]
   VITE_SUPABASE_URL = "https://asdthnxphqjpxzyhpylr.supabase.co"
   VITE_SUPABASE_ANON_KEY = "${VITE_SUPABASE_ANON_KEY}"
+  VITE_RECAPTCHA_SITE_KEY = "${VITE_RECAPTCHA_SITE_KEY}"
+  SECRETS_SCAN_OMIT_PATHS = "dist/**, netlify.toml"
  
 
 [[redirects]]
@@ -19,7 +21,7 @@
   status = 200
 
 [[redirects]]
-  from = "/api/*"
+  from = "/api/functions/*"
   to = "/.netlify/functions/:splat"
   status = 200
   force = true
@@ -40,6 +42,7 @@
 [dev.environment]
   VITE_SUPABASE_URL = "https://asdthnxphqjpxzyhpylr.supabase.co"
   VITE_SUPABASE_ANON_KEY = "${VITE_SUPABASE_ANON_KEY}"
+  VITE_RECAPTCHA_SITE_KEY = "${VITE_RECAPTCHA_SITE_KEY}"
   
 
 [functions]
